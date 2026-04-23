@@ -39,7 +39,7 @@ const SECTION_LABELS: Record<`/${PlanSection}`, string> = {
   "/stakeholders": "Stakeholders",
 }
 
-const shadowLift = "shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]"
+const shadowLift = "shadow-sm"
 
 function objectiveStatusButtonClass(status: string): { btn: string; dot: string } {
   const t = normalizeStatus(status)
@@ -49,30 +49,30 @@ function objectiveStatusButtonClass(status: string): { btn: string; dot: string 
     return {
       btn:
         base +
-        "border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100/90 text-slate-800 ring-1 ring-slate-200/80",
-      dot: "h-2 w-2 shrink-0 rounded-full bg-slate-400 shadow-sm ring-2 ring-slate-200/80",
+        "border-border bg-muted text-foreground ring-1 ring-border/60",
+      dot: "h-2 w-2 shrink-0 rounded-full bg-muted-foreground ring-2 ring-border/60",
     }
   }
   if (t.includes("complete")) {
     return {
       btn:
         base +
-        "border-emerald-200 bg-gradient-to-b from-emerald-50 to-emerald-100/80 text-emerald-900 ring-1 ring-emerald-100/80",
-      dot: "h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-sm ring-2 ring-emerald-200/80",
+        "border-border bg-secondary text-secondary-foreground ring-1 ring-border/60",
+      dot: "h-2 w-2 shrink-0 rounded-full bg-foreground ring-2 ring-border/60",
     }
   }
   return {
     btn:
       base +
-      "border-amber-200/90 bg-gradient-to-b from-amber-50 to-amber-100/80 text-amber-900 ring-1 ring-amber-100/60",
-    dot: "h-2 w-2 shrink-0 rounded-full bg-amber-500 shadow-sm ring-2 ring-amber-200/80",
+      "border-border bg-accent text-accent-foreground ring-1 ring-border/60",
+    dot: "h-2 w-2 shrink-0 rounded-full bg-foreground ring-2 ring-border/60",
   }
 }
 
 function RequestStatusPill({ label }: { label: string }) {
   const text = label?.trim() ? label.trim() : "—"
   return (
-    <span className="inline-flex max-w-full min-w-0 items-center rounded-xl border border-amber-200/90 bg-gradient-to-b from-amber-50 to-amber-100/60 px-2.5 py-1.5 text-[10px] font-semibold leading-snug text-amber-950 ring-1 ring-amber-100/70">
+    <span className="inline-flex max-w-full min-w-0 items-center rounded-xl border border-border bg-muted px-2.5 py-1.5 text-[10px] font-semibold leading-snug text-foreground ring-1 ring-border/60">
       <span className="min-w-0 break-words">{text}</span>
     </span>
   )
@@ -95,12 +95,12 @@ function FieldCell({
     (wide ? " sm:col-span-2" : "")
   const borderClass =
     mode === "metric"
-      ? " border-orange-100/90 bg-gradient-to-br from-orange-50/80 to-amber-50/50 ring-1 ring-orange-100/60 hover:border-orange-200/70 hover:shadow-sm"
-      : " border-slate-100/90 bg-white ring-1 ring-slate-100/50 hover:border-slate-200 hover:bg-slate-50/40 hover:shadow-sm"
+      ? " border-border bg-accent/40 ring-1 ring-border/60 hover:border-border hover:shadow-sm"
+      : " border-border bg-card ring-1 ring-border/40 hover:border-border hover:bg-muted/40 hover:shadow-sm"
   return (
     <div className={cn(base, borderClass)}>
-      <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-slate-500">{label}</p>
-      <div className="mt-1 break-words text-xs leading-snug whitespace-pre-wrap text-slate-800 sm:text-[13px] sm:leading-snug">
+      <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-muted-foreground">{label}</p>
+      <div className="mt-1 break-words text-xs leading-snug whitespace-pre-wrap text-foreground sm:text-[13px] sm:leading-snug">
         {mode === "status" && value ? (
           <span
             className={cn(
@@ -119,14 +119,18 @@ function FieldCell({
 }
 
 export default function ActionPlan() {
+  const location = useLocation()
   const { planSection } = useParams<{ planSection: string }>()
-  const { state } = useLocation()
+  const { state } = location
+  const isContributorArea = location.pathname.startsWith("/contributor/")
+  const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
   const nav = state as ActionPlanLocationState | undefined
 
   const isValidSection = (s: string | undefined): s is PlanSection =>
     !!s && (PLAN_SECTIONS as readonly string[]).includes(s)
 
   const parentPath = (`/${planSection ?? ""}` as keyof typeof SECTION_LABELS) as `/${PlanSection}`
+  const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
   const parentLabel = isValidSection(planSection) ? SECTION_LABELS[parentPath] ?? "Planning" : "Planning"
 
   const resolved = useMemo(() => {
@@ -355,21 +359,21 @@ export default function ActionPlan() {
   }, [actionEdit, taskModal])
 
   if (!isValidSection(planSection)) {
-    return <Navigate to="/catalysts/action-plan" replace />
+    return <Navigate to={isContributorArea ? "/contributor/catalysts/action-plan" : "/catalysts/action-plan"} replace />
   }
 
   return (
     <div className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
-      <header className="flex h-16 min-w-0 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="flex h-16 min-w-0 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb className="min-w-0">
           <BreadcrumbList className="min-w-0 flex-wrap">
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to={dashboardHref} />}>Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to={parentPath} />}>{parentLabel}</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to={sectionHref} />}>{parentLabel}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -379,19 +383,19 @@ export default function ActionPlan() {
         </Breadcrumb>
       </header>
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-slate-100 via-gray-50 to-orange-50/25 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
             className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/70 backdrop-blur-sm sm:hidden sm:text-sm"
           >
-            <Link to="/dashboard" className="text-orange-600 transition hover:text-orange-700">
+            <Link to={dashboardHref} className="text-orange-600 transition hover:text-orange-700">
               Dashboard
             </Link>
             <span className="text-slate-300" aria-hidden="true">
               /
             </span>
-            <Link to={parentPath} className="text-orange-600 transition hover:text-orange-700">
+            <Link to={sectionHref} className="text-orange-600 transition hover:text-orange-700">
               {parentLabel}
             </Link>
             <span className="text-slate-300" aria-hidden="true">
@@ -399,12 +403,12 @@ export default function ActionPlan() {
             </span>
             <span className="text-slate-800">Action plan</span>
           </nav>
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Action Plan</p>
-          <p className="mt-1 text-sm text-slate-600">Plan and track actions, tasks, their resources, and due dates</p>
+          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Action Plan</p>
+          <p className="mt-1 text-sm text-muted-foreground">Plan and track actions, tasks, their resources, and due dates</p>
         </header>
 
         <section
-          className={cn("mb-8 max-w-full min-w-0 overflow-hidden rounded-3xl border border-slate-200/80 bg-white ring-1 ring-slate-200/40", shadowLift)}
+          className={cn("mb-8 max-w-full min-w-0 overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/40", shadowLift)}
           aria-labelledby="action-plan-glance-heading"
         >
           <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-5 py-4 sm:px-6">
@@ -738,18 +742,15 @@ export default function ActionPlan() {
                   </div>
                 </div>
                 <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-                  <button
-                    type="button"
+                  <Link
+                    to={`${parentPath}/add-action`}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/90 px-4 py-2.5 text-sm font-semibold text-orange-800 shadow-sm transition hover:border-orange-300 hover:bg-orange-100/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/45 focus-visible:ring-offset-2 sm:w-auto"
-                    onClick={() =>
-                      setActionsData((prev) => [...prev, { title: "New action", totalWeight: "0%", tasks: [] }])
-                    }
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                     Add action
-                  </button>
+                  </Link>
                   <div className="rounded-xl bg-slate-100/90 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 ring-1 ring-slate-200/60 sm:text-left">
                     {actionsData.length} actions · {totalTaskCount} tasks
                   </div>

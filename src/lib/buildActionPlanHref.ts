@@ -12,6 +12,9 @@ export type ActionPlanLocationState = {
   oi: number
 }
 
-export function buildActionPlanHref(planSection: ActionPlanPlanSection): string {
-  return `/${planSection}/action-plan`
+export function buildActionPlanHref(
+  planSection: ActionPlanPlanSection,
+  routePrefix = ""
+): string {
+  return `${routePrefix}/${planSection}/action-plan`
 }

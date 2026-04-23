@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useLocation } from "react-router-dom"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -16,7 +17,27 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon, CalendarIcon, BellIcon, NetworkIcon } from "lucide-react"
+import {
+  GalleryVerticalEndIcon,
+  AudioLinesIcon,
+  TerminalIcon,
+  TerminalSquareIcon,
+  BotIcon,
+  BookOpenIcon,
+  Settings2Icon,
+  FrameIcon,
+  PieChartIcon,
+  MapIcon,
+  CalendarIcon,
+  BellIcon,
+  NetworkIcon,
+  ClipboardListIcon,
+} from "lucide-react"
+
+function resolveNavUrl(url: string, routePrefix: string) {
+  if (!url || url === "#" || !url.startsWith("/")) return url
+  return `${routePrefix}${url}`
+}
 
 // This is sample data.
 const data = {
@@ -61,6 +82,11 @@ const data = {
       title: "Notifications",
       url: "/notifications", 
       icon: <BellIcon />
+    },
+    {
+      title: "My Requests",
+      url: "/submission-status",
+      icon: <ClipboardListIcon />
     },
     {
       title: "Strategic perspectives",
@@ -212,6 +238,22 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const location = useLocation()
+  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
+
+  const navMain = React.useMemo(
+    () =>
+      data.navMain.map((item) => ({
+        ...item,
+        url: resolveNavUrl(item.url, routePrefix),
+        items: item.items?.map((sub) => ({
+          ...sub,
+          url: resolveNavUrl(sub.url, routePrefix),
+        })),
+      })),
+    [routePrefix]
+  )
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -223,7 +265,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain}  />
+        <NavMain items={navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>

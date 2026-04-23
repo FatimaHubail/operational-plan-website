@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { buildActionPlanHref, type ActionPlanLocationState } from "@/lib/buildActionPlanHref"
 import {
   Breadcrumb,
@@ -446,12 +446,12 @@ function getStatusBucket(status: string) {
 function getStatusClasses(status: string) {
   const bucket = getStatusBucket(status)
   if (bucket === "above") {
-    return "border-sky-200 bg-gradient-to-b from-sky-50 to-sky-100/80 text-sky-950 ring-1 ring-sky-100/80"
+    return "border-border bg-secondary text-secondary-foreground ring-1 ring-border/70"
   }
   if (bucket === "on_target") {
-    return "border-emerald-200 bg-gradient-to-b from-emerald-50 to-emerald-100/80 text-emerald-950 ring-1 ring-emerald-100/80"
+    return "border-border bg-muted text-foreground ring-1 ring-border/70"
   }
-  return "border-rose-200/90 bg-gradient-to-b from-rose-50 to-rose-100/80 text-rose-950 ring-1 ring-rose-100/70"
+  return "border-border bg-accent text-accent-foreground ring-1 ring-border/70"
 }
 
 function flattenObjectives(item: CatalystItem) {
@@ -459,6 +459,9 @@ function flattenObjectives(item: CatalystItem) {
 }
 
 export default function Catalysts() {
+  const location = useLocation()
+  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
+  const dashboardHref = location.pathname.startsWith("/contributor/") ? "/contributor/dashboard" : "/dashboard"
   const [catalystState, setCatalystState] = useState(catalystsData)
   const [activeCatalystKey, setActiveCatalystKey] = useState<keyof typeof catalystsData>("c1")
   const [currentSubIndex, setCurrentSubIndex] = useState(0)
@@ -602,12 +605,12 @@ export default function Catalysts() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to={dashboardHref} />}>Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -617,7 +620,7 @@ export default function Catalysts() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-slate-100 via-gray-50 to-orange-50/25 p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <div
@@ -860,7 +863,7 @@ export default function Catalysts() {
                             </div>
                           </div>
                           <Link
-                            to="/catalysts/add-objective"
+                            to={`${routePrefix}/catalysts/add-objective`}
                             className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/90 px-4 py-2.5 text-sm font-semibold text-orange-800 shadow-sm transition hover:border-orange-300 hover:bg-orange-100/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/45 focus-visible:ring-offset-2 sm:w-auto"
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -946,7 +949,7 @@ export default function Catalysts() {
                                           Delete objective
                                         </button>
                                         <Link
-                                          to={buildActionPlanHref("catalysts")}
+                                          to={buildActionPlanHref("catalysts", routePrefix)}
                                           state={
                                             {
                                               p: String(activeCatalystKey),

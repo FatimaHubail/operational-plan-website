@@ -1,5 +1,5 @@
 import type { FormEvent } from "react"
-import { Link, Navigate, useParams } from "react-router-dom"
+import { Link, Navigate, useLocation, useParams } from "react-router-dom"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +8,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Textarea } from "@/components/ui/textarea"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
@@ -109,48 +113,54 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: AiFieldId; mi
         </div>
       </div>
       <div className="mt-2 flex justify-end border-t border-violet-100/90 pt-2">
-        <button
+        <Button
           type="button"
           disabled
           data-ai-apply={fieldId}
           onClick={apply}
-          className="rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-violet-900 shadow-sm transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40"
+          variant="outline"
+          size="sm"
+          className="h-7 border-border text-xs text-foreground"
         >
           Apply to field
-        </button>
+        </Button>
       </div>
     </div>
   )
 }
 
 export default function AddObjective() {
+  const location = useLocation()
   const { planSection } = useParams<{ planSection: string }>()
+  const isContributorArea = location.pathname.startsWith("/contributor/")
+  const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
   const isValidSection = (s: string | undefined): s is PlanSection =>
     !!s && (PLAN_SECTIONS as readonly string[]).includes(s)
 
   if (!isValidSection(planSection)) {
-    return <Navigate to="/catalysts/add-objective" replace />
+    return <Navigate to={isContributorArea ? "/contributor/catalysts/add-objective" : "/catalysts/add-objective"} replace />
   }
 
-  const parentPath = `/${planSection}` as keyof typeof SECTION_LABELS
+  const parentPath = `/${planSection}` as `/${PlanSection}`
+  const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
   const parentLabel = SECTION_LABELS[parentPath] ?? "Planning"
-  const cancelHref = parentPath
+  const cancelHref = sectionHref
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
   }
 
   const inputClass =
-    "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+    "h-9 w-full bg-background text-foreground"
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to={dashboardHref} />}>Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -164,13 +174,13 @@ export default function AddObjective() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-slate-100 via-gray-50 to-orange-50/25 p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
             className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/70 backdrop-blur-sm sm:hidden sm:text-sm"
           >
-            <Link to="/dashboard" className="text-orange-600 transition hover:text-orange-700">
+            <Link to={dashboardHref} className="text-orange-600 transition hover:text-orange-700">
               Dashboard
             </Link>
             <span className="text-slate-300" aria-hidden="true">
@@ -184,8 +194,8 @@ export default function AddObjective() {
             </span>
             <span className="text-slate-800">Add operational objectives</span>
           </nav>
-          <h1 className="mt-0 text-2xl font-bold tracking-tight text-slate-900 sm:mt-5 sm:text-3xl">Add operational objectives</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">
+          <h1 className="mt-0 text-2xl font-bold tracking-tight text-foreground sm:mt-5 sm:text-3xl">Add operational objectives</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Add one operational objective based on the selected strategic perspective. Each save creates a new objective
             with all required details and yearly targets (2023–2026).
           </p>
@@ -194,7 +204,7 @@ export default function AddObjective() {
         <div className="w-full min-w-0">
           <form
             id="add-oo-form"
-            className="relative overflow-hidden rounded-3xl bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-slate-200/60"
+            className="relative overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
             onSubmit={onSubmit}
           >
             <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-orange-300/15 blur-3xl" aria-hidden="true" />
@@ -260,7 +270,7 @@ export default function AddObjective() {
                         AI
                       </span>
                     </label>
-                    <input
+                    <Input
                       id="oo-objective"
                       name="objective"
                       type="text"
@@ -278,31 +288,23 @@ export default function AddObjective() {
                       Regulatory entity <span className="text-orange-600">*</span>
                     </label>
                     <div className="relative">
-                      <select
+                      <NativeSelect
                         id="oo-regulatory-entity"
                         name="regulatoryEntity"
                         required
                         defaultValue=""
                         autoComplete="organization"
-                        className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-10 text-sm font-medium text-slate-800 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="w-full"
                       >
-                        <option value="" disabled>
+                        <NativeSelectOption value="" disabled>
                           Select regulatory entity
-                        </option>
+                        </NativeSelectOption>
                         {REGULATORY_ENTITIES.map((entity) => (
-                          <option key={entity} value={entity}>
+                          <NativeSelectOption key={entity} value={entity}>
                             {entity}
-                          </option>
+                          </NativeSelectOption>
                         ))}
-                      </select>
-                      <span
-                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        aria-hidden="true"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                        </svg>
-                      </span>
+                      </NativeSelect>
                     </div>
                   </div>
 
@@ -310,7 +312,7 @@ export default function AddObjective() {
                     <label htmlFor="oo-indicator-owner" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
                       Indicator owner within the entity <span className="text-orange-600">*</span>
                     </label>
-                    <input
+                    <Input
                       id="oo-indicator-owner"
                       name="indicatorOwnerWithinEntity"
                       type="text"
@@ -333,7 +335,7 @@ export default function AddObjective() {
                         AI
                       </span>
                     </label>
-                    <textarea
+                    <Textarea
                       id="oo-objective-execution-indicator"
                       name="objectiveExecutionIndicator"
                       rows={4}
@@ -341,7 +343,7 @@ export default function AddObjective() {
                       required
                       placeholder="KPI or measure used to judge execution"
                       aria-describedby="ai-desc-oo-objective-execution-indicator"
-                      className="min-h-[5rem] w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm leading-relaxed text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                      className="min-h-[5rem] resize-y bg-background"
                     />
                     <AiSuggestionBlock fieldId="oo-objective-execution-indicator" minHeightClass="min-h-[5rem]" />
                   </div>
@@ -358,14 +360,14 @@ export default function AddObjective() {
                         AI
                       </span>
                     </label>
-                    <textarea
+                    <Textarea
                       id="oo-execution-indicator-description"
                       name="executionIndicatorDescription"
                       rows={5}
                       required
                       placeholder="How the indicator is applied, evidenced, or calculated"
                       aria-describedby="ai-desc-oo-execution-indicator-description"
-                      className="min-h-[7rem] w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm leading-relaxed text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                      className="min-h-[7rem] resize-y bg-background"
                     />
                     <AiSuggestionBlock fieldId="oo-execution-indicator-description" minHeightClass="min-h-[5rem]" />
                   </div>
@@ -374,7 +376,7 @@ export default function AddObjective() {
                     <label htmlFor="oo-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
                       Target value <span className="text-orange-600">*</span>
                     </label>
-                    <input
+                    <Input
                       id="oo-target-value"
                       name="targetValue"
                       type="text"
@@ -402,13 +404,13 @@ export default function AddObjective() {
                         <label htmlFor={`oo-ach-${year}`} className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                           {year}
                         </label>
-                        <input
+                        <Input
                           id={`oo-ach-${year}`}
                           name={`achievement_${year}`}
                           type="text"
                           autoComplete="off"
                           placeholder="—"
-                          className="mt-1 w-full border-0 bg-transparent p-0 text-sm font-bold text-slate-900 outline-none placeholder:font-normal placeholder:text-slate-400 sm:text-base"
+                          className="mt-1 h-8 border-0 bg-transparent px-0 font-bold shadow-none focus-visible:ring-0"
                         />
                       </div>
                     ))}
@@ -423,12 +425,9 @@ export default function AddObjective() {
                 >
                   Cancel
                 </Link>
-                <button
-                  type="submit"
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-600 hover:to-orange-700 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 sm:w-auto"
-                >
+                <Button type="submit" className="w-full sm:w-auto">
                   Save objective
-                </button>
+                </Button>
               </div>
             </div>
           </form>
