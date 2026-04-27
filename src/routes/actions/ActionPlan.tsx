@@ -28,7 +28,7 @@ import {
   sumTaskWeightsPercent,
   taskBucket,
   taskStatusPillClass,
-} from "@/routes/actionPlanModel"
+} from "@/routes/actions/actionPlanModel"
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
 

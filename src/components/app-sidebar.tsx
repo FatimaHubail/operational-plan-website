@@ -1,78 +1,50 @@
 "use client"
 
 import * as React from "react"
-import { useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
-  GalleryVerticalEndIcon,
-  AudioLinesIcon,
-  TerminalIcon,
-  TerminalSquareIcon,
-  BotIcon,
-  BookOpenIcon,
-  Settings2Icon,
-  FrameIcon,
-  PieChartIcon,
-  MapIcon,
+  HomeIcon,
   CalendarIcon,
   BellIcon,
   NetworkIcon,
   ClipboardListIcon,
+  LogOutIcon,
+  UsersIcon,
+  UserPlusIcon,
 } from "lucide-react"
+
+type SidebarNavItem = {
+  title: string
+  url: string
+  icon: React.ReactNode
+  items?: { title: string; url: string }[]
+}
 
 function resolveNavUrl(url: string, routePrefix: string) {
   if (!url || url === "#" || !url.startsWith("/")) return url
   return `${routePrefix}${url}`
 }
 
-// This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: (
-        <GalleryVerticalEndIcon
-        />
-      ),
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: (
-        <AudioLinesIcon
-        />
-      ),
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: (
-        <TerminalIcon
-        />
-      ),
-      plan: "Free",
-    },
-  ],
   navMain: [
+    {
+      title: "Home",
+      url: "/dashboard",
+      icon: <HomeIcon />,
+    },
     {
       title: "Calender",
       url: "/calendar", 
@@ -84,8 +56,8 @@ const data = {
       icon: <BellIcon />
     },
     {
-      title: "My Requests",
-      url: "/submission-status",
+      title: "Proposals Status",
+      url: "/proposals-status",
       icon: <ClipboardListIcon />
     },
     {
@@ -111,147 +83,93 @@ const data = {
         },
       ],
     },
-    {
-      title: "Playground",
-      url: "#",
-      icon: (
-        <TerminalSquareIcon
-        />
-      ),
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: (
-        <BotIcon
-        />
-      ),
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: (
-        <BookOpenIcon
-        />
-      ),
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: (
-        <FrameIcon
-        />
-      ),
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: (
-        <PieChartIcon
-        />
-      ),
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: (
-        <MapIcon
-        />
-      ),
-    },
   ],
 }
 
+const adminNavMain: SidebarNavItem[] = [
+  {
+    title: "Home",
+    url: "/dashboard-admin",
+    icon: <HomeIcon />,
+  },
+  {
+    title: "Notifications",
+    url: "/notifications",
+    icon: <BellIcon />,
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: <UsersIcon />,
+  },
+  {
+    title: "Add user",
+    url: "/add-user",
+    icon: <UserPlusIcon />,
+  },
+]
+
+const auditorNavMain: SidebarNavItem[] = [
+  {
+    title: "Home",
+    url: "/dashboard-auditor",
+    icon: <HomeIcon />,
+  },
+  {
+    title: "Notifications",
+    url: "/notifications",
+    icon: <BellIcon />,
+  },
+  {
+    title: "Queue",
+    url: "/action-queue",
+    icon: <ClipboardListIcon />,
+  },
+]
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
-  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
+  const sourceContext = new URLSearchParams(location.search).get("from")
+  const isContributorArea =
+    location.pathname.startsWith("/contributor/") ||
+    location.pathname === "/contributer-dashboard" ||
+    sourceContext === "contributor-dashboard"
+  const routePrefix = isContributorArea ? "/contributor" : ""
+  const isAdminArea =
+    location.pathname === "/dashboard-admin" ||
+    location.pathname === "/users" ||
+    location.pathname === "/add-user" ||
+    (location.pathname === "/notifications" && sourceContext === "dashboard-admin") ||
+    location.pathname.startsWith("/admin/")
+  const isAuditorArea =
+    location.pathname === "/dashboard-auditor" ||
+    location.pathname === "/action-queue" ||
+    location.pathname === "/objective-queue" ||
+    location.pathname === "/review-action" ||
+    (location.pathname === "/notifications" && sourceContext === "dashboard-auditor") ||
+    location.pathname.startsWith("/auditor/")
+  const notificationsHref = isAdminArea
+    ? "/notifications?from=dashboard-admin"
+    : isAuditorArea
+      ? "/notifications?from=dashboard-auditor"
+      : isContributorArea
+        ? `${routePrefix}/notifications?from=contributor-dashboard`
+        : "/notifications?from=dashboard"
 
   const navMain = React.useMemo(
     () =>
-      data.navMain.map((item) => ({
+      (isAdminArea ? adminNavMain : isAuditorArea ? auditorNavMain : data.navMain).map((item) => ({
         ...item,
-        url: resolveNavUrl(item.url, routePrefix),
+        url:
+          item.title === "Notifications"
+            ? notificationsHref
+            : resolveNavUrl(item.url, routePrefix),
         items: item.items?.map((sub) => ({
           ...sub,
           url: resolveNavUrl(sub.url, routePrefix),
         })),
       })),
-    [routePrefix]
+    [isAdminArea, isAuditorArea, notificationsHref, routePrefix]
   )
 
   return (
@@ -262,14 +180,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarTrigger />
           </SidebarMenuItem>
         </SidebarMenu>
-        <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Log out" render={<Link to="/login" />}>
+              <LogOutIcon />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

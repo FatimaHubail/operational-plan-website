@@ -1,7 +1,7 @@
-import { beneficiariesData } from "@/routes/Beneficiary"
-import { catalystsData } from "@/routes/Catalysts"
-import { enablersData } from "@/routes/Enablers"
-import { stakeholdersData } from "@/routes/Stakeholders"
+import { beneficiariesData } from "@/routes/strategic-perpectives/Beneficiary"
+import { catalystsData } from "@/routes/strategic-perpectives/Catalysts"
+import { enablersData } from "@/routes/strategic-perpectives/Enablers"
+import { stakeholdersData } from "@/routes/strategic-perpectives/Stakeholders"
 import type { ActionPlanPlanSection } from "@/lib/buildActionPlanHref"
 
 export type ResolvedActionPlanContext = {

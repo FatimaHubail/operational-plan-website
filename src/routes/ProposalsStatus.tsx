@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Table,
@@ -22,15 +22,17 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-type SubmissionFilter = "all" | "action" | "objective"
+type SubmissionFilter = "all" | "action" | "objective" | "task"
+type ProposalType = Exclude<SubmissionFilter, "all">
+type StatusTone = "pending" | "review" | "changes" | "accepted"
 
 type SubmissionRow = {
   id: string
-  submissionType: "objective" | "action"
+  submissionType: ProposalType
   perspective: string
   summary: string
   status: string
-  statusTone: "pending" | "review" | "changes" | "accepted"
+  statusTone: StatusTone
   followUpLabel: string
   followUpTo: string
 }
@@ -51,7 +53,7 @@ const rows: SubmissionRow[] = [
     submissionType: "objective",
     perspective: "Enablers",
     summary: "Facilities — digital core uptime",
-    status: "Edited — awaiting re-review",
+    status: "Edited - awaiting re-review",
     statusTone: "review",
     followUpLabel: "View edits",
     followUpTo: "/notifications",
@@ -76,6 +78,46 @@ const rows: SubmissionRow[] = [
     followUpLabel: "View in Catalysts",
     followUpTo: "/catalysts",
   },
+  {
+    id: "REQ-2026-0150",
+    submissionType: "task",
+    perspective: "Catalysts",
+    summary: "Baseline task ownership matrix",
+    status: "Pending auditor review",
+    statusTone: "pending",
+    followUpLabel: "View",
+    followUpTo: "/notifications",
+  },
+  {
+    id: "REQ-2026-0148",
+    submissionType: "task",
+    perspective: "Enablers",
+    summary: "Data collection task timeline",
+    status: "Edited - awaiting re-review",
+    statusTone: "review",
+    followUpLabel: "View edits",
+    followUpTo: "/notifications",
+  },
+  {
+    id: "REQ-2026-0143",
+    submissionType: "task",
+    perspective: "Beneficiary",
+    summary: "Department rollout checklist",
+    status: "Changes requested",
+    statusTone: "changes",
+    followUpLabel: "Edit",
+    followUpTo: "/beneficiary/add-action",
+  },
+  {
+    id: "REQ-2026-0139",
+    submissionType: "task",
+    perspective: "Stakeholders",
+    summary: "Quarterly stakeholder outreach tasks",
+    status: "Accepted",
+    statusTone: "accepted",
+    followUpLabel: "View in Stakeholders",
+    followUpTo: "/stakeholders",
+  },
 ]
 
 function statusBadgeClass(tone: SubmissionRow["statusTone"]) {
@@ -93,12 +135,17 @@ function statusBadgeClass(tone: SubmissionRow["statusTone"]) {
   }
 }
 
+const statusRows: { tone: StatusTone; label: string }[] = [
+  { tone: "pending", label: "Pending auditor review" },
+  { tone: "review", label: "Edited - awaiting re-review" },
+  { tone: "changes", label: "Changes requested" },
+  { tone: "accepted", label: "Accepted" },
+]
+
 export default function SubmissionStatus() {
   const location = useLocation()
   const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
   const dashboardHref = routePrefix ? "/contributor/dashboard" : "/dashboard"
-  const addObjectiveHref = `${routePrefix}/catalysts/add-objective`
-  const addActionHref = `${routePrefix}/catalysts/add-action`
 
   const [filter, setFilter] = useState<SubmissionFilter>("all")
 
@@ -106,6 +153,24 @@ export default function SubmissionStatus() {
     if (filter === "all") return rows
     return rows.filter((r) => r.submissionType === filter)
   }, [filter])
+  const limitedRows = useMemo(() => visibleRows.slice(0, 5), [visibleRows])
+  const statusOverview = useMemo(
+    () =>
+      statusRows.map((status) => {
+        const objectives = rows.filter((r) => r.statusTone === status.tone && r.submissionType === "objective").length
+        const actions = rows.filter((r) => r.statusTone === status.tone && r.submissionType === "action").length
+        const tasks = rows.filter((r) => r.statusTone === status.tone && r.submissionType === "task").length
+        return {
+          tone: status.tone,
+          label: status.label,
+          objectives,
+          actions,
+          tasks,
+          total: objectives + actions + tasks,
+        }
+      }),
+    []
+  )
 
   const resolveFollowUp = (path: string) => {
     if (!path.startsWith("/")) return path
@@ -123,7 +188,7 @@ export default function SubmissionStatus() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>My submissions</BreadcrumbPage>
+              <BreadcrumbPage>My proposals</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -131,46 +196,32 @@ export default function SubmissionStatus() {
 
       <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
         <header className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Inspection &amp; approval</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Submission status</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Proposals Status</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Objectives and actions you create through{" "}
-            <Link to={addObjectiveHref} className="font-medium text-primary underline-offset-4 hover:underline">
-              Add operational objectives
-            </Link>{" "}
-            or{" "}
-            <Link to={addActionHref} className="font-medium text-primary underline-offset-4 hover:underline">
-              Add action
-            </Link>{" "}
-            enter the same workflow auditors use: <span className="font-medium text-foreground">inspect</span> the
-            payload, then <span className="font-medium text-foreground">Accept submission</span> or{" "}
-            <span className="font-medium text-foreground">Request changes</span> with field-level notes. Resubmissions
-            show as <span className="font-medium text-foreground">Edited — awaiting re-review</span>.
+            Track the inspection status of your proposed objectives, actions, and tasks
           </p>
         </header>
 
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <Card className="shadow-sm ring-1 ring-border/60">
-            <CardContent className="p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Pending review</p>
-              <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">2</p>
-              <p className="mt-1 text-xs text-muted-foreground">In auditor queues</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm ring-1 ring-border/60">
-            <CardContent className="p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Awaiting re-review</p>
-              <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">1</p>
-              <p className="mt-1 text-xs text-muted-foreground">After you applied edits</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm ring-1 ring-border/60">
-            <CardContent className="p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Accepted</p>
-              <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">4</p>
-              <p className="mt-1 text-xs text-muted-foreground">This planning cycle</p>
-            </CardContent>
-          </Card>
+        <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {statusOverview.map((row) => (
+            <div key={row.tone} className="min-h-[8.5rem] rounded-xl border border-border bg-background p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground">{row.label}</p>
+                <Badge variant="outline" className={cn("rounded-full px-2 font-bold tabular-nums", statusBadgeClass(row.tone))}>
+                  {row.total}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Objectives: <span className="font-semibold text-foreground">{row.objectives}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Actions: <span className="font-semibold text-foreground">{row.actions}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Tasks: <span className="font-semibold text-foreground">{row.tasks}</span>
+              </p>
+            </div>
+          ))}
         </div>
 
         <Card className="overflow-hidden shadow-sm ring-1 ring-border/60">
@@ -178,18 +229,16 @@ export default function SubmissionStatus() {
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
               <div className="min-w-0">
                 <CardTitle id="submissions-table-heading" className="text-lg">
-                  Your recent submissions
+                  Your recent proposals
                 </CardTitle>
-                <CardDescription className="mt-0.5 text-sm">
-                  Demo rows mirror statuses on objective and action auditor queues.
-                </CardDescription>
               </div>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Filter submissions by type">
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Filter proposals by type">
                 {(
                   [
                     { key: "all" as const, label: "All" },
                     { key: "action" as const, label: "Actions" },
                     { key: "objective" as const, label: "Objectives" },
+                        { key: "task" as const, label: "Tasks" },
                   ] as const
                 ).map(({ key, label }) => (
                   <Button
@@ -208,6 +257,7 @@ export default function SubmissionStatus() {
             </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-0">
+            <div className="max-h-[23rem] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border bg-muted/50 hover:bg-muted/50">
@@ -221,7 +271,7 @@ export default function SubmissionStatus() {
                     Strategic perspective
                   </TableHead>
                   <TableHead className="max-w-xs px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                    Summary
+                    Name
                   </TableHead>
                   <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Status
@@ -232,13 +282,17 @@ export default function SubmissionStatus() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visibleRows.map((row) => (
+                {limitedRows.map((row) => (
                   <TableRow key={row.id} className="border-border" data-submission-type={row.submissionType}>
                     <TableCell className="px-4 py-4 font-mono text-xs font-semibold text-foreground sm:px-6">
                       {row.id}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-foreground">
-                      {row.submissionType === "objective" ? "Objective" : "Action"}
+                      {row.submissionType === "objective"
+                        ? "Objective"
+                        : row.submissionType === "action"
+                          ? "Action"
+                          : "Task"}
                     </TableCell>
                     <TableCell className="px-4 py-4">
                       <Badge variant="outline" className="font-semibold">
@@ -263,6 +317,7 @@ export default function SubmissionStatus() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
