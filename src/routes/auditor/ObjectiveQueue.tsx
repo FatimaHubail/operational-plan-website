@@ -152,9 +152,17 @@ export default function ObjectiveQueue() {
                   <TableCell className="px-4 py-4">
                     <span className={`text-xs font-semibold ${statusClass(row.status)}`}>{row.status}</span>
                   </TableCell>
-                  <TableCell className="px-4 py-4 text-right lg:pr-8">
+                    <TableCell className="px-4 py-4 text-right lg:pr-8">
                     <Link
-                      to="/auditor/review-objective"
+                      to={
+                        row.status === "Edited"
+                          ? "/review-objective?edited=1"
+                          : row.status === "Accepted"
+                            ? "/review-objective?status=accepted"
+                            : row.status === "Changes requested"
+                              ? "/review-objective?status=changes_requested"
+                              : "/review-objective"
+                      }
                       className={
                         row.actionLabel === "Open"
                           ? "inline-flex rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"

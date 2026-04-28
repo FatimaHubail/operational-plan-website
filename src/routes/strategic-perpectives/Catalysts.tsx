@@ -652,7 +652,7 @@ export default function Catalysts() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-orange-500/15 via-transparent to-transparent" aria-hidden="true" />
             <div className="relative">
               <h2 id="catalysts-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300/90">
-                Summary
+                Overview
               </h2>
               <p className="mt-1 text-sm font-semibold text-white">Catalyst layer - 2026 operational plan</p>
             </div>
@@ -858,7 +858,7 @@ export default function Catalysts() {
                             <div>
                               <h4 className="text-base font-bold text-slate-900 sm:text-lg">Operational objectives</h4>
                               <p className="mt-0.5 text-xs leading-relaxed text-slate-500 sm:text-sm">
-                                Objectives for the active sub-section. Each card can include an action plan.
+                                Browse objectives in this sub-section and navigate to their supporting action plans
                               </p>
                             </div>
                           </div>
@@ -900,7 +900,7 @@ export default function Catalysts() {
 
                                       <div className="space-y-2.5 sm:space-y-3">
                                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Request status</span>
+                                          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Proposal status</span>
                                           <span className="inline-flex max-w-full items-center rounded-xl border border-amber-200/90 bg-gradient-to-b from-amber-50 to-amber-100/60 px-2.5 py-1.5 text-[10px] font-semibold leading-snug text-amber-950 ring-1 ring-amber-100/70">
                                             {objective.requestStatus}
                                           </span>

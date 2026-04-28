@@ -1,4 +1,5 @@
-import { Link, useSearchParams } from "react-router-dom"
+import { useMemo } from "react"
+import { Link, useLocation, useSearchParams } from "react-router-dom"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Textarea } from "@/components/ui/textarea"
+import { formatFieldLabel } from "@/lib/formatFieldLabel"
 
 const fieldOptions = [
   "actionTitle",
@@ -28,11 +30,27 @@ const fieldOptions = [
 ]
 
 export default function ReviewAction() {
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const status = searchParams.get("status")
   const isEdited = searchParams.get("edited") === "1"
   const isChangesRequested = status === "changes_requested"
   const isAccepted = status === "accepted"
+  const isProposalContext =
+    searchParams.get("context") === "proposal" || location.pathname.includes("/proposal/review/")
+  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
+  const proposalsStatusHref = `${routePrefix}/proposals-status`
+  const dashboardHref = routePrefix ? "/contributor/dashboard" : "/dashboard"
+
+  const showRequestedEdits = isChangesRequested && !isProposalContext
+
+  const submissionSubmittedOn = useMemo(() => {
+    const d = new Date()
+    return {
+      iso: d.toISOString().slice(0, 10),
+      label: new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(d),
+    }
+  }, [])
 
   const requestId = isEdited ? "REQ-2026-0131" : isChangesRequested ? "REQ-2026-0129" : "REQ-2026-0142"
   const badgeText = isEdited
@@ -49,15 +67,28 @@ export default function ReviewAction() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/dashboard-auditor" />}>Dashboard</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to={isProposalContext ? dashboardHref : "/dashboard-auditor"} />}>
+                Dashboard
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
+            {isProposalContext ? (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbLink render={<Link to={proposalsStatusHref} />}>Proposals Status</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            ) : (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbLink render={<Link to="/action-queue" />}>Action queue</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )}
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/action-queue" />}>Action queue</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Action</BreadcrumbPage>
+              <BreadcrumbPage>{isProposalContext ? "Review action" : "Action"}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -68,11 +99,38 @@ export default function ReviewAction() {
               {isEdited ? "Review edited action submission" : isChangesRequested ? "Review requested edits" : "Review action submission"}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Submitted by <span className="font-medium text-foreground">{isEdited ? "IT and Operations" : "Ahmed Khalil"}</span> - Source:{" "}
-              <Link to="/add-action" className="font-medium text-primary hover:underline">
-                Add action
-              </Link>{" "}
-              - {isEdited ? "Resubmitted yesterday after changes requested" : "2 hours ago"}
+              {isChangesRequested ? (
+                <>
+                  Original submission · <span className="font-medium text-foreground">College of Science</span> · Source:{" "}
+                  <Link to="/add-action" className="font-medium text-primary hover:underline">
+                    Add action
+                  </Link>{" "}
+                  · Faculty KPI mapping rollout
+                </>
+              ) : isEdited ? (
+                <>
+                  Submitted by <span className="font-medium text-foreground">IT and Operations</span> · Source:{" "}
+                  <Link to="/add-action" className="font-medium text-primary hover:underline">
+                    Add action
+                  </Link>{" "}
+                  · Resubmitted yesterday after changes requested
+                </>
+              ) : isProposalContext ? (
+                <>
+                  Submitted on:{" "}
+                  <time dateTime={submissionSubmittedOn.iso} className="font-medium text-foreground">
+                    {submissionSubmittedOn.label}
+                  </time>
+                </>
+              ) : (
+                <>
+                  Submitted by <span className="font-medium text-foreground">Ahmed Khalil</span> · Source:{" "}
+                  <Link to="/add-action" className="font-medium text-primary hover:underline">
+                    Add action
+                  </Link>{" "}
+                  · 2 hours ago
+                </>
+              )}
             </p>
           </div>
           <span className="inline-flex w-fit items-center rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
@@ -93,20 +151,21 @@ export default function ReviewAction() {
       <div className="space-y-6">
         <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
           <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
-            <h2 className="text-lg font-bold">Submitted content</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Read-only copy of fields from <span className="font-mono text-xs">add-action-form</span>.
-            </p>
+            <h2 className="text-lg font-bold">Submitted Content</h2>
           </div>
           <div className="px-6 py-6 sm:px-8 sm:py-8">
             <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Action</h3>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">actionTitle</dt>
+                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {formatFieldLabel("actionTitle")}
+                </dt>
                 <dd className="mt-1 text-sm font-medium">Faculty KPI mapping and sign-off</dd>
               </div>
               <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">actionTotalWeight</dt>
+                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {formatFieldLabel("actionTotalWeight")}
+                </dt>
                 <dd className="mt-1 text-sm font-semibold">50%</dd>
               </div>
             </dl>
@@ -114,26 +173,34 @@ export default function ReviewAction() {
             <h3 className="mt-8 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Task</h3>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">taskName</dt>
+                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {formatFieldLabel("taskName")}
+                </dt>
                 <dd className="mt-1 text-sm">Complete college-level KPI worksheet</dd>
               </div>
               <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">taskWeight</dt>
+                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {formatFieldLabel("taskWeight")}
+                </dt>
                 <dd className="mt-1 text-sm">50%</dd>
               </div>
               <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">taskStatus</dt>
+                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {formatFieldLabel("taskStatus")}
+                </dt>
                 <dd className="mt-1 text-sm">In progress</dd>
               </div>
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">taskMainEntity</dt>
+                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {formatFieldLabel("taskMainEntity")}
+                </dt>
                 <dd className="mt-1 text-sm">College of Science</dd>
               </div>
             </dl>
           </div>
         </section>
 
-        {isChangesRequested && (
+        {showRequestedEdits && (
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Requested edits</h2>
@@ -144,7 +211,7 @@ export default function ReviewAction() {
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
               <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
-                <p className="mt-1 font-mono text-sm font-semibold">taskExpectedEndDate</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel("taskExpectedEndDate")}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Move the expected end date to 30 June 2026 so Q2 milestones align with reporting window.
@@ -162,7 +229,7 @@ export default function ReviewAction() {
           </section>
         )}
 
-        {!isAccepted && !isChangesRequested && (
+        {!isProposalContext && !isAccepted && !isChangesRequested && (
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Your notes</h2>
@@ -180,7 +247,7 @@ export default function ReviewAction() {
                     <NativeSelectOption value="">Select field...</NativeSelectOption>
                     {fieldOptions.map((field) => (
                       <NativeSelectOption key={field} value={field}>
-                        {field}
+                        {formatFieldLabel(field)}
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
@@ -219,6 +286,17 @@ export default function ReviewAction() {
               </div>
             </form>
           </section>
+        )}
+
+        {isProposalContext && (
+          <div className="flex justify-start">
+            <Link
+              to={proposalsStatusHref}
+              className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
+            >
+              Back to proposals status
+            </Link>
+          </div>
         )}
       </div>
     </div>

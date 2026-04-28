@@ -29,7 +29,10 @@ type StatusTone = "pending" | "review" | "changes" | "accepted"
 type SubmissionRow = {
   id: string
   submissionType: ProposalType
+  /** Strategic perspective label (e.g. Catalysts). */
   perspective: string
+  /** Section code within that perspective (e.g. C1.1, E3.2). */
+  perspectiveSection: string
   summary: string
   status: string
   statusTone: StatusTone
@@ -42,6 +45,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0141",
     submissionType: "objective",
     perspective: "Catalysts",
+    perspectiveSection: "C1.1",
     summary: "Improve research output visibility",
     status: "Pending auditor review",
     statusTone: "pending",
@@ -49,9 +53,21 @@ const rows: SubmissionRow[] = [
     followUpTo: "/notifications",
   },
   {
+    id: "REQ-2026-0105",
+    submissionType: "objective",
+    perspective: "Catalysts",
+    perspectiveSection: "C2.3",
+    summary: "Digital services uptime target",
+    status: "Changes requested",
+    statusTone: "changes",
+    followUpLabel: "Edit",
+    followUpTo: "/catalysts/add-objective",
+  },
+  {
     id: "REQ-2026-0130",
     submissionType: "objective",
     perspective: "Enablers",
+    perspectiveSection: "E3.2",
     summary: "Facilities — digital core uptime",
     status: "Edited - awaiting re-review",
     statusTone: "review",
@@ -62,6 +78,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0112",
     submissionType: "action",
     perspective: "Beneficiary",
+    perspectiveSection: "B1.4",
     summary: "KPI mapping workshop rollout",
     status: "Changes requested",
     statusTone: "changes",
@@ -72,6 +89,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0098",
     submissionType: "objective",
     perspective: "Stakeholders",
+    perspectiveSection: "S2.1",
     summary: "Cross-unit reporting dashboard",
     status: "Accepted",
     statusTone: "accepted",
@@ -82,6 +100,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0150",
     submissionType: "task",
     perspective: "Catalysts",
+    perspectiveSection: "C4.0",
     summary: "Baseline task ownership matrix",
     status: "Pending auditor review",
     statusTone: "pending",
@@ -92,6 +111,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0148",
     submissionType: "task",
     perspective: "Enablers",
+    perspectiveSection: "E1.2",
     summary: "Data collection task timeline",
     status: "Edited - awaiting re-review",
     statusTone: "review",
@@ -102,6 +122,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0143",
     submissionType: "task",
     perspective: "Beneficiary",
+    perspectiveSection: "B3.1",
     summary: "Department rollout checklist",
     status: "Changes requested",
     statusTone: "changes",
@@ -112,6 +133,7 @@ const rows: SubmissionRow[] = [
     id: "REQ-2026-0139",
     submissionType: "task",
     perspective: "Stakeholders",
+    perspectiveSection: "S4.2",
     summary: "Quarterly stakeholder outreach tasks",
     status: "Accepted",
     statusTone: "accepted",
@@ -147,12 +169,21 @@ export default function SubmissionStatus() {
   const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
   const dashboardHref = routePrefix ? "/contributor/dashboard" : "/dashboard"
 
+  const objectiveEditsHref = `${routePrefix}/proposal/view/objective-edits`
+  const actionEditsHref = `${routePrefix}/proposal/view/action-edits`
+  const editObjectiveHref = `${routePrefix}/proposal/edit/objective`
+  const editActionHref = `${routePrefix}/proposal/edit/action`
+
   const [filter, setFilter] = useState<SubmissionFilter>("all")
+  /** When set, table shows only proposals in this lifecycle tone (e.g. Edited). */
+  const [toneFilter, setToneFilter] = useState<StatusTone | "all">("all")
 
   const visibleRows = useMemo(() => {
-    if (filter === "all") return rows
-    return rows.filter((r) => r.submissionType === filter)
-  }, [filter])
+    let list = rows
+    if (filter !== "all") list = list.filter((r) => r.submissionType === filter)
+    if (toneFilter !== "all") list = list.filter((r) => r.statusTone === toneFilter)
+    return list
+  }, [filter, toneFilter])
   const limitedRows = useMemo(() => visibleRows.slice(0, 5), [visibleRows])
   const statusOverview = useMemo(
     () =>
@@ -175,6 +206,30 @@ export default function SubmissionStatus() {
   const resolveFollowUp = (path: string) => {
     if (!path.startsWith("/")) return path
     return `${routePrefix}${path}`
+  }
+
+  const followUpHref = (row: SubmissionRow) => {
+    if (row.statusTone === "pending" && row.followUpLabel === "View") {
+      const path =
+        row.submissionType === "objective"
+          ? `${routePrefix}/proposal/review/objective`
+          : `${routePrefix}/proposal/review/action`
+      return `${path}?context=proposal`
+    }
+    // Edited - awaiting re-review → view-edits detail pages
+    if (row.statusTone === "review" && row.followUpLabel === "View edits") {
+      const path = row.submissionType === "objective" ? objectiveEditsHref : actionEditsHref
+      return path
+    }
+    // Changes requested → contributor edit flow
+    if (row.statusTone === "changes" && row.followUpLabel === "Edit") {
+      return row.submissionType === "objective" ? editObjectiveHref : editActionHref
+    }
+    return resolveFollowUp(row.followUpTo)
+  }
+
+  const toggleToneCard = (tone: StatusTone) => {
+    setToneFilter((prev) => (prev === tone ? "all" : tone))
   }
 
   return (
@@ -203,26 +258,55 @@ export default function SubmissionStatus() {
         </header>
 
         <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {statusOverview.map((row) => (
-            <div key={row.tone} className="min-h-[8.5rem] rounded-xl border border-border bg-background p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold text-muted-foreground">{row.label}</p>
-                <Badge variant="outline" className={cn("rounded-full px-2 font-bold tabular-nums", statusBadgeClass(row.tone))}>
-                  {row.total}
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Objectives: <span className="font-semibold text-foreground">{row.objectives}</span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Actions: <span className="font-semibold text-foreground">{row.actions}</span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Tasks: <span className="font-semibold text-foreground">{row.tasks}</span>
-              </p>
-            </div>
-          ))}
+          {statusOverview.map((row) => {
+            const isActive = toneFilter === row.tone
+            return (
+              <button
+                key={row.tone}
+                type="button"
+                onClick={() => toggleToneCard(row.tone)}
+                className={cn(
+                  "min-h-[8.5rem] cursor-pointer rounded-xl border bg-background p-3 text-left transition hover:bg-muted/40",
+                  isActive ? "border-primary ring-2 ring-primary/30" : "border-border"
+                )}
+                aria-pressed={isActive}
+                aria-label={`Filter table by ${row.label}`}
+              >
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold text-muted-foreground">{row.label}</p>
+                  <Badge variant="outline" className={cn("rounded-full px-2 font-bold tabular-nums", statusBadgeClass(row.tone))}>
+                    {row.total}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Objectives: <span className="font-semibold text-foreground">{row.objectives}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Actions: <span className="font-semibold text-foreground">{row.actions}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tasks: <span className="font-semibold text-foreground">{row.tasks}</span>
+                </p>
+                <p className="mt-2 text-[11px] font-medium text-primary">Click to filter table</p>
+              </button>
+            )
+          })}
         </div>
+
+        {toneFilter !== "all" && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            Showing proposals in:{" "}
+            <span className="font-semibold text-foreground">{statusRows.find((s) => s.tone === toneFilter)?.label}</span>
+            .{" "}
+            <button
+              type="button"
+              className="font-medium text-primary decoration-primary/60 underline-offset-4 hover:underline"
+              onClick={() => setToneFilter("all")}
+            >
+              Clear status filter
+            </button>
+          </p>
+        )}
 
         <Card className="overflow-hidden shadow-sm ring-1 ring-border/60">
           <CardHeader className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
@@ -257,8 +341,8 @@ export default function SubmissionStatus() {
             </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-0">
-            <div className="max-h-[23rem] overflow-y-auto">
-            <Table>
+            <div className="max-h-[23rem] overflow-x-auto overflow-y-auto">
+            <Table className="min-w-[720px]">
               <TableHeader>
                 <TableRow className="border-border bg-muted/50 hover:bg-muted/50">
                   <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:px-6">
@@ -267,7 +351,7 @@ export default function SubmissionStatus() {
                   <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Type
                   </TableHead>
-                  <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  <TableHead className="min-w-[10rem] whitespace-nowrap px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground lg:min-w-[12rem]">
                     Strategic perspective
                   </TableHead>
                   <TableHead className="max-w-xs px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -294,9 +378,14 @@ export default function SubmissionStatus() {
                           ? "Action"
                           : "Task"}
                     </TableCell>
-                    <TableCell className="px-4 py-4">
-                      <Badge variant="outline" className="font-semibold">
-                        {row.perspective}
+                    <TableCell className="min-w-[10rem] max-w-[18rem] px-4 py-3 align-middle lg:min-w-[12rem]">
+                      <Badge
+                        variant="outline"
+                        className="inline-flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-lg px-2 py-1 text-[11px] font-normal leading-snug"
+                      >
+                        <span className="font-semibold text-foreground">{row.perspective}</span>
+                        <span className="shrink-0 text-muted-foreground">-</span>
+                        <span className="font-mono font-semibold tabular-nums text-foreground">{row.perspectiveSection}</span>
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-xs whitespace-normal px-4 py-4 text-muted-foreground">{row.summary}</TableCell>
@@ -307,7 +396,7 @@ export default function SubmissionStatus() {
                     </TableCell>
                     <TableCell className="px-4 py-4 sm:px-6">
                       <Link
-                        to={resolveFollowUp(row.followUpTo)}
+                        to={followUpHref(row)}
                         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                       >
                         {row.followUpLabel}

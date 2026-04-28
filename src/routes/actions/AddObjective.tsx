@@ -134,6 +134,7 @@ export default function AddObjective() {
   const { planSection } = useParams<{ planSection: string }>()
   const isContributorArea = location.pathname.startsWith("/contributor/")
   const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
+  const proposalsStatusHref = isContributorArea ? "/contributor/proposals-status" : "/proposals-status"
   const isValidSection = (s: string | undefined): s is PlanSection =>
     !!s && (PLAN_SECTIONS as readonly string[]).includes(s)
 
@@ -200,6 +201,17 @@ export default function AddObjective() {
             with all required details and yearly targets (2023–2026).
           </p>
         </header>
+
+        <div className="mb-8 rounded-2xl border border-border bg-muted/40 p-4 shadow-sm ring-1 ring-border/60 sm:p-5" role="note">
+          <p className="text-xs font-bold uppercase tracking-wide text-foreground/70">After you submit</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            This objective enters the auditor queue for inspection. The auditor may Accept your proposal or Request changes with notes on specific fields. Monitor status on{" "}
+            <Link to={proposalsStatusHref} className="font-medium text-primary underline-offset-4 hover:underline">
+              Proposals Status
+            </Link>
+            .
+          </p>
+        </div>
 
         <div className="w-full min-w-0">
           <form
@@ -372,7 +384,7 @@ export default function AddObjective() {
                     <AiSuggestionBlock fieldId="oo-execution-indicator-description" minHeightClass="min-h-[5rem]" />
                   </div>
 
-                  <div className="min-w-0 rounded-lg border border-orange-100/90 bg-gradient-to-br from-orange-50/80 to-amber-50/50 p-3 ring-1 ring-orange-100/60 sm:col-span-2 sm:max-w-md">
+                  <div className="min-w-0 sm:col-span-2 sm:max-w-md">
                     <label htmlFor="oo-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
                       Target value <span className="text-orange-600">*</span>
                     </label>
@@ -383,7 +395,7 @@ export default function AddObjective() {
                       autoComplete="off"
                       required
                       placeholder="Planned percentage or number the indicator must reach"
-                      className="w-full rounded-md border border-orange-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-800 outline-none transition placeholder:font-normal placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                      className={inputClass}
                     />
                   </div>
                 </div>

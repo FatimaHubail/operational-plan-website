@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link, Navigate, useLocation, useParams } from "react-router-dom"
+import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,7 +22,6 @@ import {
   flattenTasksFromActions,
   formatDate,
   initialActionsData,
-  newTaskTemplate,
   normalizeStatus,
   parseISODate,
   sumTaskWeightsPercent,
@@ -120,6 +119,7 @@ function FieldCell({
 
 export default function ActionPlan() {
   const location = useLocation()
+  const navigate = useNavigate()
   const { planSection } = useParams<{ planSection: string }>()
   const { state } = location
   const isContributorArea = location.pathname.startsWith("/contributor/")
@@ -131,6 +131,7 @@ export default function ActionPlan() {
 
   const parentPath = (`/${planSection ?? ""}` as keyof typeof SECTION_LABELS) as `/${PlanSection}`
   const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
+  const addTaskHref = `${sectionHref}/add-task`
   const parentLabel = isValidSection(planSection) ? SECTION_LABELS[parentPath] ?? "Planning" : "Planning"
 
   const resolved = useMemo(() => {
@@ -141,13 +142,12 @@ export default function ActionPlan() {
   }, [planSection, nav])
 
   const sub = resolved?.subLabel ?? "C1.1"
-  const perspective = resolved?.perspectiveTitle ?? "Institutional direction"
   const obj = resolved?.objDisplay ?? "1"
   const objectiveLead =
     resolved?.objectiveLead ?? "Align institutional KPIs with national quality benchmarks"
   const status = resolved?.status ?? "In progress"
 
-  const headingText = `${sub}: ${perspective} Objective ${obj}`
+  const headingText = `${sub} - Objective ${obj}`
   const statusStyles = objectiveStatusButtonClass(status)
 
   const [actionsData, setActionsData] = useState<ActionPlanAction[]>(() =>
@@ -163,15 +163,23 @@ export default function ActionPlan() {
 
   const [taskEditMode, setTaskEditMode] = useState(false)
 
-  const [actionEdit, setActionEdit] = useState<{
+  const [actionDetails, setActionDetails] = useState<{
     action: ActionPlanAction
     index: number
   } | null>(null)
 
-  const [actionEditDraft, setActionEditDraft] = useState({
+  const [actionDetailsEditMode, setActionDetailsEditMode] = useState(false)
+  const [actionDetailsDraft, setActionDetailsDraft] = useState({
     actionTitle: "",
     totalWeight: "",
-    totalAchievement: "",
+    taskMainEntity: "",
+    taskSupportingEntities: "",
+    taskHumanResources: "",
+    taskFinancialResources: "",
+    taskActionContributionPercentage: "",
+    taskStatus: "",
+    taskNotes: "",
+    actionProposalStatus: "",
   })
 
   const glance = useMemo(() => {
@@ -283,30 +291,59 @@ export default function ActionPlan() {
     setTaskEditMode(false)
   }
 
-  const openActionEdit = (action: ActionPlanAction, index: number) => {
-    setActionEdit({ action, index })
-    setActionEditDraft({
+  const openActionDetails = (action: ActionPlanAction, index: number) => {
+    const firstTask = action.tasks?.[0]
+    setActionDetailsEditMode(false)
+    setActionDetails({ action, index })
+    setActionDetailsDraft({
       actionTitle: action.title || "",
       totalWeight: action.totalWeight || "",
-      totalAchievement: action.totalAchievement != null ? String(action.totalAchievement) : "",
+      taskMainEntity: firstTask?.mainEntity || "",
+      taskSupportingEntities: firstTask?.supportingEntities || "",
+      taskHumanResources: firstTask?.humanResources || "",
+      taskFinancialResources: firstTask?.financialResources || "",
+      taskActionContributionPercentage: firstTask?.actionContributionPercentage || "",
+      taskStatus: firstTask?.status || "Not started",
+      taskNotes: firstTask?.notes || "",
+      actionProposalStatus: firstTask?.requestStatus || "—",
     })
   }
 
-  const saveActionEdit = (e: React.FormEvent) => {
+  const saveActionDetails = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!actionEdit) return
+    if (!actionDetails) return
     setActionsData((prev) => {
       const next = structuredClone(prev)
-      const act = next[actionEdit.index]
+      const act = next[actionDetails.index]
       if (!act) return prev
-      act.title = actionEditDraft.actionTitle.trim() || "Untitled action"
-      act.totalWeight = actionEditDraft.totalWeight.trim() || "0%"
-      const ta = actionEditDraft.totalAchievement.trim()
-      if (ta === "") delete act.totalAchievement
-      else act.totalAchievement = ta
+      act.title = actionDetailsDraft.actionTitle.trim() || "Untitled action"
+      act.totalWeight = actionDetailsDraft.totalWeight.trim() || "0%"
+      const firstTask = act.tasks?.[0]
+      if (firstTask) {
+        firstTask.mainEntity = actionDetailsDraft.taskMainEntity.trim()
+        firstTask.supportingEntities = actionDetailsDraft.taskSupportingEntities.trim()
+        firstTask.humanResources = actionDetailsDraft.taskHumanResources.trim()
+        firstTask.financialResources = actionDetailsDraft.taskFinancialResources.trim()
+        firstTask.actionContributionPercentage = actionDetailsDraft.taskActionContributionPercentage.trim()
+        firstTask.status = actionDetailsDraft.taskStatus.trim() || "Not started"
+        firstTask.notes = actionDetailsDraft.taskNotes.trim()
+        firstTask.requestStatus = actionDetailsDraft.actionProposalStatus.trim() || "—"
+      }
       return next
     })
-    setActionEdit(null)
+    setActionDetails((prev) =>
+      prev
+        ? {
+            ...prev,
+            action: {
+              ...prev.action,
+              title: actionDetailsDraft.actionTitle.trim() || "Untitled action",
+              totalWeight: actionDetailsDraft.totalWeight.trim() || "0%",
+            },
+          }
+        : null
+    )
+    setActionDetailsEditMode(false)
   }
 
   const saveTaskEdit = () => {
@@ -320,20 +357,12 @@ export default function ActionPlan() {
       ...taskModal.task,
       name: val("name"),
       weight: val("weight"),
-      mainEntity: val("mainEntity"),
-      supportingEntities: val("supportingEntities"),
-      humanResources: val("humanResources"),
-      financialResources: val("financialResources"),
       startDate: val("startDate"),
       expectedEndDate: val("expectedEndDate"),
       performanceIndicators: val("performanceIndicators"),
       targetValue: val("targetValue"),
       actualValueAchieved: val("actualValueAchieved"),
       achievementPercentage: val("achievementPercentage"),
-      actionContributionPercentage: val("actionContributionPercentage"),
-      status: val("status") || "Not started",
-      requestStatus: val("requestStatus") || "—",
-      notes: val("notes"),
     }
 
     setActionsData((prev) => {
@@ -351,12 +380,12 @@ export default function ActionPlan() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return
-      if (actionEdit) setActionEdit(null)
+      if (actionDetails) setActionDetails(null)
       else if (taskModal) closeTaskModal()
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
-  }, [actionEdit, taskModal])
+  }, [actionDetails, taskModal])
 
   if (!isValidSection(planSection)) {
     return <Navigate to={isContributorArea ? "/contributor/catalysts/action-plan" : "/catalysts/action-plan"} replace />
@@ -735,9 +764,9 @@ export default function ActionPlan() {
                     </svg>
                   </span>
                   <div className="min-w-0">
-                    <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Actions &amp; tasks</h2>
+                    <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Actions &amp; Tasks</h2>
                     <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-500">
-                      Actions group related work. Each task captures resources, dates, KPIs, and contribution to the action.
+                      Actions define key initiatives under each objective, and tasks break them down into executable steps with timelines and resources
                     </p>
                   </div>
                 </div>
@@ -763,21 +792,15 @@ export default function ActionPlan() {
                     key={`action-${actionIndex}-${action.title}`}
                     action={action}
                     actionIndex={actionIndex}
-                    onEditAction={() => openActionEdit(action, actionIndex)}
+                    onViewActionDetails={() => openActionDetails(action, actionIndex)}
                     onDeleteAction={() => {
                       if (!confirm("Remove this action and all of its tasks?")) return
                       setActionsData((prev) => prev.filter((_, i) => i !== actionIndex))
                       closeTaskModal()
-                      setActionEdit(null)
+                      setActionDetails(null)
                     }}
                     onAddTask={() => {
-                      setActionsData((prev) => {
-                        const next = structuredClone(prev)
-                        const a = next[actionIndex]
-                        if (!a.tasks) a.tasks = []
-                        a.tasks.push(newTaskTemplate())
-                        return next
-                      })
+                      navigate(addTaskHref)
                     }}
                     onOpenTask={(task, taskIndex) => openTaskModal(task, taskIndex, actionIndex, action)}
                     onDeleteTask={(taskIndex) => {
@@ -826,24 +849,12 @@ export default function ActionPlan() {
               {!taskEditMode ? (
                 <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2">
                   <FieldCell label="Weight" value={taskModal.task.weight} mode="metric" />
-                  <FieldCell label="Main entity" value={taskModal.task.mainEntity} />
-                  <FieldCell label="Supporting entity/s" value={taskModal.task.supportingEntities} />
-                  <FieldCell label="Human resources required" value={taskModal.task.humanResources} />
-                  <FieldCell label="Financial resources required" value={taskModal.task.financialResources} />
                   <FieldCell label="Start date" value={formatDate(taskModal.task.startDate)} />
                   <FieldCell label="Expected end date" value={formatDate(taskModal.task.expectedEndDate)} />
                   <FieldCell label="Performance indicators" value={taskModal.task.performanceIndicators} wide />
                   <FieldCell label="Target value" value={taskModal.task.targetValue} />
                   <FieldCell label="Actual value achieved" value={taskModal.task.actualValueAchieved} />
                   <FieldCell label="Achievement percentage" value={taskModal.task.achievementPercentage} mode="metric" />
-                  <FieldCell
-                    label="Action contribution percentage"
-                    value={taskModal.task.actionContributionPercentage}
-                    mode="metric"
-                  />
-                  <FieldCell label="Status" value={taskModal.task.status} mode="status" />
-                  <FieldCell label="Request status" value={taskModal.task.requestStatus} />
-                  <FieldCell label="Notes" value={taskModal.task.notes} wide />
                 </div>
               ) : (
                 <form
@@ -889,77 +900,102 @@ export default function ActionPlan() {
         </div>
       ) : null}
 
-      {actionEdit ? (
+      {actionDetails ? (
         <div className="fixed inset-0 z-[105] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
           <button
             type="button"
             className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] transition hover:bg-slate-900/55"
-            aria-label="Close action editor"
-            onClick={() => setActionEdit(null)}
+            aria-label="Close action details"
+            onClick={() => setActionDetails(null)}
           />
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+          <div className="relative z-10 flex max-h-[min(90vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
             <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-white px-5 py-4 sm:px-6">
-              <h2 className="text-base font-bold text-slate-900">Edit action</h2>
+              <h2 className="text-base font-bold text-slate-900">
+                Action {actionDetails.index + 1} - {actionDetails.action.title || "Untitled action"}
+              </h2>
               <button
                 type="button"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40"
                 aria-label="Close"
-                onClick={() => setActionEdit(null)}
+                onClick={() => setActionDetails(null)}
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <form onSubmit={saveActionEdit} className="space-y-3 px-5 py-4 sm:px-6 sm:py-5">
+            <form id="action-details-edit-fields" onSubmit={saveActionDetails} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
               <label className="block">
                 <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Action title</span>
                 <input
                   name="actionTitle"
-                  required
-                  value={actionEditDraft.actionTitle}
-                  onChange={(e) => setActionEditDraft((d) => ({ ...d, actionTitle: e.target.value }))}
+                  value={actionDetailsDraft.actionTitle}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionTitle: e.target.value }))}
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
                 />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Total weight</span>
-                <input
-                  name="totalWeight"
-                  placeholder="e.g. 50%"
-                  value={actionEditDraft.totalWeight}
-                  onChange={(e) => setActionEditDraft((d) => ({ ...d, totalWeight: e.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
-                />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Main entity</span>
+                <input name="taskMainEntity" value={actionDetailsDraft.taskMainEntity} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskMainEntity: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                  Total achievement (optional)
-                </span>
-                <input
-                  name="totalAchievement"
-                  placeholder="Leave blank to calculate from tasks"
-                  value={actionEditDraft.totalAchievement}
-                  onChange={(e) => setActionEditDraft((d) => ({ ...d, totalAchievement: e.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
-                />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Supporting entities</span>
+                <input name="taskSupportingEntities" value={actionDetailsDraft.taskSupportingEntities} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskSupportingEntities: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
               </label>
-              <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                <button
-                  type="submit"
-                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-600 hover:to-orange-700 sm:flex-none sm:px-6"
-                >
-                  Save
-                </button>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Human resources required</span>
+                <textarea name="taskHumanResources" rows={3} value={actionDetailsDraft.taskHumanResources} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskHumanResources: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+              </label>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Financial resources required</span>
+                <textarea name="taskFinancialResources" rows={3} value={actionDetailsDraft.taskFinancialResources} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskFinancialResources: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+              </label>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Action contribution percentage</span>
+                <input name="taskActionContributionPercentage" value={actionDetailsDraft.taskActionContributionPercentage} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskActionContributionPercentage: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+              </label>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status</span>
+                <input name="taskStatus" value={actionDetailsDraft.taskStatus} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskStatus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+              </label>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Action proposal status</span>
+                <input name="actionProposalStatus" value={actionDetailsDraft.actionProposalStatus} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionProposalStatus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+              </label>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Notes</span>
+                <textarea name="taskNotes" rows={3} value={actionDetailsDraft.taskNotes} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskNotes: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+              </label>
+            </form>
+            <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-5 py-3 sm:px-6">
+              {!actionDetailsEditMode ? (
                 <button
                   type="button"
-                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 sm:flex-none"
-                  onClick={() => setActionEdit(null)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 focus-visible:ring-offset-2 sm:w-auto"
+                  onClick={() => setActionDetailsEditMode(true)}
                 >
-                  Cancel
+                  Edit details
                 </button>
-              </div>
-            </form>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="submit"
+                    form="action-details-edit-fields"
+                    className="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-600 hover:to-orange-700 sm:flex-none sm:px-6"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 sm:flex-none"
+                    onClick={() => setActionDetailsEditMode(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ) : null}
@@ -997,20 +1033,12 @@ function TaskEditFields({ task }: { task: ActionPlanTask }) {
     <>
       {field("name", "Task name")}
       {field("weight", "Weight")}
-      {field("mainEntity", "Main entity")}
-      {field("supportingEntities", "Supporting entity/s")}
-      {field("humanResources", "Human resources required", true, true)}
-      {field("financialResources", "Financial resources required", true, true)}
       {field("startDate", "Start date (YYYY-MM-DD)")}
       {field("expectedEndDate", "Expected end date (YYYY-MM-DD)")}
       {field("performanceIndicators", "Performance indicators", true, true)}
       {field("targetValue", "Target value")}
-      {field("actualValueAchieved", "Actual value achieved", true, true)}
+      {field("actualValueAchieved", "Actual value achieved")}
       {field("achievementPercentage", "Achievement percentage")}
-      {field("actionContributionPercentage", "Action contribution percentage")}
-      {field("status", "Status")}
-      {field("requestStatus", "Request status")}
-      {field("notes", "Notes", true, true)}
     </>
   )
 }
@@ -1018,7 +1046,7 @@ function TaskEditFields({ task }: { task: ActionPlanTask }) {
 function ActionCard({
   action,
   actionIndex,
-  onEditAction,
+  onViewActionDetails,
   onDeleteAction,
   onAddTask,
   onOpenTask,
@@ -1026,7 +1054,7 @@ function ActionCard({
 }: {
   action: ActionPlanAction
   actionIndex: number
-  onEditAction: () => void
+  onViewActionDetails: () => void
   onDeleteAction: () => void
   onAddTask: () => void
   onOpenTask: (task: ActionPlanTask, taskIndex: number) => void
@@ -1038,6 +1066,7 @@ function ActionCard({
     action.totalAchievement != null && action.totalAchievement !== ""
       ? String(action.totalAchievement)
       : aggregateActionAchievementPercent(tasks) || "—"
+  const actionProposalStatus = tasks[0]?.requestStatus?.trim() || "—"
 
   return (
     <section
@@ -1086,13 +1115,21 @@ function ActionCard({
             <p className="mt-1 text-xs font-medium text-slate-500">
               {tasks.length === 1 ? "1 task" : `${tasks.length} tasks`}
             </p>
+            <div className="mt-2 flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                Action Proposal status
+              </span>
+              <div className="min-w-0 flex-1">
+                <RequestStatusPill label={actionProposalStatus} />
+              </div>
+            </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 sm:text-sm"
-                onClick={onEditAction}
+                onClick={onViewActionDetails}
               >
-                Edit action
+                View details
               </button>
               <button
                 type="button"
@@ -1142,7 +1179,7 @@ function ActionCard({
               <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-slate-100 bg-gradient-to-br from-slate-50/95 via-white to-orange-50/25 px-3 py-3 sm:mt-3 sm:px-4 sm:py-3.5">
                 <div className="flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                   <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                    Request status
+                    Task Proposal status
                   </span>
                   <div className="min-w-0 flex-1">
                     <RequestStatusPill label={task.requestStatus} />
