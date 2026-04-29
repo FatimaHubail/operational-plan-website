@@ -207,7 +207,7 @@ export default function ReviewObjective() {
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="requested-edits-edited-oo-heading">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 id="requested-edits-edited-oo-heading" className="text-lg font-bold text-foreground">
-                Requested edits
+                Requested Edits
               </h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
                 Previously requested changes shown for reference before reviewing this edited resubmission.
@@ -298,19 +298,13 @@ export default function ReviewObjective() {
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="requested-edits-oo-heading">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 id="requested-edits-oo-heading" className="text-lg font-bold text-foreground">
-                Requested edits
+                Requested Edits
               </h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                Read-only summary of field-level and general feedback already sent to the submitter. After they resubmit,
-                open the item from the queue when status is <span className="font-medium text-foreground">Edited</span> to
-                continue review.
+                Overview of feedback already sent to the submitter. After they resubmit,open the proposal to continue inspection
               </p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
-              <p className="text-xs text-muted-foreground">
-                Logged <span className="font-medium text-foreground">10 Mar 2026 · 11:05</span> · Decision:{" "}
-                <span className="font-medium text-foreground">Request changes</span>
-              </p>
               <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel("targetValue")}</p>
@@ -336,7 +330,7 @@ export default function ReviewObjective() {
                 </p>
               </div>
               <div className="rounded-xl border border-border bg-muted/40 px-4 py-3">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">General notes (sent with request)</p>
+                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Additional notes</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Align wording with the IT service catalogue entry for “Digital core services” so the objective can be traced to
                   a single service line.

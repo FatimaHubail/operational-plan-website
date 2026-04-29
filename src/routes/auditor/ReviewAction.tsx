@@ -198,7 +198,7 @@ export default function ReviewAction() {
         {isEdited && !isProposalContext && (
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
-              <h2 className="text-lg font-bold">Requested edits</h2>
+              <h2 className="text-lg font-bold">Requested Edits</h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
                 Previously requested changes shown for reference before reviewing this edited resubmission.
               </p>
@@ -291,9 +291,9 @@ export default function ReviewAction() {
         {showRequestedEdits && (
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
-              <h2 className="text-lg font-bold">Requested edits</h2>
+              <h2 className="text-lg font-bold">Requested Edits</h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                Read-only record of what was asked from submitter before Resubmission.
+                Overview of feedback already sent to the submitter. After they resubmit,open the proposal to continue inspection
               </p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">

@@ -162,7 +162,7 @@ export default function AuditorDashboard() {
 
           <Card className="flex min-h-[20rem] flex-col ring-1 ring-border/60 lg:min-h-[28rem]">
             <CardHeader>
-              <CardTitle className="text-xl">Latest in queue</CardTitle>
+              <CardTitle className="text-xl">Latest in Queue</CardTitle>
               <CardDescription>Open a proposal to inspect the full submission and record your decision</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col">

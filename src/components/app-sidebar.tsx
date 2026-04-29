@@ -21,6 +21,8 @@ import {
   BellIcon,
   NetworkIcon,
   ClipboardListIcon,
+  ClipboardCheckIcon,
+  ListTodoIcon,
   LogOutIcon,
   UsersIcon,
   UserPlusIcon,
@@ -121,9 +123,19 @@ const auditorNavMain: SidebarNavItem[] = [
     icon: <BellIcon />,
   },
   {
-    title: "Queue",
+    title: "Action queue",
     url: "/action-queue",
     icon: <ClipboardListIcon />,
+  },
+  {
+    title: "Objective queue",
+    url: "/objective-queue",
+    icon: <ClipboardCheckIcon />,
+  },
+  {
+    title: "Task queue",
+    url: "/task-queue",
+    icon: <ListTodoIcon />,
   },
 ]
 
@@ -145,7 +157,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     location.pathname === "/dashboard-auditor" ||
     location.pathname === "/action-queue" ||
     location.pathname === "/objective-queue" ||
+    location.pathname === "/task-queue" ||
     location.pathname === "/review-action" ||
+    location.pathname === "/review-objective" ||
+    location.pathname === "/review-task" ||
     (location.pathname === "/notifications" && sourceContext === "dashboard-auditor") ||
     location.pathname.startsWith("/auditor/")
   const notificationsHref = isAdminArea
