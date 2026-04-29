@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -19,16 +20,56 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { SearchIcon, UserPlusIcon } from "lucide-react"
+import { PencilIcon, SearchIcon, UserPlusIcon, XIcon } from "lucide-react"
 
 type UserRow = {
   name: string
   email: string
-  role: "Administrator" | "Contributor" | "Auditor"
+  role: "Administrator" | "Contributor" | "Auditor" | "Indicator Owner"
   unit: string
-  status: "Active" | "Invited"
-  actionLabel: "Manage" | "Resend invite"
+  status: "Active" | "Invited" | "Not invited"
+  actionLabel: "Manage" | "Resend invite" | "Invite"
 }
+
+type DepartmentCard = { department: string; subUnits: string[] }
+
+const UNIT_DEPARTMENT_OPTIONS = [
+  "President's Office",
+  "VP Office for Partnerships & Development",
+  "VP Office for Academic Affairs",
+  "General Director of Administrative Services Office",
+  "Deanship of Graduate Studies & Scientific Research",
+  "Deanship of Student Affairs",
+  "Deanship of Admission & Registration",
+  "University Rankings Committee",
+  "Governance Committee (Policies & Procedures)",
+  "Quality Assurance & Accreditation Center",
+  "Business Incubator Center",
+  "IT & Digital Learning Directorate",
+  "English Language Center",
+  "Media Center",
+  "Community Service & Continuing Education Center",
+  "Teaching Excellence & Leadership Unit",
+  "Human Resources Directorate",
+  "Public Relations & Media Directorate",
+  "General Services Directorate",
+  "Library & Information Services Directorate",
+  "Security & Safety Directorate",
+  "Finance & Budget Directorate",
+  "Procurement Directorate",
+  "Assets & Stores Directorate",
+  "Buildings & Maintenance Directorate",
+  "Alumni Affairs Directorate",
+  "College of Arts",
+  "College of Science",
+  "College of Business Administration",
+  "Bahrain Teachers College (BTC)",
+  "College of Applied Studies",
+  "College of Information Technology",
+  "College of Law",
+  "College of Health & Sport Sciences",
+  "College of Engineering",
+] as const
 
 const users: UserRow[] = [
   {
@@ -55,15 +96,103 @@ const users: UserRow[] = [
     status: "Invited",
     actionLabel: "Resend invite",
   },
+  {
+    name: "Fatima Al-Mansoori",
+    email: "f.almansoori@uob.edu.bh",
+    role: "Indicator Owner",
+    unit: "College of Engineering",
+    status: "Not invited",
+    actionLabel: "Invite",
+  },
 ]
 
 function roleClass(role: UserRow["role"]) {
   if (role === "Administrator") return "bg-accent text-accent-foreground"
   if (role === "Contributor") return "bg-secondary text-secondary-foreground"
+  if (role === "Indicator Owner") return "bg-primary/10 text-foreground"
   return "bg-muted text-foreground"
 }
 
 export default function AdminUsers() {
+  const [manageUser, setManageUser] = useState<UserRow | null>(null)
+  const [editable, setEditable] = useState<Record<string, boolean>>({})
+  const [manageForm, setManageForm] = useState({
+    fullName: "",
+    email: "",
+    password: "********",
+    role: "" as UserRow["role"] | "",
+    departmentCards: [{ department: "", subUnits: [""] }] as DepartmentCard[],
+  })
+
+  const openManage = (user: UserRow) => {
+    setManageUser(user)
+    setEditable({})
+    setManageForm({
+      fullName: user.name,
+      email: user.email,
+      password: "********",
+      role: user.role,
+      departmentCards: [{ department: user.unit, subUnits: [""] }],
+    })
+  }
+
+  const toggleFieldEdit = (field: string) => {
+    setEditable((prev) => ({ ...prev, [field]: !prev[field] }))
+  }
+
+  const addDepartmentCard = () => {
+    setManageForm((prev) => ({
+      ...prev,
+      departmentCards: [...prev.departmentCards, { department: "", subUnits: [""] }],
+    }))
+  }
+
+  const removeDepartmentCard = (index: number) => {
+    setManageForm((prev) => ({
+      ...prev,
+      departmentCards:
+        prev.departmentCards.length <= 1 ? prev.departmentCards : prev.departmentCards.filter((_, i) => i !== index),
+    }))
+  }
+
+  const updateDepartmentCard = (index: number, patch: Partial<DepartmentCard>) => {
+    setManageForm((prev) => ({
+      ...prev,
+      departmentCards: prev.departmentCards.map((entry, i) => (i === index ? { ...entry, ...patch } : entry)),
+    }))
+  }
+
+  const addSubUnit = (cardIndex: number) => {
+    setManageForm((prev) => ({
+      ...prev,
+      departmentCards: prev.departmentCards.map((entry, i) =>
+        i === cardIndex ? { ...entry, subUnits: [...entry.subUnits, ""] } : entry
+      ),
+    }))
+  }
+
+  const updateSubUnit = (cardIndex: number, subIndex: number, value: string) => {
+    setManageForm((prev) => ({
+      ...prev,
+      departmentCards: prev.departmentCards.map((entry, i) =>
+        i === cardIndex
+          ? { ...entry, subUnits: entry.subUnits.map((sub, j) => (j === subIndex ? value : sub)) }
+          : entry
+      ),
+    }))
+  }
+
+  const removeSubUnit = (cardIndex: number, subIndex: number) => {
+    setManageForm((prev) => ({
+      ...prev,
+      departmentCards: prev.departmentCards.map((entry, i) => {
+        if (i !== cardIndex) return entry
+        if (entry.subUnits.length <= 1) return entry
+        return { ...entry, subUnits: entry.subUnits.filter((_, j) => j !== subIndex) }
+      }),
+    }))
+  }
+
   return (
     <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
         <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
@@ -79,10 +208,9 @@ export default function AdminUsers() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Access control</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Users</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Add colleagues and assign roles so they can view or contribute to the operational plan workspace.
+              Add colleagues and assign roles so they can view or contribute to the operational plan workspace
             </p>
           </div>
           <Link
@@ -99,7 +227,7 @@ export default function AdminUsers() {
           <div className="flex flex-col gap-4 border-b border-border bg-muted/30 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6 lg:px-8">
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold">Directory</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">University accounts with access to this application</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">University accounts with access to the operational plan workspace</p>
             </div>
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[20rem] sm:flex-row sm:items-center">
               <label className="relative block flex-1 sm:min-w-[12rem]">
@@ -113,12 +241,14 @@ export default function AdminUsers() {
               <NativeSelect id="filter-role" name="role" className="w-full min-w-[10rem] rounded-full sm:w-auto">
                 <NativeSelectOption value="">All roles</NativeSelectOption>
                 <NativeSelectOption value="admin">Administrator</NativeSelectOption>
+                <NativeSelectOption value="owner">Indicator Owner</NativeSelectOption>
                 <NativeSelectOption value="contributor">Contributor</NativeSelectOption>
                 <NativeSelectOption value="auditor">Auditor</NativeSelectOption>
               </NativeSelect>
             </div>
           </div>
 
+          <div className="max-h-[22rem] overflow-x-auto overflow-y-auto">
           <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -129,7 +259,7 @@ export default function AdminUsers() {
                   Role
                 </TableHead>
                 <TableHead className="hidden whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground md:table-cell">
-                  Unit
+                  Department/s
                 </TableHead>
                 <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                   Status
@@ -170,24 +300,190 @@ export default function AdminUsers() {
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">{user.status}</span>
                   </TableCell>
                   <TableCell className="px-4 py-4 text-right lg:pr-8">
-                    <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold">
-                      {user.actionLabel}
-                    </Button>
+                    <div className="inline-flex flex-col items-end gap-1">
+                      {user.actionLabel === "Manage" ? (
+                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold" onClick={() => openManage(user)}>
+                          Manage
+                        </Button>
+                      ) : (
+                        <>
+                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold">
+                            {user.actionLabel}
+                          </Button>
+                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold" onClick={() => openManage(user)}>
+                            Manage
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          </div>
 
           <div className="flex flex-col items-start justify-between gap-3 border-t border-border px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8">
             <p className="text-xs text-muted-foreground">
-              Showing <span className="font-medium text-foreground">3</span> users
+              Showing <span className="font-medium text-foreground">4</span> users
             </p>
             <p className="text-xs text-muted-foreground">
               Connect directory sync or SSO here when backend services are available.
             </p>
           </div>
         </section>
+
+        {manageUser ? (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+            <button
+              type="button"
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
+              aria-label="Close manage user"
+              onClick={() => setManageUser(null)}
+            />
+            <div className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+              <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-4 sm:px-6">
+                <h2 className="text-lg font-bold">Manage User</h2>
+                <button type="button" className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground" onClick={() => setManageUser(null)} aria-label="Close">
+                  <XIcon className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Full name *</label>
+                    <div className="relative">
+                      <Input className="pr-9" value={manageForm.fullName} disabled={!editable.fullName} onChange={(e) => setManageForm((p) => ({ ...p, fullName: e.target.value }))} />
+                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
+                        <PencilIcon className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">University email *</label>
+                    <div className="relative">
+                      <Input className="pr-9" value={manageForm.email} disabled={!editable.email} onChange={(e) => setManageForm((p) => ({ ...p, email: e.target.value }))} />
+                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
+                        <PencilIcon className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Password *</label>
+                    <div className="relative">
+                      <Input className="pr-9" type="password" value={manageForm.password} disabled={!editable.password} onChange={(e) => setManageForm((p) => ({ ...p, password: e.target.value }))} />
+                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
+                        <PencilIcon className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Role *</label>
+                    <div className="relative">
+                      <NativeSelect
+                        className="pr-9"
+                        value={manageForm.role}
+                        disabled={!editable.role}
+                        onChange={(e) => setManageForm((p) => ({ ...p, role: e.target.value as UserRow["role"] }))}
+                      >
+                        <NativeSelectOption value="">Select a role</NativeSelectOption>
+                        <NativeSelectOption value="Auditor">Auditor - action inspection and approval</NativeSelectOption>
+                        <NativeSelectOption value="Indicator Owner">Indicator Owner - unit head/chief with contributor editing abilities</NativeSelectOption>
+                        <NativeSelectOption value="Contributor">Contributor - edit assigned plans</NativeSelectOption>
+                        <NativeSelectOption value="Administrator">Administrator - manage users and settings</NativeSelectOption>
+                      </NativeSelect>
+                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
+                        <PencilIcon className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Department &amp; Sub-unit *</p>
+                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={addDepartmentCard}>
+                      Add
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {manageForm.departmentCards.map((entry, cardIndex) => (
+                      <div key={`manage-card-${cardIndex}`} className="rounded-xl border border-border bg-muted/30 p-4">
+                        <div className="mb-3 flex items-center justify-between">
+                          <span />
+                          {cardIndex > 0 ? (
+                            <Button type="button" variant="outline" size="sm" onClick={() => removeDepartmentCard(cardIndex)}>
+                              Remove
+                            </Button>
+                          ) : null}
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div>
+                            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Department *</label>
+                            <div className="relative">
+                              <NativeSelect
+                                className="pr-9"
+                                value={entry.department}
+                                disabled={!editable[`department-${cardIndex}`]}
+                                onChange={(e) => updateDepartmentCard(cardIndex, { department: e.target.value })}
+                              >
+                                <NativeSelectOption value="">Select unit / department</NativeSelectOption>
+                                {UNIT_DEPARTMENT_OPTIONS.map((option) => (
+                                  <NativeSelectOption key={option} value={option}>
+                                    {option}
+                                  </NativeSelectOption>
+                                ))}
+                              </NativeSelect>
+                              <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
+                                <PencilIcon className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="mb-1.5 flex items-end justify-between gap-2">
+                              <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Sub-unit *</label>
+                              <Button type="button" variant="ghost" className="h-auto p-0 text-primary" onClick={() => addSubUnit(cardIndex)}>
+                                +
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              {entry.subUnits.map((sub, subIndex) => (
+                                <div key={`manage-sub-${cardIndex}-${subIndex}`} className="flex gap-2">
+                                  <div className="relative flex-1">
+                                    <Input
+                                      className="pr-9"
+                                      value={sub}
+                                      disabled={!editable[`sub-${cardIndex}-${subIndex}`]}
+                                      onChange={(e) => updateSubUnit(cardIndex, subIndex, e.target.value)}
+                                      placeholder="e.g. Practical Training and Career Guidance Section"
+                                    />
+                                    <button
+                                      type="button"
+                                      className="absolute right-2 top-1/2 -translate-y-1/2 text-primary"
+                                      onClick={() => toggleFieldEdit(`sub-${cardIndex}-${subIndex}`)}
+                                      aria-label="Edit sub-unit"
+                                    >
+                                      <PencilIcon className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                  {subIndex > 0 ? (
+                                    <Button type="button" variant="outline" size="sm" onClick={() => removeSubUnit(cardIndex, subIndex)}>
+                                      Remove
+                                    </Button>
+                                  ) : null}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
     </div>
   )
 }

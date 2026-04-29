@@ -2,7 +2,6 @@ import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  ClipboardListIcon,
   MailIcon,
   ShieldCheckIcon,
   UserCogIcon,
@@ -44,10 +43,9 @@ export default function AdminDashboard() {
         <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <Badge variant="outline">Administration</Badge>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Overview</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Welcome, Juliana</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              You manage who can access the operational plan workspace, their roles, and invitation lifecycle.
+              Manage who can access the operational plan workspace, their roles, and invitation lifecycle
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
@@ -63,7 +61,7 @@ export default function AdminDashboard() {
               to="/users"
               className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-xs transition hover:bg-accent"
             >
-              View directory
+              View users directory
             </Link>
           </div>
         </header>
@@ -83,8 +81,8 @@ export default function AdminDashboard() {
         <div className="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
           <Card className="overflow-hidden lg:col-span-2 ring-1 ring-border/60">
             <CardHeader className="border-b border-border bg-muted/30">
-              <CardTitle>Recent access activity</CardTitle>
-              <CardDescription>Invitations and role changes (demo data)</CardDescription>
+              <CardTitle>Notifications</CardTitle>
+              <CardDescription>Recent access activity</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <ul className="divide-y divide-border">
@@ -106,7 +104,7 @@ export default function AdminDashboard() {
 
           <Card className="ring-1 ring-border/60">
             <CardHeader>
-              <CardTitle>Roles at a glance</CardTitle>
+              <CardTitle>Roles at a Glance</CardTitle>
               <CardDescription>What each access level can do in the workspace</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
@@ -117,24 +115,23 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-muted/50 p-4">
-                <p className="font-semibold">Contributor</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  Edit operational plans they are assigned to.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border bg-accent/50 p-4 ring-1 ring-border/60">
                 <p className="font-semibold">Auditor</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   Inspect actions and participate in approval workflows.
                 </p>
               </div>
-              <Link
-                to="/proposals-status"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-xs transition hover:bg-accent"
-              >
-                <ClipboardListIcon className="h-4 w-4" />
-                Open request statuses
-              </Link>
+              <div className="rounded-2xl border border-border bg-muted/50 p-4">
+                <p className="font-semibold">Indicator Owner</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Lead indicator governance as the unit chief, approve metric targets, and oversee performance accountability, also edit operational plans.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-muted/50 p-4">
+                <p className="font-semibold">Contributor</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Edit operational plans they are assigned to.
+                </p>
+              </div>
               <Link
                 to="/users"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-xs transition hover:bg-secondary/80"
