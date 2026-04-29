@@ -15,34 +15,30 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 const fieldOptions = [
-  "actionTitle",
-  "actionTotalWeight",
-  "actionTotalAchievement",
-  "taskMainEntity",
-  "taskSupportingEntities",
-  "taskHumanResources",
-  "taskFinancialResources",
-  "taskActionContributionPercentage",
-  "taskStatus",
-  "taskNotes",
+  "taskName",
+  "taskWeight",
+  "taskStartDate",
+  "taskExpectedEndDate",
+  "taskPerformanceIndicators",
+  "taskTargetValue",
+  "taskActualValueAchieved",
+  "taskAchievementPercentage",
 ]
 
-const actionFieldLabels: Record<string, string> = {
-  actionTitle: "Action title",
-  actionTotalWeight: "Total weight",
-  actionTotalAchievement: "Total achievement",
-  taskMainEntity: "Main entity",
-  taskSupportingEntities: "Supporting entities",
-  taskHumanResources: "Human resources required",
-  taskFinancialResources: "Financial resources required",
-  taskActionContributionPercentage: "Action contribution percentage",
-  taskStatus: "Status",
-  taskNotes: "Notes",
+const taskFieldLabels: Record<string, string> = {
+  taskName: "Task name",
+  taskWeight: "Task weight",
+  taskStartDate: "Start date",
+  taskExpectedEndDate: "End date",
+  taskPerformanceIndicators: "Performance indicators",
+  taskTargetValue: "Target value",
+  taskActualValueAchieved: "Number achieved",
+  taskAchievementPercentage: "Achievement percentage",
 }
 
 type FieldModRow = { id: string; field: string; note: string }
 
-export default function ReviewAction() {
+export default function ReviewTask() {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const status = searchParams.get("status")
@@ -80,7 +76,7 @@ export default function ReviewAction() {
     }
   }, [])
 
-  const requestId = isEdited ? "REQ-2026-0131" : isChangesRequested ? "REQ-2026-0129" : "REQ-2026-0142"
+  const requestId = isEdited ? "REQ-2026-0157" : isChangesRequested ? "REQ-2026-0154" : "REQ-2026-0150"
   const badgeText = isEdited
     ? "Edited - awaiting re-review"
     : isChangesRequested
@@ -124,13 +120,13 @@ export default function ReviewAction() {
             ) : (
               <>
                 <BreadcrumbItem>
-                  <BreadcrumbLink render={<Link to="/action-queue" />}>Action queue</BreadcrumbLink>
+                  <BreadcrumbLink render={<Link to="/task-queue" />}>Task queue</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
               </>
             )}
             <BreadcrumbItem>
-              <BreadcrumbPage>{`${breadcrumbStatus} action`}</BreadcrumbPage>
+              <BreadcrumbPage>{`${breadcrumbStatus} task`}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -138,7 +134,7 @@ export default function ReviewAction() {
           <div>
             <p className="font-mono text-xs font-semibold text-muted-foreground">{requestId}</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-              {isEdited ? "Review Edited Action Submission" : isChangesRequested ? "Review Requested Edits" : "Review Action Submission"}
+              {isEdited ? "Review Edited Task Submission" : isChangesRequested ? "Review Requested Edits" : "Review Task Submission"}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               {isChangesRequested ? (
@@ -162,12 +158,7 @@ export default function ReviewAction() {
                   </time>
                 </>
               ) : isProposalContext ? (
-                <>
-                  Submitted on {" "}
-                  <time dateTime={submissionSubmittedOn.iso} className="font-medium text-foreground">
-                    {submissionSubmittedOn.label}
-                  </time>
-                </>
+                <>Submitted on {" "} <time dateTime={submissionSubmittedOn.iso} className="font-medium text-foreground">{submissionSubmittedOn.label}</time></>
               ) : (
                 <>
                   Submitted by <span className="font-medium text-foreground">Ahmed Khalil</span> -{" "}
@@ -179,20 +170,9 @@ export default function ReviewAction() {
               )}
             </p>
           </div>
-          <span className="inline-flex w-fit items-center rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-            {badgeText}
-          </span>
+          <span className="inline-flex w-fit items-center rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">{badgeText}</span>
         </div>
       </header>
-
-      {isEdited && (
-        <div className="mb-6 rounded-2xl border border-border bg-accent/40 px-4 py-3 text-sm text-foreground shadow-sm">
-          <p className="font-semibold">Edited Resubmission</p>
-          <p className="mt-1 text-muted-foreground">
-            The submitter updated this record after you requested changes. What you see below is the latest version.
-          </p>
-        </div>
-      )}
 
       <div className="space-y-6">
         {isEdited && !isProposalContext && (
@@ -206,12 +186,12 @@ export default function ReviewAction() {
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
               <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{actionFieldLabels.actionTotalAchievement}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{taskFieldLabels.taskExpectedEndDate}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">58%</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">15 May 2026</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Update total achievement to reflect current completed deliverables and keep the value aligned with the latest evidence.
+                  Move the expected end date to 30 June 2026 so Q2 milestones align with reporting window.
                 </p>
               </div>
             </div>
@@ -224,66 +204,14 @@ export default function ReviewAction() {
           </div>
           <div className="px-6 py-6 sm:px-8 sm:py-8">
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.actionTitle}
-                </dt>
-                <dd className="mt-1 text-sm font-medium">Faculty KPI mapping and sign-off</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.actionTotalWeight}
-                </dt>
-                <dd className="mt-1 text-sm font-semibold">50%</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.actionTotalAchievement}
-                </dt>
-                <dd className="mt-1 text-sm">64%</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskMainEntity}
-                </dt>
-                <dd className="mt-1 text-sm">College of Science</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskSupportingEntities}
-                </dt>
-                <dd className="mt-1 text-sm">IT and Operations, Quality Office</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskHumanResources}
-                </dt>
-                <dd className="mt-1 text-sm">2 analysts + 1 coordinator</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskFinancialResources}
-                </dt>
-                <dd className="mt-1 text-sm">15,000 SAR</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskActionContributionPercentage}
-                </dt>
-                <dd className="mt-1 text-sm">35%</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskStatus}
-                </dt>
-                <dd className="mt-1 text-sm">In progress</dd>
-              </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
-                <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {actionFieldLabels.taskNotes}
-                </dt>
-                <dd className="mt-1 text-sm">Milestones depend on workshop attendance and KPI owner confirmation.</dd>
-              </div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskName}</dt><dd className="mt-1 text-sm">Complete college-level KPI worksheet</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskWeight}</dt><dd className="mt-1 text-sm">50%</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskStartDate}</dt><dd className="mt-1 text-sm">01 Apr 2026</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskExpectedEndDate}</dt><dd className="mt-1 text-sm">15 May 2026</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskPerformanceIndicators}</dt><dd className="mt-1 text-sm">KPI worksheet completion and sign-off ratio.</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskTargetValue}</dt><dd className="mt-1 text-sm">100</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskActualValueAchieved}</dt><dd className="mt-1 text-sm">64</dd></div>
+              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskAchievementPercentage}</dt><dd className="mt-1 text-sm">64%</dd></div>
             </dl>
           </div>
         </section>
@@ -292,29 +220,19 @@ export default function ReviewAction() {
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Requested edits</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Read-only record of what was asked from submitter before Resubmission.
-              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">Read-only record of what was asked from submitter before Resubmission.</p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
               <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{actionFieldLabels.actionTotalAchievement}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{taskFieldLabels.taskExpectedEndDate}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">58%</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">15 May 2026</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Update total achievement to reflect current completed deliverables and keep the value aligned with the latest evidence.
+                  Move the expected end date to 30 June 2026 so Q2 milestones align with reporting window.
                 </p>
               </div>
-            </div>
-            <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
-              <Link
-                to="/action-queue"
-                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
-              >
-                Back to action queue
-              </Link>
             </div>
           </section>
         )}
@@ -323,13 +241,11 @@ export default function ReviewAction() {
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Your Notes</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Select a field, then specify your modifications
-              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">Select a field, then specify your modifications</p>
             </div>
             <form className="space-y-6 px-6 py-6 sm:px-8 sm:py-8">
               <Input type="hidden" name="submissionId" value={requestId} />
-              <Input type="hidden" name="submissionType" value="action" />
+              <Input type="hidden" name="submissionType" value="task" />
               <div>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <span />
@@ -373,9 +289,7 @@ export default function ReviewAction() {
                           >
                             <NativeSelectOption value="">Select field...</NativeSelectOption>
                             {fieldOptions.map((field) => (
-                              <NativeSelectOption key={field} value={field}>
-                                {actionFieldLabels[field] ?? field}
-                              </NativeSelectOption>
+                              <NativeSelectOption key={field} value={field}>{taskFieldLabels[field] ?? field}</NativeSelectOption>
                             ))}
                           </NativeSelect>
                         </div>
@@ -397,22 +311,14 @@ export default function ReviewAction() {
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground">Additional notes</label>
-                <Textarea
-                  name="auditorGeneralNote"
-                  rows={4}
-                />
-              </div>
+                <Textarea name="auditorGeneralNote" rows={4} />
+              </div>    
               <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-between">
-                <Link
-                  to="/action-queue"
-                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
-                >
-                  Back to action queue
+                <Link to="/task-queue" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent">
+                  Back to task queue
                 </Link>
                 <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
-                  <Button type="submit" variant="outline">
-                    Request changes
-                  </Button>
+                  <Button type="submit" variant="outline">Request changes</Button>
                   <Button type="submit">Accept submission</Button>
                 </div>
               </div>
@@ -434,3 +340,4 @@ export default function ReviewAction() {
     </div>
   )
 }
+

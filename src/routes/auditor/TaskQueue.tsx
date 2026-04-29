@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type ActionRequest = {
+type TaskRequest = {
   requestId: string
   title: string
   submittedBy: string
@@ -29,46 +29,46 @@ type ActionRequest = {
   actionLabel: "Open" | "View"
 }
 
-const requests: ActionRequest[] = [
+const requests: TaskRequest[] = [
   {
-    requestId: "REQ-2026-0142",
-    title: "Faculty KPI mapping and sign-off",
-    submittedBy: "Ahmed Khalil",
-    entity: "College of Science",
-    strategicPerspective: "Beneficiary - B1.4",
+    requestId: "REQ-2026-0150",
+    title: "Baseline task ownership matrix",
+    submittedBy: "Mariam Al-Sayed",
+    entity: "Operations",
+    strategicPerspective: "Catalysts - C4.0",
     status: "Pending",
     actionLabel: "Open",
   },
   {
-    requestId: "REQ-2026-0131",
-    title: "Cross-unit handover checklist",
+    requestId: "REQ-2026-0148",
+    title: "Data collection task timeline",
     submittedBy: "IT and Operations",
     entity: "IT and Operations",
-    strategicPerspective: "Catalysts - C1.1",
+    strategicPerspective: "Enablers - E1.2",
     status: "Edited",
     actionLabel: "Open",
   },
   {
-    requestId: "REQ-2026-0138",
-    title: "Budget alignment checkpoint",
-    submittedBy: "Juliana Rahman",
-    entity: "Finance Unit",
-    strategicPerspective: "Stakeholders - S2.1",
-    status: "Accepted",
+    requestId: "REQ-2026-0143",
+    title: "Department rollout checklist",
+    submittedBy: "Planning Office",
+    entity: "Planning Office",
+    strategicPerspective: "Beneficiary - B3.1",
+    status: "Changes requested",
     actionLabel: "View",
   },
   {
-    requestId: "REQ-2026-0129",
-    title: "Q2 milestone consolidation",
-    submittedBy: "Planning office",
-    entity: "Planning Office",
-    strategicPerspective: "Enablers - E3.2",
-    status: "Changes requested",
+    requestId: "REQ-2026-0139",
+    title: "Quarterly stakeholder outreach tasks",
+    submittedBy: "Quality Assurance",
+    entity: "Quality Assurance",
+    strategicPerspective: "Stakeholders - S4.2",
+    status: "Accepted",
     actionLabel: "View",
   },
 ]
 
-function statusClass(status: ActionRequest["status"]) {
+function statusClass(status: TaskRequest["status"]) {
   if (status === "Pending") return "text-muted-foreground"
   if (status === "Edited") return "text-accent-foreground"
   if (status === "Accepted") return "text-secondary-foreground"
@@ -93,68 +93,68 @@ function renderStrategicPerspective(value: string) {
   )
 }
 
-export default function ActionQueue() {
+export default function TaskQueue() {
   return (
     <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
-        <header className="mb-4 sm:mb-6">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink render={<Link to="/dashboard-auditor" />}>Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Action queue</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Action Queue</h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Inspect actions proposed by contributors
-          </p>
-        </header>
+      <header className="mb-4 sm:mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/dashboard-auditor" />}>Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Task queue</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Task Queue</h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Inspect tasks proposed by contributors
+        </p>
+      </header>
 
-        <nav aria-label="Queue type" className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-4">
-          <Button type="button" size="sm">
-            Action queue
-          </Button>
-          <Link
-            to="/objective-queue"
-            className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent"
-          >
-            Objective queue
-          </Link>
-          <Link
-            to="/task-queue"
-            className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent"
-          >
-            Task queue
-          </Link>
-        </nav>
+      <nav aria-label="Queue type" className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-4">
+        <Link
+          to="/action-queue"
+          className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent"
+        >
+          Action queue
+        </Link>
+        <Link
+          to="/objective-queue"
+          className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent"
+        >
+          Objective queue
+        </Link>
+        <Button type="button" size="sm">
+          Task queue
+        </Button>
+      </nav>
 
-        <Card className="overflow-hidden ring-1 ring-border/60">
-          <CardHeader className="flex flex-col gap-4 border-b border-border bg-muted/30 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="text-lg">Action Proposals</CardTitle>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm">
-                Pending
-              </Button>
-              <Button type="button" size="sm" variant="outline">
-                Accepted
-              </Button>
-              <Button type="button" size="sm" variant="outline">
-                Changes requested
-              </Button>
-              <Button type="button" size="sm" variant="outline">
-                Edited
-              </Button>
-            </div>
-          </CardHeader>
+      <Card className="overflow-hidden ring-1 ring-border/60">
+        <CardHeader className="flex flex-col gap-4 border-b border-border bg-muted/30 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-lg">Task Proposals</CardTitle>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" size="sm">
+              Pending
+            </Button>
+            <Button type="button" size="sm" variant="outline">
+              Accepted
+            </Button>
+            <Button type="button" size="sm" variant="outline">
+              Changes requested
+            </Button>
+            <Button type="button" size="sm" variant="outline">
+              Edited
+            </Button>
+          </div>
+        </CardHeader>
 
-          <CardContent className="p-0">
-            <div className="max-h-[22rem] overflow-x-auto overflow-y-auto">
+        <CardContent className="p-0">
+          <div className="max-h-[22rem] overflow-x-auto overflow-y-auto">
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -198,12 +198,12 @@ export default function ActionQueue() {
                       <Link
                         to={
                           row.status === "Edited"
-                            ? "/review-action?edited=1"
+                            ? "/review-task?edited=1"
                             : row.status === "Accepted"
-                              ? "/review-action?status=accepted"
+                              ? "/review-task?status=accepted"
                               : row.status === "Changes requested"
-                                ? "/review-action?status=changes_requested"
-                                : "/review-action"
+                                ? "/review-task?status=changes_requested"
+                                : "/review-task"
                         }
                         className={
                           row.actionLabel === "Open"
@@ -218,9 +218,9 @@ export default function ActionQueue() {
                 ))}
               </TableBody>
             </Table>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

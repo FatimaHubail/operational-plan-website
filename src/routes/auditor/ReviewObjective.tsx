@@ -48,9 +48,9 @@ export default function ReviewObjective() {
   const requestId = isEdited ? "REQ-2026-0130" : isChangesRequested ? "REQ-2026-0135" : isAccepted ? "REQ-2026-0124" : "REQ-2026-0141"
 
   const pageTitle = useMemo(() => {
-    if (isEdited) return "Review edited operational objective"
-    if (isChangesRequested) return "Review requested edits"
-    return "Review operational objective"
+    if (isEdited) return "Review Edited Objective Submission"
+    if (isChangesRequested) return "Review Requested Edits"
+    return "Review Operational Objective Submission"
   }, [isEdited, isChangesRequested])
 
   const badgeText = isEdited
@@ -60,6 +60,7 @@ export default function ReviewObjective() {
       : isAccepted
         ? "Accepted"
         : "Pending auditor review"
+  const breadcrumbStatus = isEdited ? "Edited" : isChangesRequested ? "Changes requested" : isAccepted ? "Accepted" : "Pending"
 
   const badgeClass = cn(
     "inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold",
@@ -92,10 +93,25 @@ export default function ReviewObjective() {
       label: new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(d),
     }
   }, [])
+  const editedTimeline = useMemo(() => {
+    const lastEdited = new Date()
+    const editRequested = new Date()
+    editRequested.setDate(editRequested.getDate() - 1)
+    return {
+      lastEdited: {
+        iso: lastEdited.toISOString().slice(0, 10),
+        label: new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(lastEdited),
+      },
+      editRequested: {
+        iso: editRequested.toISOString().slice(0, 10),
+        label: new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(editRequested),
+      },
+    }
+  }, [])
 
   const decisionHelpText = isEdited
-    ? "This is a revised version. Accept if it resolves your prior comments; otherwise use one card per field that still needs work (+ to add more), then add general notes if needed."
-    : "Each field gets its own card with a dropdown and note. Use the + in the card header for another block. General notes are below, separate from these cards."
+    ? "This is a revised version. Accept if it resolves your prior comments; otherwise add your additional modifications"
+    : "Select a field, then specify your modifications"
 
   return (
     <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
@@ -124,7 +140,7 @@ export default function ReviewObjective() {
               </>
             )}
             <BreadcrumbItem>
-              <BreadcrumbPage>{isProposalContext ? "Review objective" : "Objective"}</BreadcrumbPage>
+              <BreadcrumbPage>{`${breadcrumbStatus} objective`}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -136,34 +152,38 @@ export default function ReviewObjective() {
             <p className="mt-2 text-sm text-muted-foreground">
               {isChangesRequested ? (
                 <>
-                  Original submission · <span className="font-medium text-foreground">Finance unit</span> · Source:{" "}
-                  <Link to="/catalysts/add-objective" className="font-medium text-primary hover:underline">
-                    Add operational objectives
-                  </Link>{" "}
-                  · Digital services uptime objective
+                  Submitted by <span className="font-medium text-foreground">Noor Hassan</span> -{" "}
+                  <span className="font-medium text-foreground">Finance Unit</span> · Edit requested on{" "}
+                  <time dateTime={editedTimeline.editRequested.iso} className="font-medium text-foreground">
+                    {editedTimeline.editRequested.label}
+                  </time>
                 </>
               ) : isEdited ? (
                 <>
-                  Submitted by <span className="font-medium text-foreground">Facilities planning</span> · Source:{" "}
-                  <Link to="/catalysts/add-objective" className="font-medium text-primary hover:underline">
-                    Add operational objectives
-                  </Link>{" "}
-                  · Resubmitted yesterday after changes requested
+                  Submitted by <span className="font-medium text-foreground">Noor Hassan</span> -{" "}
+                  <span className="font-medium text-foreground">Facilities Planning</span> · Edit requested on{" "}
+                  <time dateTime={editedTimeline.editRequested.iso} className="font-medium text-foreground">
+                    {editedTimeline.editRequested.label}
+                  </time>{" "}
+                  · Last edited{" "}
+                  <time dateTime={editedTimeline.lastEdited.iso} className="font-medium text-foreground">
+                    {editedTimeline.lastEdited.label}
+                  </time>
                 </>
               ) : isProposalContext ? (
                 <>
-                  Submitted on:{" "}
+                  Submitted on {" "}
                   <time dateTime={submissionSubmittedOn.iso} className="font-medium text-foreground">
                     {submissionSubmittedOn.label}
                   </time>
                 </>
               ) : (
                 <>
-                  Submitted by <span className="font-medium text-foreground">Noor Hassan</span> · Source:{" "}
-                  <Link to="/catalysts/add-objective" className="font-medium text-primary hover:underline">
-                    Add operational objectives
-                  </Link>{" "}
-                  · Today
+                  Submitted by <span className="font-medium text-foreground">Noor Hassan</span> -{" "}
+                  <span className="font-medium text-foreground">Planning Office</span> · submitted on:{" "}
+                  <time dateTime={submissionSubmittedOn.iso} className="font-medium text-foreground">
+                    {submissionSubmittedOn.label}
+                  </time>
                 </>
               )}
             </p>
@@ -174,7 +194,7 @@ export default function ReviewObjective() {
 
       {isEdited && (
         <div className="mb-6 rounded-2xl border border-border bg-accent/40 px-4 py-3 text-sm shadow-sm" role="status">
-          <p className="font-semibold text-foreground">Edited resubmission</p>
+          <p className="font-semibold text-foreground">Edited Resubmission</p>
           <p className="mt-1 text-muted-foreground">
             The submitter revised this objective after your change request. Review the updated fields below, then accept
             or request further edits.
@@ -183,6 +203,32 @@ export default function ReviewObjective() {
       )}
 
       <div className="space-y-6">
+        {isEdited && !isProposalContext && (
+          <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="requested-edits-edited-oo-heading">
+            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+              <h2 id="requested-edits-edited-oo-heading" className="text-lg font-bold text-foreground">
+                Requested edits
+              </h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Previously requested changes shown for reference before reviewing this edited resubmission.
+              </p>
+            </div>
+            <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
+              <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel("targetValue")}</p>
+                <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">Service uptime objective text only (no numeric percentage)</p>
+                <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  Express the target as a <span className="font-medium text-foreground">numeric uptime percentage</span> with
+                  the measurement window (e.g. calendar month), not only narrative text.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="submitted-oo-heading">
           <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
             <h2 id="submitted-oo-heading" className="text-lg font-bold text-foreground">
@@ -190,7 +236,6 @@ export default function ReviewObjective() {
             </h2>
           </div>
           <div className="px-6 py-6 sm:px-8 sm:py-8">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Operational objective</h3>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
                 <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -269,6 +314,8 @@ export default function ReviewObjective() {
               <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel("targetValue")}</p>
+                <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">Service uptime objective text only (no numeric percentage)</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Express the target as a <span className="font-medium text-foreground">numeric uptime percentage</span> with
@@ -278,6 +325,10 @@ export default function ReviewObjective() {
               <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 font-mono text-sm font-semibold text-foreground">executionIndicatorDescription</p>
+                <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  Description did not clarify whether planned maintenance windows are included in uptime.
+                </p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Clarify whether planned maintenance windows are <span className="font-medium text-foreground">in or out</span>{" "}
@@ -307,7 +358,7 @@ export default function ReviewObjective() {
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="auditor-notes-oo-heading">
             <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
               <h2 id="auditor-notes-oo-heading" className="text-lg font-bold text-foreground">
-                Your notes
+                Your Notes
               </h2>
               <p className="mt-0.5 text-sm text-muted-foreground">{decisionHelpText}</p>
             </div>
@@ -317,10 +368,20 @@ export default function ReviewObjective() {
               <Input type="hidden" name="auditorReviewStatus" value={isEdited ? "edited" : "pending"} />
 
               <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Field-level modifications</p>
-                <p className="mb-4 text-xs text-muted-foreground">
-                  Blocks are isolated—field choice and modification text in one card do not mix with another card.
-                </p>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-primary text-xl leading-none"
+                    title="Add field modification"
+                    aria-label="Add another field modification"
+                    onClick={addFieldRow}
+                  >
+                    +
+                  </Button>
+                </div>
                 <div className="flex flex-col gap-6">
                   {fieldRows.map((row, index) => (
                     <div
@@ -336,22 +397,11 @@ export default function ReviewObjective() {
                             type="button"
                             variant="ghost"
                             size="icon-sm"
-                            className={cn(fieldRows.length <= 1 && "invisible")}
+                            className={cn("text-xl leading-none", index === 0 && "invisible")}
                             aria-label="Remove this field modification"
                             onClick={() => removeFieldRow(row.id)}
                           >
-                            ×
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-primary"
-                            title="Add field modification"
-                            aria-label="Add another field modification"
-                            onClick={addFieldRow}
-                          >
-                            +
+                            -
                           </Button>
                         </div>
                       </div>
@@ -402,13 +452,12 @@ export default function ReviewObjective() {
                   htmlFor="auditor-general-note-objective"
                   className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground"
                 >
-                  General notes
+                  Additional notes
                 </label>
                 <Textarea
                   id="auditor-general-note-objective"
                   name="auditorGeneralNote"
                   rows={4}
-                  placeholder="Cross-cutting feedback, alignment with policy, or notes not tied to a single field."
                 />
               </div>
 

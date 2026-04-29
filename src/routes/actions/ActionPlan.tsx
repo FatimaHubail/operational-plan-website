@@ -802,6 +802,16 @@ export default function ActionPlan() {
                     onAddTask={() => {
                       navigate(addTaskHref)
                     }}
+                    onUpdateActionMetrics={(changes) => {
+                      setActionsData((prev) => {
+                        const next = structuredClone(prev)
+                        const current = next[actionIndex]
+                        if (!current) return prev
+                        if (typeof changes.totalWeight === "string") current.totalWeight = changes.totalWeight
+                        if (typeof changes.totalAchievement === "string") current.totalAchievement = changes.totalAchievement
+                        return next
+                      })
+                    }}
                     onOpenTask={(task, taskIndex) => openTaskModal(task, taskIndex, actionIndex, action)}
                     onDeleteTask={(taskIndex) => {
                       if (!confirm("Remove this task from the action?")) return
@@ -1049,6 +1059,7 @@ function ActionCard({
   onViewActionDetails,
   onDeleteAction,
   onAddTask,
+  onUpdateActionMetrics,
   onOpenTask,
   onDeleteTask,
 }: {
@@ -1057,6 +1068,7 @@ function ActionCard({
   onViewActionDetails: () => void
   onDeleteAction: () => void
   onAddTask: () => void
+  onUpdateActionMetrics: (changes: { totalWeight?: string; totalAchievement?: string }) => void
   onOpenTask: (task: ActionPlanTask, taskIndex: number) => void
   onDeleteTask: (taskIndex: number) => void
 }) {
@@ -1067,6 +1079,24 @@ function ActionCard({
       ? String(action.totalAchievement)
       : aggregateActionAchievementPercent(tasks) || "—"
   const actionProposalStatus = tasks[0]?.requestStatus?.trim() || "—"
+  const [editingMetric, setEditingMetric] = useState<"weight" | "achievement" | null>(null)
+  const [metricDraft, setMetricDraft] = useState({ weight: action.totalWeight || "", achievement: String(action.totalAchievement || "") })
+
+  useEffect(() => {
+    setMetricDraft({
+      weight: action.totalWeight || "",
+      achievement: String(action.totalAchievement || ""),
+    })
+  }, [action.totalWeight, action.totalAchievement])
+
+  const saveMetric = (metric: "weight" | "achievement") => {
+    if (metric === "weight") {
+      onUpdateActionMetrics({ totalWeight: metricDraft.weight.trim() })
+    } else {
+      onUpdateActionMetrics({ totalAchievement: metricDraft.achievement.trim() })
+    }
+    setEditingMetric(null)
+  }
 
   return (
     <section
@@ -1092,24 +1122,56 @@ function ActionCard({
                 {action.title || "Untitled action"}
               </h2>
               <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-stretch lg:justify-end lg:gap-2">
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex w-full min-w-0 cursor-not-allowed items-center gap-1.5 rounded-lg border border-sky-200/90 bg-gradient-to-b from-sky-50/90 to-white px-3 py-2 text-xs shadow-sm ring-1 ring-sky-100/70 select-none disabled:pointer-events-none disabled:opacity-100 lg:w-auto lg:py-1.5 lg:text-sm"
-                  aria-label={`Total weight ${weightDisplay}`}
-                >
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-sky-200/90 bg-gradient-to-b from-sky-50/90 to-white px-3 py-2 text-xs shadow-sm ring-1 ring-sky-100/70 lg:w-auto lg:py-1.5 lg:text-sm">
                   <span className="font-semibold text-sky-800/70">Total weight</span>
-                  <span className="font-bold tabular-nums text-sky-700">{weightDisplay}</span>
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex w-full min-w-0 cursor-not-allowed items-center gap-1.5 rounded-lg border border-emerald-200/90 bg-gradient-to-b from-emerald-50/90 to-white px-3 py-2 text-xs shadow-sm ring-1 ring-emerald-100/70 select-none disabled:pointer-events-none disabled:opacity-100 lg:w-auto lg:py-1.5 lg:text-sm"
-                  aria-label={`Total achievement ${achievementDisplay}`}
-                >
+                  {editingMetric === "weight" ? (
+                    <>
+                      <input
+                        value={metricDraft.weight}
+                        onChange={(e) => setMetricDraft((d) => ({ ...d, weight: e.target.value }))}
+                        className="h-7 w-24 rounded border border-sky-200 bg-white px-2 text-xs text-slate-900 outline-none ring-1 ring-transparent focus:border-sky-400 focus:ring-sky-200"
+                      />
+                      <button type="button" onClick={() => saveMetric("weight")} className="rounded p-1 text-sky-700 hover:bg-sky-100" aria-label="Save total weight edit">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.415l-7.37 7.37a1 1 0 01-1.414 0L3.296 9.45a1 1 0 111.415-1.414l3.916 3.915 6.662-6.66a1 1 0 011.415 0z" clipRule="evenodd" /></svg>
+                      </button>
+                      <button type="button" onClick={() => setEditingMetric(null)} className="rounded p-1 text-sky-700 hover:bg-sky-100" aria-label="Cancel total weight edit">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-bold tabular-nums text-sky-700">{weightDisplay}</span>
+                      <button type="button" onClick={() => setEditingMetric("weight")} className="rounded p-1 text-sky-700 hover:bg-sky-100" aria-label="Edit total weight">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-emerald-200/90 bg-gradient-to-b from-emerald-50/90 to-white px-3 py-2 text-xs shadow-sm ring-1 ring-emerald-100/70 lg:w-auto lg:py-1.5 lg:text-sm">
                   <span className="font-semibold text-emerald-800/70">Total achievement</span>
-                  <span className="font-bold tabular-nums text-emerald-700">{achievementDisplay}</span>
-                </button>
+                  {editingMetric === "achievement" ? (
+                    <>
+                      <input
+                        value={metricDraft.achievement}
+                        onChange={(e) => setMetricDraft((d) => ({ ...d, achievement: e.target.value }))}
+                        className="h-7 w-24 rounded border border-emerald-200 bg-white px-2 text-xs text-slate-900 outline-none ring-1 ring-transparent focus:border-emerald-400 focus:ring-emerald-200"
+                      />
+                      <button type="button" onClick={() => saveMetric("achievement")} className="rounded p-1 text-emerald-700 hover:bg-emerald-100" aria-label="Save total achievement edit">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.415l-7.37 7.37a1 1 0 01-1.414 0L3.296 9.45a1 1 0 111.415-1.414l3.916 3.915 6.662-6.66a1 1 0 011.415 0z" clipRule="evenodd" /></svg>
+                      </button>
+                      <button type="button" onClick={() => setEditingMetric(null)} className="rounded p-1 text-emerald-700 hover:bg-emerald-100" aria-label="Cancel total achievement edit">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-bold tabular-nums text-emerald-700">{achievementDisplay}</span>
+                      <button type="button" onClick={() => setEditingMetric("achievement")} className="rounded p-1 text-emerald-700 hover:bg-emerald-100" aria-label="Edit total achievement">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <p className="mt-1 text-xs font-medium text-slate-500">

@@ -7,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -22,6 +23,8 @@ type ObjectiveRequest = {
   requestId: string
   title: string
   submittedBy: string
+  entity: string
+  strategicPerspective: string
   status: "Pending" | "Edited" | "Accepted" | "Changes requested"
   actionLabel: "Open" | "View"
 }
@@ -31,6 +34,8 @@ const requests: ObjectiveRequest[] = [
     requestId: "REQ-2026-0141",
     title: "Improve research output visibility",
     submittedBy: "Noor Hassan",
+    entity: "Planning Office",
+    strategicPerspective: "Catalysts - C1.1",
     status: "Pending",
     actionLabel: "Open",
   },
@@ -38,6 +43,8 @@ const requests: ObjectiveRequest[] = [
     requestId: "REQ-2026-0130",
     title: "Sustainability metrics refresh",
     submittedBy: "Facilities planning",
+    entity: "Facilities Planning",
+    strategicPerspective: "Enablers - E3.2",
     status: "Edited",
     actionLabel: "Open",
   },
@@ -45,6 +52,8 @@ const requests: ObjectiveRequest[] = [
     requestId: "REQ-2026-0135",
     title: "Digital services uptime objective",
     submittedBy: "Finance unit",
+    entity: "Finance Unit",
+    strategicPerspective: "Beneficiary - B1.4",
     status: "Changes requested",
     actionLabel: "View",
   },
@@ -52,6 +61,8 @@ const requests: ObjectiveRequest[] = [
     requestId: "REQ-2026-0124",
     title: "Student satisfaction index (annual)",
     submittedBy: "Quality assurance",
+    entity: "Quality Assurance",
+    strategicPerspective: "Stakeholders - S2.1",
     status: "Accepted",
     actionLabel: "View",
   },
@@ -62,6 +73,24 @@ function statusClass(status: ObjectiveRequest["status"]) {
   if (status === "Edited") return "text-accent-foreground"
   if (status === "Accepted") return "text-secondary-foreground"
   return "text-foreground"
+}
+
+function renderStrategicPerspective(value: string) {
+  const [perspective, section] = value.split(" - ")
+  return (
+    <Badge
+      variant="outline"
+      className="inline-flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-lg px-2 py-1 text-[11px] font-normal leading-snug"
+    >
+      <span className="font-semibold text-foreground">{perspective ?? value}</span>
+      {section ? (
+        <>
+          <span className="shrink-0 text-muted-foreground">-</span>
+          <span className="font-mono font-semibold tabular-nums text-foreground">{section}</span>
+        </>
+      ) : null}
+    </Badge>
+  )
 }
 
 export default function ObjectiveQueue() {
@@ -79,12 +108,10 @@ export default function ObjectiveQueue() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Add operational objectives</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Objective queue</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Submissions created when contributors save the Add operational objectives form. Only objective-type requests
-          appear here.
-        </p>
+          Inspect objectives proposed by contributors
+        </p>  
       </header>
 
       <nav aria-label="Queue type" className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-4">
@@ -97,15 +124,18 @@ export default function ObjectiveQueue() {
         <Button type="button" size="sm">
           Objective queue
         </Button>
+        <Link
+          to="/task-queue"
+          className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent"
+        >
+          Task queue
+        </Link>
       </nav>
 
       <Card className="overflow-hidden ring-1 ring-border/60">
         <CardHeader className="flex flex-col gap-4 border-b border-border bg-muted/30 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-lg">Objective requests</CardTitle>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Source: Add operational objectives - filter chips are static until backend is wired
-            </p>
+            <CardTitle className="text-lg">Objective Proposals</CardTitle>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm">
@@ -124,6 +154,7 @@ export default function ObjectiveQueue() {
         </CardHeader>
 
         <CardContent className="p-0">
+          <div className="max-h-[22rem] overflow-x-auto overflow-y-auto">
           <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -132,6 +163,15 @@ export default function ObjectiveQueue() {
                 </TableHead>
                 <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                   Submitted by
+                </TableHead>
+                <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Entity
+                </TableHead>
+                <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Strategic perspective
+                </TableHead>
+                <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Name
                 </TableHead>
                 <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                   Status
@@ -146,9 +186,11 @@ export default function ObjectiveQueue() {
                 <TableRow key={row.requestId} className="transition hover:bg-muted/30">
                   <TableCell className="px-4 py-4 sm:px-6 lg:pl-8">
                     <p className="font-mono text-xs font-semibold text-muted-foreground">{row.requestId}</p>
-                    <p className="mt-0.5 font-semibold">{row.title}</p>
                   </TableCell>
                   <TableCell className="px-4 py-4 text-muted-foreground">{row.submittedBy}</TableCell>
+                  <TableCell className="px-4 py-4 text-muted-foreground">{row.entity}</TableCell>
+                  <TableCell className="px-4 py-4 text-muted-foreground">{renderStrategicPerspective(row.strategicPerspective)}</TableCell>
+                  <TableCell className="px-4 py-4 font-semibold">{row.title}</TableCell>
                   <TableCell className="px-4 py-4">
                     <span className={`text-xs font-semibold ${statusClass(row.status)}`}>{row.status}</span>
                   </TableCell>
@@ -176,6 +218,7 @@ export default function ObjectiveQueue() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -114,7 +114,7 @@ export default function EditObjective() {
                 <time dateTime={lastEditedOn.iso} className="font-medium text-foreground">
                   {lastEditedOn.label}
                 </time>{" "}
-                · Edit requested in:{" "}
+                · Edit requested on:{" "}
                 <time dateTime={editRequestedInOn.iso} className="font-medium text-foreground">
                   {editRequestedInOn.label}
                 </time>

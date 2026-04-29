@@ -171,8 +171,10 @@ export default function SubmissionStatus() {
 
   const objectiveEditsHref = `${routePrefix}/proposal/view/objective-edits`
   const actionEditsHref = `${routePrefix}/proposal/view/action-edits`
+  const taskEditsHref = `${routePrefix}/proposal/view/task-edits`
   const editObjectiveHref = `${routePrefix}/proposal/edit/objective`
   const editActionHref = `${routePrefix}/proposal/edit/action`
+  const editTaskHref = `${routePrefix}/proposal/edit/task`
 
   const [filter, setFilter] = useState<SubmissionFilter>("all")
   /** When set, table shows only proposals in this lifecycle tone (e.g. Edited). */
@@ -213,17 +215,24 @@ export default function SubmissionStatus() {
       const path =
         row.submissionType === "objective"
           ? `${routePrefix}/proposal/review/objective`
-          : `${routePrefix}/proposal/review/action`
+          : row.submissionType === "action"
+            ? `${routePrefix}/proposal/review/action`
+            : `${routePrefix}/proposal/review/task`
       return `${path}?context=proposal`
     }
     // Edited - awaiting re-review → view-edits detail pages
     if (row.statusTone === "review" && row.followUpLabel === "View edits") {
-      const path = row.submissionType === "objective" ? objectiveEditsHref : actionEditsHref
+      const path =
+        row.submissionType === "objective"
+          ? objectiveEditsHref
+          : row.submissionType === "action"
+            ? actionEditsHref
+            : taskEditsHref
       return path
     }
     // Changes requested → contributor edit flow
     if (row.statusTone === "changes" && row.followUpLabel === "Edit") {
-      return row.submissionType === "objective" ? editObjectiveHref : editActionHref
+      return row.submissionType === "objective" ? editObjectiveHref : row.submissionType === "action" ? editActionHref : editTaskHref
     }
     return resolveFollowUp(row.followUpTo)
   }
@@ -313,7 +322,7 @@ export default function SubmissionStatus() {
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
               <div className="min-w-0">
                 <CardTitle id="submissions-table-heading" className="text-lg">
-                  Your recent proposals
+                  Your Recent Proposals
                 </CardTitle>
               </div>
               <div className="flex flex-wrap gap-2" role="group" aria-label="Filter proposals by type">
