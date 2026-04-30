@@ -99,6 +99,14 @@ export default function AdminDashboard() {
                   </li>
                 ))}
               </ul>
+              <div className="border-t border-border px-6 py-4 sm:px-8">
+                <Link
+                  to="/admin/notifications"
+                  className="inline-flex w-full items-center justify-center rounded-full border border-border bg-background py-2 text-xs font-semibold text-foreground transition hover:bg-accent"
+                >
+                  View all notifications
+                </Link>
+              </div>
             </CardContent>
           </Card>
 

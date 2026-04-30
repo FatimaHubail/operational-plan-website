@@ -2,7 +2,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import AppLayout from "@/routes/AppLayout"
 import Dashboard from "@/routes/dashboards/Dashboard"
 import Calendar from "@/routes/Calendar"
-import Notifications from "@/routes/Notifications"
+import Notifications from "@/routes/notifications/Notifications"
+import AuditorNotifications from "@/routes/notifications/AuditorNotifications"
+import AdminNotifications from "@/routes/notifications/AdminNotifications"
 import Catalysts from "@/routes/strategic-perpectives/Catalysts"
 import Enablers from "@/routes/strategic-perpectives/Enablers"
 import Beneficiary from "@/routes/strategic-perpectives/Beneficiary"
@@ -73,6 +75,8 @@ export default function App() {
           <Route path="/contributer-dashboard" element={<ContributerDashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
+          <Route path="/auditor/notifications" element={<AuditorNotifications />} />
           <Route path="/proposals-status" element={<SubmissionStatus />} />
           <Route path="/submission-status" element={<Navigate to="/proposals-status" replace />} />
           <Route path="/catalysts" element={<Catalysts />} />

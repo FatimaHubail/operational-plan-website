@@ -164,9 +164,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     (location.pathname === "/notifications" && sourceContext === "dashboard-auditor") ||
     location.pathname.startsWith("/auditor/")
   const notificationsHref = isAdminArea
-    ? "/notifications?from=dashboard-admin"
+    ? "/admin/notifications?from=dashboard-admin"
     : isAuditorArea
-      ? "/notifications?from=dashboard-auditor"
+      ? "/auditor/notifications?from=dashboard-auditor"
       : isContributorArea
         ? `${routePrefix}/notifications?from=contributor-dashboard`
         : "/notifications?from=dashboard"

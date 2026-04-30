@@ -152,7 +152,7 @@ export default function AuditorDashboard() {
                 </Link>
               ))}
               <Link
-                to="/notifications"
+                to="/auditor/notifications"
                 className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-border bg-background py-2 text-xs font-semibold text-foreground transition hover:bg-accent"
               >
                 View all notifications
