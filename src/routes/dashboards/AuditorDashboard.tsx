@@ -132,10 +132,27 @@ const auditorNotificationPreviewItems: AuditorPreviewItem[] = [
 const latestQueueEntryLinkClassName =
   "flex min-h-[7.5rem] flex-col justify-center rounded-2xl border border-border bg-muted/30 p-5 transition-colors hover:border-[oklch(0.72_0.145_48)] hover:bg-[color-mix(in_oklch,oklch(0.7_0.2_25)_5%,white)] sm:min-h-[8.5rem] sm:p-6"
 
+const auditorQueueHeaderLinksClassName =
+  "notif-secondary-action inline-flex min-w-0 items-center justify-center rounded-md border border-transparent bg-[oklch(0.945_0.01_255)] px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors"
+
 export default function AuditorDashboard() {
   return (
-    <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
-        <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-center lg:justify-between lg:pr-[7.5rem]">
+    <div className="min-w-0 flex-1 bg-background">
+        {/* Top-right, flush left of UOB logo (AppLayout: right-4/6/8 + w-20 + gap); sibling of padded scroll area avoids overflow-x clip */}
+        <div className="pointer-events-auto absolute right-[6.75rem] top-12 z-20 flex max-w-[calc(100%-7rem)] flex-wrap items-center justify-end gap-3 sm:right-[7.25rem] sm:top-14 lg:right-[7.75rem] lg:top-16 lg:gap-4">
+          <Link to="/action-queue" className={auditorQueueHeaderLinksClassName}>
+            Action queue
+          </Link>
+          <Link to="/objective-queue" className={auditorQueueHeaderLinksClassName}>
+            Objective queue
+          </Link>
+          <Link to="/task-queue" className={auditorQueueHeaderLinksClassName}>
+            Task queue
+          </Link>
+        </div>
+
+        <div className="overflow-x-hidden p-4 sm:p-6 lg:p-8">
+        <header className="mb-6 sm:mb-8 lg:pr-[7.5rem]">
           <div>
             <Badge
               variant="outline"
@@ -149,26 +166,6 @@ export default function AuditorDashboard() {
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Inspect and approve objectives, actions, and tasks
             </p>
-          </div>
-          <div className="flex w-full shrink-0 flex-wrap items-center gap-3 lg:w-auto lg:gap-4">
-            <Link
-              to="/action-queue"
-              className="notif-secondary-action inline-flex min-w-0 items-center justify-center rounded-md border border-transparent bg-[oklch(0.945_0.01_255)] px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors"
-            >
-              Action queue
-            </Link>
-            <Link
-              to="/objective-queue"
-              className="notif-secondary-action inline-flex min-w-0 items-center justify-center rounded-md border border-transparent bg-[oklch(0.945_0.01_255)] px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors"
-            >
-              Objective queue
-            </Link>
-            <Link
-              to="/task-queue"
-              className="notif-secondary-action inline-flex min-w-0 items-center justify-center rounded-md border border-transparent bg-[oklch(0.945_0.01_255)] px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors"
-            >
-              Task queue
-            </Link>
           </div>
         </header>
 
@@ -224,7 +221,7 @@ export default function AuditorDashboard() {
                     className={latestQueueEntryLinkClassName}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-secondary-foreground">
+                      <span className="proposal-stat-label-bg-chart-4 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide proposal-stat-label-text-chart-4">
                         Action
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground">Pending</span>
@@ -239,7 +236,7 @@ export default function AuditorDashboard() {
                     className={latestQueueEntryLinkClassName}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-foreground">
+                      <span className="notif-type-badge-chart-5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide">
                         Objective
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground">Pending</span>
@@ -254,7 +251,7 @@ export default function AuditorDashboard() {
                     className={latestQueueEntryLinkClassName}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-foreground">
+                      <span className="proposal-stat-label-bg-chart-2 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide proposal-stat-label-text-chart-2">
                         Task
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground">Pending</span>
@@ -264,7 +261,7 @@ export default function AuditorDashboard() {
                   </Link>
                 </li>
               </ul>
-              <div className="mt-6 flex flex-wrap items-center gap-3 lg:gap-4">
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 lg:gap-4">
                 <Link
                   to="/action-queue"
                   className="notif-secondary-action inline-flex min-w-0 items-center justify-center rounded-md border border-transparent bg-[oklch(0.945_0.01_255)] px-4 py-2 text-sm font-medium text-foreground shadow-xs transition-colors"
@@ -286,6 +283,7 @@ export default function AuditorDashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
     </div>
   )

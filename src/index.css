@@ -349,10 +349,49 @@
       white
     ) !important;
   }
+  /* Same mix as swatch — use on text when the pill fill is a lighter tint. */
+  .proposal-stat-label-text-chart-4 {
+    color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  /* Lighter tint of the label text hue — pill fill behind `.proposal-stat-label-text-chart-4`. */
+  .proposal-stat-label-bg-chart-4 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(
+        in oklch,
+        color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
+        white
+      ) 30%,
+      white
+    ) !important;
+  }
   .proposal-stat-swatch-chart-2 {
     background-color: color-mix(
       in oklch,
       color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  /* Tasks segment — same mixes as swatch; pill fill is lighter (matches chart-4 pattern). */
+  .proposal-stat-label-text-chart-2 {
+    color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  .proposal-stat-label-bg-chart-2 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(
+        in oklch,
+        color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
+        white
+      ) 30%,
       white
     ) !important;
   }
@@ -383,11 +422,47 @@
       oklch(0.98 0.006 250)
     ) !important;
   }
+  .dark .proposal-stat-label-text-chart-4 {
+    color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
+      oklch(0.98 0.006 250)
+    ) !important;
+  }
+  .dark .proposal-stat-label-bg-chart-4 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(
+        in oklch,
+        color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
+        oklch(0.98 0.006 250)
+      ) 34%,
+      var(--card)
+    ) !important;
+  }
   .dark .proposal-stat-swatch-chart-2 {
     background-color: color-mix(
       in oklch,
       color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
       oklch(0.98 0.006 250)
+    ) !important;
+  }
+  .dark .proposal-stat-label-text-chart-2 {
+    color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
+      oklch(0.98 0.006 250)
+    ) !important;
+  }
+  .dark .proposal-stat-label-bg-chart-2 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(
+        in oklch,
+        color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
+        oklch(0.98 0.006 250)
+      ) 34%,
+      var(--card)
     ) !important;
   }
   /*
