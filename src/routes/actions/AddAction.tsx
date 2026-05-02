@@ -1,4 +1,4 @@
-import type { FormEvent } from "react"
+import { type FormEvent, useState } from "react"
 import { Link, Navigate, useLocation, useParams } from "react-router-dom"
 import {
   Breadcrumb,
@@ -12,7 +12,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
@@ -38,19 +44,19 @@ function SparklesIcon({ className }: { className?: string }) {
 
 function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: string; minHeightClass: string }) {
   return (
-    <div className="mt-2 rounded-xl border border-violet-200/60 bg-gradient-to-br from-violet-50/90 to-white p-3 ring-1 ring-violet-100/50">
+    <div className="mt-2 rounded-xl border border-border bg-gradient-to-br from-muted/90 to-card p-3 ring-1 ring-border/50">
       <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600" aria-hidden="true">
+        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground" aria-hidden="true">
           <SparklesIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-violet-800/75">Suggested text</p>
-          <p className={`mt-1 text-xs leading-relaxed text-slate-500 italic ${minHeightClass}`} data-ai-for={fieldId}>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Suggested text</p>
+          <p className={`mt-1 text-xs leading-relaxed text-muted-foreground italic ${minHeightClass}`} data-ai-for={fieldId}>
             Connect an assistant to show suggestions here.
           </p>
         </div>
       </div>
-      <div className="mt-2 flex justify-end border-t border-violet-100/90 pt-2">
+      <div className="mt-2 flex justify-end border-t border-border pt-2">
         <Button type="button" variant="outline" size="sm" disabled className="h-7 border-border text-xs">
           Apply to field
         </Button>
@@ -61,6 +67,7 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: string; minHe
 
 export default function AddAction() {
   const location = useLocation()
+  const [taskStatus, setTaskStatus] = useState("")
   const { planSection } = useParams<{ planSection: string }>()
   const isContributorArea = location.pathname.startsWith("/contributor/")
   const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
@@ -131,27 +138,27 @@ export default function AddAction() {
           className="relative overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
           onSubmit={onSubmit}
         >
-          <div className="relative border-b border-slate-100 bg-gradient-to-r from-slate-50/95 via-white to-orange-50/30 px-6 py-6 sm:px-10 sm:py-8">
+          <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-card to-muted/30 px-6 py-6 sm:px-10 sm:py-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-500/30 sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg sm:h-14 sm:w-14">
                 <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-orange-800/60">New action</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">New action</p>
               </div>
             </div>
           </div>
 
-          <div className="relative mx-6 mb-2 rounded-2xl border border-violet-200/60 bg-gradient-to-r from-violet-50/80 to-white px-4 py-3.5 shadow-sm ring-1 ring-violet-100/50 sm:mx-10">
+          <div className="relative mx-6 mb-2 rounded-2xl border border-border bg-gradient-to-r from-muted/80 to-card px-4 py-3.5 shadow-sm ring-1 ring-border/50 sm:mx-10">
             <div className="flex gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                 <SparklesIcon className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-violet-950">Assistant-ready fields</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
+                <p className="text-sm font-semibold text-foreground">Assistant-ready fields</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                 AI-generated suggestions are provided to help you draft the objective and its indicators. Review and edit the text as needed to ensure it fits your institution’s context.
                 </p>
               </div>
@@ -160,12 +167,12 @@ export default function AddAction() {
 
           <div className="relative space-y-10 px-6 py-8 sm:px-10 sm:py-10">
             <fieldset className="space-y-4 border-0 p-0">
-              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800/55">Action</legend>
+              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Action</legend>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
                 <div className="sm:col-span-2">
-                  <label htmlFor="action-title" className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    <span>Action title <span className="text-orange-600">*</span></span>
-                    <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-violet-800">AI</span>
+                  <label htmlFor="action-title" className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    <span>Action title <span className="text-primary">*</span></span>
+                    <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">AI</span>
                   </label>
                   <Input
                     id="action-title"
@@ -176,8 +183,8 @@ export default function AddAction() {
                   <AiSuggestionBlock fieldId="action-title" minHeightClass="min-h-[2.75rem]" />
                 </div>
                 <div className="sm:max-w-xs">
-                  <label htmlFor="action-total-weight" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    Total weight <span className="text-orange-600">*</span>
+                  <label htmlFor="action-total-weight" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Total weight <span className="text-primary">*</span>
                   </label>
                   <Input
                     id="action-total-weight"
@@ -187,7 +194,7 @@ export default function AddAction() {
                   />
                 </div>
                 <div className="sm:max-w-xs">
-                  <label htmlFor="action-total-achievement" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
+                  <label htmlFor="action-total-achievement" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Total achievement
                   </label>
                   <Input
@@ -199,8 +206,8 @@ export default function AddAction() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="task-main-entity" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    Main entity <span className="text-orange-600">*</span>
+                  <label htmlFor="task-main-entity" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Main entity <span className="text-primary">*</span>
                   </label>
                   <Input
                     id="task-main-entity"
@@ -212,9 +219,9 @@ export default function AddAction() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="task-supporting-entities"
-                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                   >
-                    Supporting entities <span className="text-orange-600">*</span>
+                    Supporting entities <span className="text-primary">*</span>
                   </label>
                   <Input
                     id="task-supporting-entities"
@@ -226,9 +233,9 @@ export default function AddAction() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="task-human-resources"
-                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                   >
-                    Human resources required <span className="text-orange-600">*</span>
+                    Human resources required <span className="text-primary">*</span>
                   </label>
                   <Textarea
                     id="task-human-resources"
@@ -242,9 +249,9 @@ export default function AddAction() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="task-financial-resources"
-                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                   >
-                    Financial resources required <span className="text-orange-600">*</span>
+                    Financial resources required <span className="text-primary">*</span>
                   </label>
                   <Textarea
                     id="task-financial-resources"
@@ -259,9 +266,9 @@ export default function AddAction() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="task-action-contribution-percentage"
-                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                   >
-                    Action contribution percentage <span className="text-orange-600">*</span>
+                    Action contribution percentage <span className="text-primary">*</span>
                   </label>
                   <Input
                     id="task-action-contribution-percentage"
@@ -272,19 +279,24 @@ export default function AddAction() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="task-status" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    Status <span className="text-orange-600">*</span>
+                  <label htmlFor="task-status" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Status <span className="text-primary">*</span>
                   </label>
-                  <NativeSelect id="task-status" name="taskStatus" className="w-full">
-                    <NativeSelectOption value="">Select status…</NativeSelectOption>
-                    <NativeSelectOption value="Not started">Not started</NativeSelectOption>
-                    <NativeSelectOption value="In progress">In progress</NativeSelectOption>
-                    <NativeSelectOption value="Completed">Completed</NativeSelectOption>
-                  </NativeSelect>
+                  <input type="hidden" name="taskStatus" value={taskStatus} />
+                  <Select value={taskStatus || undefined} onValueChange={setTaskStatus}>
+                    <SelectTrigger id="task-status" className="w-full">
+                      <SelectValue placeholder="Select status…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Not started">Not started</SelectItem>
+                      <SelectItem value="In progress">In progress</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="task-notes" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
+                  <label htmlFor="task-notes" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Notes
                   </label>
                   <Textarea
@@ -299,10 +311,10 @@ export default function AddAction() {
               </div>
             </fieldset>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-8 sm:flex-row sm:items-center sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-end">
               <Link
                 to={actionPlanHref}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200/60 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/60 transition hover:border-border hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Cancel
               </Link>

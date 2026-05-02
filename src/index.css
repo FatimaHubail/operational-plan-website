@@ -49,72 +49,375 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(0.965 0.003 250);
+  --foreground: oklch(0.22 0.04 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.04 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.04 265);
+  --primary: oklch(0.70 0.18 47);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.005 250);
+  --secondary-foreground: oklch(0.22 0.04 265);
+  --muted: oklch(0.96 0.005 250);
+  --muted-foreground: oklch(0.55 0.015 255);
+  --accent: oklch(0.95 0.01 250);
+  --accent-foreground: oklch(0.22 0.04 265);
+  --destructive: oklch(0.62 0.22 25);
+  --border: oklch(0.92 0.005 250);
+  --input: oklch(0.92 0.005 250);
+  --ring: oklch(0.70 0.18 47);
+  --chart-1: oklch(0.78 0.12 300);
+  --chart-2: oklch(0.83 0.13 145);
+  --chart-3: oklch(0.92 0.13 95);
+  --chart-4: oklch(0.66 0.22 355);
+  --chart-5: oklch(0.70 0.18 47);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.22 0.045 265);
+  --sidebar-foreground: oklch(0.86 0.01 250);
+  --sidebar-primary: oklch(0.70 0.18 47);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.28 0.045 265);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(0.30 0.04 265);
+  --sidebar-ring: oklch(0.70 0.18 47);
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.16 0.02 265);
+  --foreground: oklch(0.96 0 0);
+  --card: oklch(0.22 0.04 265);
+  --card-foreground: oklch(0.96 0 0);
+  --popover: oklch(0.22 0.04 265);
+  --popover-foreground: oklch(0.96 0 0);
+  --primary: oklch(0.72 0.18 47);
+  --primary-foreground: oklch(0.16 0.02 265);
+  --secondary: oklch(0.26 0.04 265);
+  --secondary-foreground: oklch(0.96 0 0);
+  --muted: oklch(0.26 0.04 265);
+  --muted-foreground: oklch(0.72 0.015 255);
+  --accent: oklch(0.28 0.045 265);
+  --accent-foreground: oklch(0.96 0 0);
+  --destructive: oklch(0.70 0.20 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.72 0.18 47);
+  --chart-1: oklch(0.68 0.14 300);
+  --chart-2: oklch(0.73 0.14 145);
+  --chart-3: oklch(0.80 0.14 95);
+  --chart-4: oklch(0.66 0.22 355);
+  --chart-5: oklch(0.72 0.18 47);
+  --sidebar: oklch(0.18 0.04 265);
+  --sidebar-foreground: oklch(0.86 0.01 250);
+  --sidebar-primary: oklch(0.72 0.18 47);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.26 0.04 265);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.72 0.18 47);
+}
+/*
+ * Notification icons: glyph = exact --chart-*; chip = light pastel of that hue (white mix in light, card mix in dark).
+ * .notif-icon-wrap = smaller rounded rectangle behind the SVG.
+ * .notif-type-badge-chart-* = category label (“Proposal lifecycle”, etc.) — no border; text mixed toward foreground for contrast on pastel fill.
+ */
+@layer components {
+  .notif-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    height: 2rem;
+    min-width: 2.5rem;
+    padding-inline: 0.3125rem;
+    border-radius: 0.625rem;
+  }
+  .notif-icon-wrap svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .notif-icon-chart-1 {
+    color: var(--chart-1);
+    background-color: color-mix(in oklch, var(--chart-1) 18%, white);
+  }
+  .notif-icon-chart-2 {
+    color: var(--chart-2);
+    background-color: color-mix(in oklch, var(--chart-2) 18%, white);
+  }
+  .notif-icon-chart-3 {
+    color: var(--chart-3);
+    background-color: color-mix(in oklch, var(--chart-3) 16%, white);
+  }
+  .notif-icon-chart-4 {
+    color: var(--chart-4);
+    background-color: color-mix(in oklch, var(--chart-4) 18%, white);
+  }
+  .notif-icon-chart-5 {
+    color: var(--chart-5);
+    background-color: color-mix(in oklch, var(--chart-5) 18%, white);
+  }
+
+  .dark .notif-icon-chart-1 {
+    background-color: color-mix(in oklch, var(--chart-1) 32%, var(--card));
+  }
+  .dark .notif-icon-chart-2 {
+    background-color: color-mix(in oklch, var(--chart-2) 32%, var(--card));
+  }
+  .dark .notif-icon-chart-3 {
+    background-color: color-mix(in oklch, var(--chart-3) 28%, var(--card));
+  }
+  .dark .notif-icon-chart-4 {
+    background-color: color-mix(in oklch, var(--chart-4) 32%, var(--card));
+  }
+  .dark .notif-icon-chart-5 {
+    background-color: color-mix(in oklch, var(--chart-5) 32%, var(--card));
+  }
+
+  .notif-type-badge-chart-1 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-1) 20%, white);
+    color: color-mix(in oklch, var(--chart-1) 42%, var(--foreground)) !important;
+  }
+  .notif-type-badge-chart-2 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-2) 20%, white);
+    color: color-mix(in oklch, var(--chart-2) 54%, var(--foreground)) !important;
+  }
+  .notif-type-badge-chart-3 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-3) 18%, white);
+    /* Dark yellow / olive — slightly lifted L vs before */
+    color: oklch(0.46 0.088 94) !important;
+  }
+  .notif-type-badge-chart-4 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-4) 20%, white);
+    color: color-mix(in oklch, var(--chart-4) 42%, var(--foreground)) !important;
+  }
+  .notif-type-badge-chart-5 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-5) 20%, white);
+    /* Match glyph color on .notif-icon-chart-5 */
+    color: var(--chart-5) !important;
+  }
+
+  .dark .notif-type-badge-chart-1 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-1) 34%, var(--card));
+    color: color-mix(in oklch, var(--chart-1) 58%, var(--foreground)) !important;
+  }
+  .dark .notif-type-badge-chart-2 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-2) 34%, var(--card));
+    color: color-mix(in oklch, var(--chart-2) 72%, var(--foreground)) !important;
+  }
+  .dark .notif-type-badge-chart-3 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-3) 30%, var(--card));
+    color: oklch(0.89 0.11 96) !important;
+  }
+  .dark .notif-type-badge-chart-4 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-4) 34%, var(--card));
+    color: color-mix(in oklch, var(--chart-4) 58%, var(--foreground)) !important;
+  }
+  .dark .notif-type-badge-chart-5 {
+    border: none !important;
+    background-color: color-mix(in oklch, var(--chart-5) 34%, var(--card));
+    color: var(--chart-5) !important;
+  }
+
+  /*
+   * Strategic Perspectives card links — catalysts/enablers/beneficiary/stakeholders use --chart-1, 2, 4, 5 (same chip mixes as .notif-icon-chart-*). Base class applies to any element (e.g. role panels); hover rules stay on anchors.
+   */
+  .strategic-perspective-bg-chart-1 {
+    background-color: color-mix(in oklch, var(--chart-1) 18%, white) !important;
+  }
+  a.strategic-perspective-bg-chart-1:hover {
+    background-color: color-mix(in oklch, var(--chart-1) 26%, white) !important;
+  }
+  .strategic-perspective-bg-chart-2 {
+    background-color: color-mix(in oklch, var(--chart-2) 18%, white) !important;
+  }
+  a.strategic-perspective-bg-chart-2:hover {
+    background-color: color-mix(in oklch, var(--chart-2) 26%, white) !important;
+  }
+  .strategic-perspective-bg-chart-4 {
+    background-color: color-mix(in oklch, var(--chart-5) 18%, white) !important;
+  }
+  a.strategic-perspective-bg-chart-4:hover {
+    background-color: color-mix(in oklch, var(--chart-5) 26%, white) !important;
+  }
+  .strategic-perspective-bg-chart-5 {
+    background-color: color-mix(in oklch, var(--chart-4) 18%, white) !important;
+  }
+  a.strategic-perspective-bg-chart-5:hover {
+    background-color: color-mix(in oklch, var(--chart-4) 26%, white) !important;
+  }
+
+  .dark .strategic-perspective-bg-chart-1 {
+    background-color: color-mix(in oklch, var(--chart-1) 32%, var(--card)) !important;
+  }
+  .dark a.strategic-perspective-bg-chart-1:hover {
+    background-color: color-mix(in oklch, var(--chart-1) 42%, var(--card)) !important;
+  }
+  .dark .strategic-perspective-bg-chart-2 {
+    background-color: color-mix(in oklch, var(--chart-2) 32%, var(--card)) !important;
+  }
+  .dark a.strategic-perspective-bg-chart-2:hover {
+    background-color: color-mix(in oklch, var(--chart-2) 42%, var(--card)) !important;
+  }
+  .dark .strategic-perspective-bg-chart-4 {
+    background-color: color-mix(in oklch, var(--chart-4) 32%, var(--card)) !important;
+  }
+  .dark a.strategic-perspective-bg-chart-4:hover {
+    background-color: color-mix(in oklch, var(--chart-4) 42%, var(--card)) !important;
+  }
+  .dark .strategic-perspective-bg-chart-5 {
+    background-color: color-mix(in oklch, var(--chart-5) 32%, var(--card)) !important;
+  }
+  .dark a.strategic-perspective-bg-chart-5:hover {
+    background-color: color-mix(in oklch, var(--chart-5) 42%, var(--card)) !important;
+  }
+
+  /*
+   * Your Proposals card numerals — palette + foreground (higher chroma share = lighter / more vivid).
+   */
+  /* Pending: same hue (47°) as oklch(0.72 0.18 47), lower L — not mixed with --foreground (avoids navy) */
+  .proposal-stat-num-pending {
+    color: oklch(0.34 0.15 47) !important;
+  }
+  .proposal-stat-num-chart-2 {
+    color: color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) !important;
+  }
+  .proposal-stat-num-chart-3 {
+    color: color-mix(in oklch, var(--chart-3) 30%, var(--foreground)) !important;
+  }
+  .proposal-stat-num-chart-4 {
+    color: color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) !important;
+  }
+  .proposal-stat-num-filed {
+    color: oklch(0.16 0.02 265) !important;
+  }
+  /* Objectives / actions / tasks — accent */
+  .proposal-stat-num-summary {
+    color: oklch(0.72 0.18 47) !important;
+  }
+
+  .dark .proposal-stat-num-filed {
+    color: oklch(0.88 0.02 265) !important;
+  }
+  .dark .proposal-stat-num-pending {
+    color: oklch(0.52 0.15 47) !important;
+  }
+  .dark .proposal-stat-num-chart-2 {
+    color: color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) !important;
+  }
+  .dark .proposal-stat-num-chart-3 {
+    color: color-mix(in oklch, var(--chart-3) 64%, var(--foreground)) !important;
+  }
+  .dark .proposal-stat-num-chart-4 {
+    color: color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) !important;
+  }
+
+  /* Auditor summary mix bars + swatches — pastel lifts (lighter than stat numerals) */
+  .proposal-stat-bar-pending {
+    fill: oklch(0.7 0.18 47) !important;
+  }
+  .proposal-stat-bar-chart-4 {
+    fill: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  .proposal-stat-bar-chart-2 {
+    fill: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  .proposal-stat-swatch-pending {
+    background-color: oklch(0.7 0.18 47) !important;
+  }
+  .proposal-stat-swatch-chart-4 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  .proposal-stat-swatch-chart-2 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
+      white
+    ) !important;
+  }
+  .dark .proposal-stat-bar-pending {
+    fill: oklch(0.7 0.18 47) !important;
+  }
+  .dark .proposal-stat-bar-chart-4 {
+    fill: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
+      oklch(0.98 0.006 250)
+    ) !important;
+  }
+  .dark .proposal-stat-bar-chart-2 {
+    fill: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
+      oklch(0.98 0.006 250)
+    ) !important;
+  }
+  .dark .proposal-stat-swatch-pending {
+    background-color: oklch(0.7 0.18 47) !important;
+  }
+  .dark .proposal-stat-swatch-chart-4 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
+      oklch(0.98 0.006 250)
+    ) !important;
+  }
+  .dark .proposal-stat-swatch-chart-2 {
+    background-color: color-mix(
+      in oklch,
+      color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
+      oklch(0.98 0.006 250)
+    ) !important;
+  }
+  /*
+   * “N new” badge (notification lists + dashboard card) — accent + light fill of same hue.
+   */
+  .notif-new-badge {
+    border: none !important;
+    background-color: color-mix(in oklch, oklch(0.7 0.2 25) 20%, white) !important;
+    color: oklch(0.7 0.2 25) !important;
+  }
+  .dark .notif-new-badge {
+    background-color: color-mix(in oklch, oklch(0.7 0.2 25) 32%, var(--card)) !important;
+    color: oklch(0.7 0.2 25) !important;
+  }
+
+  /*
+   * Notifications secondary actions — dashboard “View all …”, list “Load more”.
+   * Hover: fill + border oklch(0.22 0.04 265), not light secondary/outline.
+   */
+  a.notif-secondary-action,
+  button.notif-secondary-action {
+    border: 1px solid transparent;
+  }
+  a.notif-secondary-action:hover,
+  button.notif-secondary-action:hover {
+    background-color: oklch(0.22 0.04 265) !important;
+    border-color: oklch(0.22 0.04 265) !important;
+    color: oklch(1 0 0) !important;
+    box-shadow: none !important;
+  }
 }
 
 @layer base {

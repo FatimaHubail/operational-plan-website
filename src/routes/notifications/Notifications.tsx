@@ -3,6 +3,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  chartSlotForContributor,
+  NOTIF_ICON_WRAP_CLASS,
+  notifIconChartClass,
+  notifTypeBadgeClass,
+} from "@/lib/notificationIconChart"
+import { cn } from "@/lib/utils"
 
 type NotificationCategory =
   | "lifecycle"
@@ -204,22 +211,8 @@ export default function Notifications() {
   const canLoadMoreToday = visibleTodayCount < todayNotifications.length
   const canLoadMoreEarlier = visibleEarlierCount < earlierNotifications.length
 
-  const iconToneClass = (category: NotificationCategory) => {
-    switch (category) {
-      case "lifecycle":
-        return "bg-secondary text-secondary-foreground"
-      case "resubmission":
-        return "bg-accent text-accent-foreground"
-      case "calendar":
-        return "bg-muted text-foreground"
-      case "perspective":
-        return "bg-secondary text-secondary-foreground"
-      case "performance":
-        return "bg-accent text-accent-foreground"
-      default:
-        return "bg-muted text-muted-foreground"
-    }
-  }
+  const contributorIconClass = (category: NotificationCategory) =>
+    notifIconChartClass(chartSlotForContributor(category))
 
   const renderCategoryIcon = (category: NotificationCategory) => {
     switch (category) {
@@ -261,9 +254,20 @@ export default function Notifications() {
   const renderNotificationRow = (item: NotificationItem) => (
     <li key={item.id}>
       <div className="flex w-full gap-4 px-5 py-4 text-left transition hover:bg-muted/40 sm:px-6 sm:py-5">
-        <span className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconToneClass(item.category)}`}>
+        <span
+          className={cn(
+            "relative",
+            NOTIF_ICON_WRAP_CLASS,
+            contributorIconClass(item.category),
+          )}
+        >
           {renderCategoryIcon(item.category)}
-          {item.unread ? <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" aria-hidden="true" /> : null}
+          {item.unread ? (
+            <span
+              className="absolute -right-px -top-px h-2 w-2 rounded-full bg-primary ring-1 ring-background"
+              aria-hidden="true"
+            />
+          ) : null}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-start justify-between gap-2">
@@ -272,7 +276,12 @@ export default function Notifications() {
           </span>
           <span className="mt-0.5 block text-sm text-muted-foreground">{item.body}</span>
           <span className="mt-2 flex flex-wrap gap-2">
-            <Badge variant="secondary">{categoryLabel(item.category)}</Badge>
+            <Badge
+              variant="outline"
+              className={cn("font-medium", notifTypeBadgeClass(chartSlotForContributor(item.category)))}
+            >
+              {categoryLabel(item.category)}
+            </Badge>
             <Badge variant="outline" className="capitalize">
               {item.entityType}
             </Badge>
@@ -354,14 +363,19 @@ export default function Notifications() {
                 <>
                   <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 sm:px-6">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today</p>
-                    <Badge variant="secondary" className="rounded-full px-3">
+                    <Badge variant="secondary" className="notif-new-badge rounded-full px-3">
                       {unreadCount} new
                     </Badge>
                   </div>
                   <ul className="divide-y divide-border">{visibleTodayNotifications.map((item) => renderNotificationRow(item))}</ul>
                   {canLoadMoreToday ? (
                     <div className="border-t border-border px-5 py-4 sm:px-6">
-                      <Button type="button" variant="outline" className="w-full" onClick={() => setVisibleTodayCount((prev) => prev + 3)}>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="notif-secondary-action w-full"
+                        onClick={() => setVisibleTodayCount((prev) => prev + 3)}
+                      >
                         Load more
                       </Button>
                     </div>
@@ -377,7 +391,12 @@ export default function Notifications() {
                   <ul className="divide-y divide-border">{visibleEarlierNotifications.map((item) => renderNotificationRow(item))}</ul>
                   {canLoadMoreEarlier ? (
                     <div className="border-t border-border px-5 py-4 sm:px-6">
-                      <Button type="button" variant="outline" className="w-full" onClick={() => setVisibleEarlierCount((prev) => prev + 3)}>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="notif-secondary-action w-full"
+                        onClick={() => setVisibleEarlierCount((prev) => prev + 3)}
+                      >
                         Load more
                       </Button>
                     </div>

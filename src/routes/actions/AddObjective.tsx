@@ -1,4 +1,4 @@
-import type { FormEvent } from "react"
+import { type FormEvent, useState } from "react"
 import { Link, Navigate, useLocation, useParams } from "react-router-dom"
 import {
   Breadcrumb,
@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -93,26 +99,26 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: AiFieldId; mi
   return (
     <div
       id={`ai-desc-${fieldId}`}
-      className="mt-2 rounded-xl border border-violet-200/60 bg-gradient-to-br from-violet-50/90 to-white p-3 ring-1 ring-violet-100/50"
+      className="mt-2 rounded-xl border border-border bg-gradient-to-br from-muted/90 to-card p-3 ring-1 ring-border/50"
     >
       <div className="flex items-start gap-2.5">
         <span
-          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600"
+          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground"
           aria-hidden="true"
         >
           <SparklesIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-violet-800/75">Suggested text</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Suggested text</p>
           <p
-            className={`ai-suggestion-body mt-1 text-xs leading-relaxed text-slate-500 italic ${minHeightClass}`}
+            className={`ai-suggestion-body mt-1 text-xs leading-relaxed text-muted-foreground italic ${minHeightClass}`}
             data-ai-for={fieldId}
           >
             Connect an assistant to show suggestions here.
           </p>
         </div>
       </div>
-      <div className="mt-2 flex justify-end border-t border-violet-100/90 pt-2">
+      <div className="mt-2 flex justify-end border-t border-border pt-2">
         <Button
           type="button"
           disabled
@@ -132,6 +138,7 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: AiFieldId; mi
 export default function AddObjective() {
   const location = useLocation()
   const { planSection } = useParams<{ planSection: string }>()
+  const [regulatoryEntity, setRegulatoryEntity] = useState("")
   const isContributorArea = location.pathname.startsWith("/contributor/")
   const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
   const proposalsStatusHref = isContributorArea ? "/contributor/proposals-status" : "/proposals-status"
@@ -179,21 +186,21 @@ export default function AddObjective() {
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
-            className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/70 backdrop-blur-sm sm:hidden sm:text-sm"
+            className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border/70 backdrop-blur-sm sm:hidden sm:text-sm"
           >
-            <Link to={dashboardHref} className="text-orange-600 transition hover:text-orange-700">
+            <Link to={dashboardHref} className="text-primary transition hover:text-primary/90">
               Dashboard
             </Link>
-            <span className="text-slate-300" aria-hidden="true">
+            <span className="text-muted-foreground/50" aria-hidden="true">
               /
             </span>
-            <Link to={cancelHref} className="text-orange-600 transition hover:text-orange-700">
+            <Link to={cancelHref} className="text-primary transition hover:text-primary/90">
               {parentLabel}
             </Link>
-            <span className="text-slate-300" aria-hidden="true">
+            <span className="text-muted-foreground/50" aria-hidden="true">
               /
             </span>
-            <span className="text-slate-800">Add operational objectives</span>
+            <span className="text-foreground">Add operational objectives</span>
           </nav>
           <h1 className="mt-0 text-2xl font-bold tracking-tight text-foreground sm:mt-5 sm:text-3xl">Add operational objectives</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -219,13 +226,13 @@ export default function AddObjective() {
             className="relative overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
             onSubmit={onSubmit}
           >
-            <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-orange-300/15 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 w-56 rounded-full bg-amber-200/20 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 w-56 rounded-full bg-muted/30 blur-3xl" aria-hidden="true" />
 
-            <div className="relative border-b border-slate-100 bg-gradient-to-r from-slate-50/95 via-white to-orange-50/30 px-6 py-6 sm:px-10 sm:py-8">
+            <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-card to-muted/30 px-6 py-6 sm:px-10 sm:py-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
                 <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25 sm:h-14 sm:w-14"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-primary text-primary-foreground shadow-md shadow-md sm:h-14 sm:w-14"
                   aria-hidden="true"
                 >
                   <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -237,22 +244,22 @@ export default function AddObjective() {
                   </svg>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-orange-800/60">New operational objective</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">New operational objective</p>
                 </div>
               </div>
             </div>
 
             <div
-              className="relative mx-6 mb-2 mt-4 rounded-2xl border border-violet-200/60 bg-gradient-to-r from-violet-50/80 to-white px-4 py-3.5 shadow-sm ring-1 ring-violet-100/50 sm:mx-10"
+              className="relative mx-6 mb-2 mt-4 rounded-2xl border border-border bg-gradient-to-r from-muted/80 to-card px-4 py-3.5 shadow-sm ring-1 ring-border/50 sm:mx-10"
               role="note"
             >
               <div className="flex gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600" aria-hidden="true">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground" aria-hidden="true">
                   <SparklesIcon className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-violet-950">Assistant-ready fields</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
+                  <p className="text-sm font-semibold text-foreground">Assistant-ready fields</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                     AI-generated suggestions are provided to help you draft the objective and its indicators. Review and
                     edit the text as needed to ensure it fits your institution’s context.
                   </p>
@@ -262,10 +269,10 @@ export default function AddObjective() {
 
             <div className="relative space-y-10 px-6 py-8 sm:px-10 sm:py-10">
               <fieldset className="min-w-0 space-y-4 border-0 p-0">
-                <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800/55">
+                <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                   Operational objective
                 </legend>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Fill in the required fields to define an operational objective
                 </p>
 
@@ -273,12 +280,12 @@ export default function AddObjective() {
                   <div className="min-w-0 sm:col-span-2">
                     <label
                       htmlFor="oo-objective"
-                      className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                      className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                     >
                       <span>
-                        Operational objective <span className="text-orange-600">*</span>
+                        Operational objective <span className="text-primary">*</span>
                       </span>
-                      <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-violet-800">
+                      <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">
                         AI
                       </span>
                     </label>
@@ -296,33 +303,29 @@ export default function AddObjective() {
                   </div>
 
                   <div className="min-w-0 sm:col-span-2">
-                    <label htmlFor="oo-regulatory-entity" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                      Regulatory entity <span className="text-orange-600">*</span>
+                    <label htmlFor="oo-regulatory-entity" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Regulatory entity <span className="text-primary">*</span>
                     </label>
                     <div className="relative">
-                      <NativeSelect
-                        id="oo-regulatory-entity"
-                        name="regulatoryEntity"
-                        required
-                        defaultValue=""
-                        autoComplete="organization"
-                        className="w-full"
-                      >
-                        <NativeSelectOption value="" disabled>
-                          Select regulatory entity
-                        </NativeSelectOption>
-                        {REGULATORY_ENTITIES.map((entity) => (
-                          <NativeSelectOption key={entity} value={entity}>
-                            {entity}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
+                      <input type="hidden" name="regulatoryEntity" value={regulatoryEntity} required />
+                      <Select value={regulatoryEntity || undefined} onValueChange={setRegulatoryEntity}>
+                        <SelectTrigger id="oo-regulatory-entity" className="w-full">
+                          <SelectValue placeholder="Select regulatory entity" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {REGULATORY_ENTITIES.map((entity) => (
+                            <SelectItem key={entity} value={entity}>
+                              {entity}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
                   <div className="min-w-0 sm:col-span-2">
-                    <label htmlFor="oo-indicator-owner" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                      Indicator owner within the entity <span className="text-orange-600">*</span>
+                    <label htmlFor="oo-indicator-owner" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Indicator owner within the entity <span className="text-primary">*</span>
                     </label>
                     <Input
                       id="oo-indicator-owner"
@@ -338,12 +341,12 @@ export default function AddObjective() {
                   <div className="min-w-0 sm:col-span-2">
                     <label
                       htmlFor="oo-objective-execution-indicator"
-                      className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                      className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                     >
                       <span>
-                        objective execution Indicator <span className="text-orange-600">*</span>
+                        objective execution Indicator <span className="text-primary">*</span>
                       </span>
-                      <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-violet-800">
+                      <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">
                         AI
                       </span>
                     </label>
@@ -363,12 +366,12 @@ export default function AddObjective() {
                   <div className="min-w-0 sm:col-span-2">
                     <label
                       htmlFor="oo-execution-indicator-description"
-                      className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                      className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                     >
                       <span>
-                        execution Indicator description <span className="text-orange-600">*</span>
+                        execution Indicator description <span className="text-primary">*</span>
                       </span>
-                      <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-violet-800">
+                      <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">
                         AI
                       </span>
                     </label>
@@ -385,8 +388,8 @@ export default function AddObjective() {
                   </div>
 
                   <div className="min-w-0 sm:col-span-2 sm:max-w-md">
-                    <label htmlFor="oo-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                      Target value <span className="text-orange-600">*</span>
+                    <label htmlFor="oo-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Target value <span className="text-primary">*</span>
                     </label>
                     <Input
                       id="oo-target-value"
@@ -401,19 +404,19 @@ export default function AddObjective() {
                 </div>
               </fieldset>
 
-              <fieldset className="min-w-0 space-y-4 border-0 border-t border-slate-100 p-0 pt-10">
-                <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800/55">Achievement rate</legend>
-                <p className="text-xs text-slate-500">
-                  <span className="font-medium text-slate-700">Achievement rate</span> is the objective’s recorded
+              <fieldset className="min-w-0 space-y-4 border-0 border-t border-border p-0 pt-10">
+                <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Achievement rate</legend>
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">Achievement rate</span> is the objective’s recorded
                   performance or status for each calendar year (2023–2026) against its execution indicator.
                 </p>
 
-                <div className="rounded-xl border border-slate-200/50 bg-gradient-to-b from-slate-50 to-white p-4 ring-1 ring-slate-100 sm:p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">By year</p>
+                <div className="rounded-xl border border-border/50 bg-gradient-to-b from-muted to-card p-4 ring-1 ring-border sm:p-5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">By year</p>
                   <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
                     {achievementYears.map((year) => (
-                      <div key={year} className="rounded-xl bg-white px-2.5 py-2.5 ring-1 ring-slate-200/50 sm:px-3">
-                        <label htmlFor={`oo-ach-${year}`} className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <div key={year} className="rounded-xl bg-card px-2.5 py-2.5 ring-1 ring-border/50 sm:px-3">
+                        <label htmlFor={`oo-ach-${year}`} className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {year}
                         </label>
                         <Input
@@ -430,10 +433,10 @@ export default function AddObjective() {
                 </div>
               </fieldset>
 
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-8 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+              <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
                 <Link
                   to={cancelHref}
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200/60 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                  className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/60 transition hover:border-border hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   Cancel
                 </Link>

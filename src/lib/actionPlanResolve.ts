@@ -11,6 +11,9 @@ export type ResolvedActionPlanContext = {
   objDisplay: string
   objectiveLead: string
   status: string
+  proposedByName?: string
+  proposedByDepartment?: string
+  proposedBySubUnit?: string
 }
 
 function getDataset(planSection: ActionPlanPlanSection) {
@@ -55,5 +58,8 @@ export function resolveActionPlanContext(
     objDisplay: String(oi + 1),
     objectiveLead: objective.objective,
     status: objective.objectiveStatus,
+    proposedByName: objective.proposedByName,
+    proposedByDepartment: objective.proposedByDepartment,
+    proposedBySubUnit: objective.proposedBySubUnit,
   }
 }

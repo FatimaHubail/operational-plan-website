@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
@@ -282,16 +288,22 @@ export default function ReviewTask() {
                       <div className="space-y-4">
                         <div>
                           <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Field</label>
-                          <NativeSelect
-                            name="auditorModificationField[]"
-                            value={row.field}
-                            onChange={(e) => updateFieldRow(row.id, { field: e.target.value })}
+                          <input type="hidden" name="auditorModificationField[]" value={row.field} />
+                          <Select
+                            value={row.field || undefined}
+                            onValueChange={(v) => updateFieldRow(row.id, { field: v })}
                           >
-                            <NativeSelectOption value="">Select field...</NativeSelectOption>
-                            {fieldOptions.map((field) => (
-                              <NativeSelectOption key={field} value={field}>{taskFieldLabels[field] ?? field}</NativeSelectOption>
-                            ))}
-                          </NativeSelect>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select field..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fieldOptions.map((field) => (
+                                <SelectItem key={field} value={field}>
+                                  {taskFieldLabels[field] ?? field}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div>
                           <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground">Requested change</label>

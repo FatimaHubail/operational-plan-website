@@ -21,6 +21,10 @@ export type ActionPlanAction = {
   title: string
   totalWeight: string
   totalAchievement?: string
+  /** Owner who proposed this action (same shape as operational objectives). */
+  proposedByName?: string
+  proposedByDepartment?: string
+  proposedBySubUnit?: string
   tasks: ActionPlanTask[]
 }
 
@@ -49,6 +53,9 @@ export const initialActionsData: ActionPlanAction[] = [
   {
     title: "Faculty KPI mapping and sign-off",
     totalWeight: "50%",
+    proposedByName: "Ahmed Khalil",
+    proposedByDepartment: "Office of Strategy & Planning",
+    proposedBySubUnit: "Institutional KPI & Reporting Section",
     tasks: [
       {
         name: "Faculty workshop series",
@@ -92,6 +99,9 @@ export const initialActionsData: ActionPlanAction[] = [
   {
     title: "National benchmark dashboard",
     totalWeight: "50%",
+    proposedByName: "Sara Al-Najjar",
+    proposedByDepartment: "Institutional Research",
+    proposedBySubUnit: "Analytics & Benchmarking Unit",
     tasks: [
       {
         name: "Indicator definitions workshop",
@@ -131,9 +141,9 @@ export function normalizeStatus(s: string): string {
 
 export function taskStatusPillClass(status: string): string {
   const t = normalizeStatus(status)
-  if (t.includes("not start")) return "bg-slate-100 text-slate-800 ring-1 ring-slate-200/80"
-  if (t.includes("complete")) return "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200/80"
-  return "bg-amber-100 text-amber-900 ring-1 ring-amber-200/70"
+  if (t.includes("not start")) return "bg-muted text-foreground ring-1 ring-border"
+  if (t.includes("complete")) return "bg-primary text-primary-foreground ring-1 ring-border"
+  return "bg-secondary text-secondary-foreground ring-1 ring-border"
 }
 
 export function sumTaskWeightsPercent(tasks: ActionPlanTask[]): string | null {
@@ -221,5 +231,27 @@ export function computeObjectiveAchievementPercent(actions: ActionPlanAction[]):
   return Math.round((sum / totalW) * 10) / 10
 }
 
-export const BAR_COLORS = ["#ea580c", "#d97706", "#64748b", "#0284c7", "#7c3aed"]
-export const ACH_COLORS = ["#059669", "#0d9488", "#047857", "#0369a1"]
+/** SVG rect fill classes (theme chart colors). */
+export const CHART_SEGMENT_FILL = [
+  "fill-chart-1",
+  "fill-chart-2",
+  "fill-chart-3",
+  "fill-chart-4",
+  "fill-chart-5",
+] as const
+/** Legend color swatches next to labels. */
+export const CHART_LEGEND_BG = [
+  "bg-chart-1",
+  "bg-chart-2",
+  "bg-chart-3",
+  "bg-chart-4",
+  "bg-chart-5",
+] as const
+/** Emphasis text matching chart index. */
+export const CHART_LABEL_TEXT = [
+  "text-chart-1",
+  "text-chart-2",
+  "text-chart-3",
+  "text-chart-4",
+  "text-chart-5",
+] as const

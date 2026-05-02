@@ -12,7 +12,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { UserPlusIcon } from "lucide-react"
 
 const UNIT_DEPARTMENT_OPTIONS = [
@@ -59,6 +65,7 @@ export default function AddUser() {
   const showUsersCrumb = from !== "dashboard-admin"
   const [departmentCards, setDepartmentCards] = useState([{ department: "", subUnits: [""] }])
   const [sendInvite, setSendInvite] = useState(true)
+  const [role, setRole] = useState("")
 
   const addDepartmentCard = () => {
     setDepartmentCards((prev) => [...prev, { department: "", subUnits: [""] }])
@@ -181,13 +188,18 @@ export default function AddUser() {
                   <label htmlFor="user-role" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Role <span className="text-primary">*</span>
                   </label>
-                  <NativeSelect id="user-role" name="role" required>
-                    <NativeSelectOption value="">Select a role</NativeSelectOption>
-                    <NativeSelectOption value="auditor">Auditor - action inspection and approval</NativeSelectOption>
-                    <NativeSelectOption value="owner">Indicator Owner - unit head/chief with contributor editing abilities</NativeSelectOption>
-                    <NativeSelectOption value="contributor">Contributor - edit assigned plans</NativeSelectOption>
-                    <NativeSelectOption value="admin">Administrator - manage users and settings</NativeSelectOption>
-                  </NativeSelect>
+                  <input type="hidden" name="role" value={role} required />
+                  <Select value={role || undefined} onValueChange={setRole}>
+                    <SelectTrigger id="user-role" className="w-full">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auditor">Auditor - action inspection and approval</SelectItem>
+                      <SelectItem value="owner">Indicator Owner - unit head/chief with contributor editing abilities</SelectItem>
+                      <SelectItem value="contributor">Contributor - edit assigned plans</SelectItem>
+                      <SelectItem value="admin">Administrator - manage users and settings</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <div className="mb-1.5 flex flex-wrap items-end justify-between gap-2">
@@ -212,19 +224,22 @@ export default function AddUser() {
                             <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                               Department <span className="text-primary">*</span>
                             </label>
-                            <NativeSelect
-                              name="unitDepartment[]"
-                              required
-                              value={entry.department}
-                              onChange={(e) => updateDepartmentCard(index, { department: e.target.value })}
+                            <input type="hidden" name="unitDepartment[]" value={entry.department} required />
+                            <Select
+                              value={entry.department || undefined}
+                              onValueChange={(v) => updateDepartmentCard(index, { department: v })}
                             >
-                              <NativeSelectOption value="">Select unit / department</NativeSelectOption>
-                              {UNIT_DEPARTMENT_OPTIONS.map((option) => (
-                                <NativeSelectOption key={option} value={option}>
-                                  {option}
-                                </NativeSelectOption>
-                              ))}
-                            </NativeSelect>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select unit / department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {UNIT_DEPARTMENT_OPTIONS.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="min-w-0">
                             <div className="mb-1.5 flex items-end justify-between gap-2">

@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
@@ -230,11 +236,16 @@ export default function EditAction() {
                   <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground" htmlFor="edit-taskStatus">
                     Status
                   </label>
-                  <NativeSelect id="edit-taskStatus" value={form.taskStatus} onChange={(e) => setForm((p) => ({ ...p, taskStatus: e.target.value }))} className="mt-2 w-full border-border bg-background">
-                    <NativeSelectOption value="Not started">Not started</NativeSelectOption>
-                    <NativeSelectOption value="In progress">In progress</NativeSelectOption>
-                    <NativeSelectOption value="Completed">Completed</NativeSelectOption>
-                  </NativeSelect>
+                  <Select value={form.taskStatus} onValueChange={(v) => setForm((p) => ({ ...p, taskStatus: v }))}>
+                    <SelectTrigger id="edit-taskStatus" className="mt-2 w-full border-border bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Not started">Not started</SelectItem>
+                      <SelectItem value="In progress">In progress</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
                   <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground" htmlFor="edit-taskNotes">

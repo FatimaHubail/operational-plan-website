@@ -37,19 +37,19 @@ function SparklesIcon({ className }: { className?: string }) {
 
 function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: string; minHeightClass: string }) {
   return (
-    <div className="mt-2 rounded-xl border border-violet-200/60 bg-gradient-to-br from-violet-50/90 to-white p-3 ring-1 ring-violet-100/50">
+    <div className="mt-2 rounded-xl border border-border bg-gradient-to-br from-muted/90 to-card p-3 ring-1 ring-border/50">
       <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600" aria-hidden="true">
+        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground" aria-hidden="true">
           <SparklesIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-violet-800/75">Suggested text</p>
-          <p className={`mt-1 text-xs leading-relaxed text-slate-500 italic ${minHeightClass}`} data-ai-for={fieldId}>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Suggested text</p>
+          <p className={`mt-1 text-xs leading-relaxed text-muted-foreground italic ${minHeightClass}`} data-ai-for={fieldId}>
             Connect an assistant to show suggestions here.
           </p>
         </div>
       </div>
-      <div className="mt-2 flex justify-end border-t border-violet-100/90 pt-2">
+      <div className="mt-2 flex justify-end border-t border-border pt-2">
         <Button type="button" variant="outline" size="sm" disabled className="h-7 border-border text-xs">
           Apply to field
         </Button>
@@ -129,9 +129,9 @@ export default function AddTask() {
           className="relative overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
           onSubmit={onSubmit}
         >
-          <div className="relative border-b border-slate-100 bg-gradient-to-r from-slate-50/95 via-white to-orange-50/30 px-6 py-6 sm:px-10 sm:py-8">
+          <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-card to-muted/30 px-6 py-6 sm:px-10 sm:py-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-500/30 sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg sm:h-14 sm:w-14">
                 <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -141,19 +141,19 @@ export default function AddTask() {
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-orange-800/60">New task</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">New task</p>
               </div>
             </div>
           </div>
 
-          <div className="relative mx-6 mb-2 rounded-2xl border border-violet-200/60 bg-gradient-to-r from-violet-50/80 to-white px-4 py-3.5 shadow-sm ring-1 ring-violet-100/50 sm:mx-10">
+          <div className="relative mx-6 mb-2 rounded-2xl border border-border bg-gradient-to-r from-muted/80 to-card px-4 py-3.5 shadow-sm ring-1 ring-border/50 sm:mx-10">
             <div className="flex gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                 <SparklesIcon className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-violet-950">Assistant-ready fields</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
+                <p className="text-sm font-semibold text-foreground">Assistant-ready fields</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                   AI-generated suggestions are provided to help you draft the task details. Review and edit the text as needed to ensure it fits your institution's context.
                 </p>
               </div>
@@ -162,12 +162,12 @@ export default function AddTask() {
 
           <div className="relative space-y-10 px-6 py-8 sm:px-10 sm:py-10">
             <fieldset className="space-y-4 border-0 p-0">
-              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800/55">Task</legend>
+              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Task</legend>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
                 <div className="sm:col-span-2">
-                  <label htmlFor="task-name" className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    <span>Task name <span className="text-orange-600">*</span></span>
-                    <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-violet-800">AI</span>
+                  <label htmlFor="task-name" className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    <span>Task name <span className="text-primary">*</span></span>
+                    <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">AI</span>
                   </label>
                   <Input
                     id="task-name"
@@ -179,8 +179,8 @@ export default function AddTask() {
                 </div>
 
                 <div>
-                  <label htmlFor="task-weight" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    Task weight <span className="text-orange-600">*</span>
+                  <label htmlFor="task-weight" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Task weight <span className="text-primary">*</span>
                   </label>
                   <Input
                     id="task-weight"
@@ -191,14 +191,14 @@ export default function AddTask() {
                 </div>
 
                 <div className="sm:col-span-1">
-                  <label htmlFor="task-start-date" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    Start date <span className="text-orange-600">*</span>
+                  <label htmlFor="task-start-date" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Start date <span className="text-primary">*</span>
                   </label>
                   <Input id="task-start-date" type="date" name="taskStartDate" className="h-9 bg-background" />
                 </div>
                 <div className="sm:col-span-1">
-                  <label htmlFor="task-expected-end-date" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    End date <span className="text-orange-600">*</span>
+                  <label htmlFor="task-expected-end-date" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    End date <span className="text-primary">*</span>
                   </label>
                   <Input id="task-expected-end-date" type="date" name="taskExpectedEndDate" className="h-9 bg-background" />
                 </div>
@@ -206,9 +206,9 @@ export default function AddTask() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="task-performance-indicators"
-                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500"
+                    className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                   >
-                    Performance indicators <span className="text-orange-600">*</span>
+                    Performance indicators <span className="text-primary">*</span>
                   </label>
                   <Textarea
                     id="task-performance-indicators"
@@ -221,8 +221,8 @@ export default function AddTask() {
                 </div>
 
                 <div>
-                  <label htmlFor="task-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                    Target value <span className="text-orange-600">*</span>
+                  <label htmlFor="task-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Target value <span className="text-primary">*</span>
                   </label>
                   <Input
                     id="task-target-value"
@@ -233,7 +233,7 @@ export default function AddTask() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="task-actual-value-achieved" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
+                  <label htmlFor="task-actual-value-achieved" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Number achieved
                   </label>
                   <Input
@@ -245,7 +245,7 @@ export default function AddTask() {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label htmlFor="task-achievement-percentage" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-slate-500">
+                  <label htmlFor="task-achievement-percentage" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Achievement percentage
                   </label>
                   <Input
@@ -257,10 +257,10 @@ export default function AddTask() {
               </div>
             </fieldset>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-8 sm:flex-row sm:items-center sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-end">
               <Link
                 to={actionPlanHref}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200/60 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/60 transition hover:border-border hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Cancel
               </Link>

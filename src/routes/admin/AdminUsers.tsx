@@ -10,8 +10,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -20,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PencilIcon, SearchIcon, UserPlusIcon, XIcon } from "lucide-react"
+import { PencilIcon, SearchIcon, UserPlusIcon } from "lucide-react"
 
 type UserRow = {
   name: string
@@ -114,6 +126,7 @@ function roleClass(role: UserRow["role"]) {
 }
 
 export default function AdminUsers() {
+  const [roleFilter, setRoleFilter] = useState("")
   const [manageUser, setManageUser] = useState<UserRow | null>(null)
   const [editable, setEditable] = useState<Record<string, boolean>>({})
   const [manageForm, setManageForm] = useState({
@@ -238,13 +251,17 @@ export default function AdminUsers() {
               <label className="sr-only" htmlFor="filter-role">
                 Filter by role
               </label>
-              <NativeSelect id="filter-role" name="role" className="w-full min-w-[10rem] rounded-full sm:w-auto">
-                <NativeSelectOption value="">All roles</NativeSelectOption>
-                <NativeSelectOption value="admin">Administrator</NativeSelectOption>
-                <NativeSelectOption value="owner">Indicator Owner</NativeSelectOption>
-                <NativeSelectOption value="contributor">Contributor</NativeSelectOption>
-                <NativeSelectOption value="auditor">Auditor</NativeSelectOption>
-              </NativeSelect>
+              <Select value={roleFilter || undefined} onValueChange={setRoleFilter}>
+                <SelectTrigger id="filter-role" className="w-full min-w-[10rem] rounded-full sm:w-auto">
+                  <SelectValue placeholder="All roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="owner">Indicator Owner</SelectItem>
+                  <SelectItem value="contributor">Contributor</SelectItem>
+                  <SelectItem value="auditor">Auditor</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -333,68 +350,74 @@ export default function AdminUsers() {
           </div>
         </section>
 
-        {manageUser ? (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-            <button
-              type="button"
-              className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
-              aria-label="Close manage user"
-              onClick={() => setManageUser(null)}
-            />
-            <div className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
-              <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-4 sm:px-6">
-                <h2 className="text-lg font-bold">Manage User</h2>
-                <button type="button" className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground" onClick={() => setManageUser(null)} aria-label="Close">
-                  <XIcon className="h-4 w-4" />
-                </button>
-              </div>
+        <Dialog
+          open={manageUser != null}
+          onOpenChange={(open) => {
+            if (!open) setManageUser(null)
+          }}
+        >
+          {manageUser ? (
+            <DialogContent
+              className="flex max-h-[90vh] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-xl sm:max-w-3xl"
+              showCloseButton
+            >
+              <DialogHeader className="shrink-0 border-b border-border bg-muted/30 px-5 py-4 sm:px-6">
+                <DialogTitle className="text-lg font-bold">Manage User</DialogTitle>
+              </DialogHeader>
               <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Full name *</label>
                     <div className="relative">
                       <Input className="pr-9" value={manageForm.fullName} disabled={!editable.fullName} onChange={(e) => setManageForm((p) => ({ ...p, fullName: e.target.value }))} />
-                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
                         <PencilIcon className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">University email *</label>
                     <div className="relative">
                       <Input className="pr-9" value={manageForm.email} disabled={!editable.email} onChange={(e) => setManageForm((p) => ({ ...p, email: e.target.value }))} />
-                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
                         <PencilIcon className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Password *</label>
                     <div className="relative">
                       <Input className="pr-9" type="password" value={manageForm.password} disabled={!editable.password} onChange={(e) => setManageForm((p) => ({ ...p, password: e.target.value }))} />
-                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
                         <PencilIcon className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div>
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Role *</label>
                     <div className="relative">
-                      <NativeSelect
-                        className="pr-9"
-                        value={manageForm.role}
+                      <Select
+                        value={manageForm.role || undefined}
+                        onValueChange={(v) =>
+                          setManageForm((p) => ({ ...p, role: v as UserRow["role"] }))
+                        }
                         disabled={!editable.role}
-                        onChange={(e) => setManageForm((p) => ({ ...p, role: e.target.value as UserRow["role"] }))}
                       >
-                        <NativeSelectOption value="">Select a role</NativeSelectOption>
-                        <NativeSelectOption value="Auditor">Auditor - action inspection and approval</NativeSelectOption>
-                        <NativeSelectOption value="Indicator Owner">Indicator Owner - unit head/chief with contributor editing abilities</NativeSelectOption>
-                        <NativeSelectOption value="Contributor">Contributor - edit assigned plans</NativeSelectOption>
-                        <NativeSelectOption value="Administrator">Administrator - manage users and settings</NativeSelectOption>
-                      </NativeSelect>
-                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
+                        <SelectTrigger className="w-full pr-9">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Auditor">Auditor - action inspection and approval</SelectItem>
+                          <SelectItem value="Indicator Owner">
+                            Indicator Owner - unit head/chief with contributor editing abilities
+                          </SelectItem>
+                          <SelectItem value="Contributor">Contributor - edit assigned plans</SelectItem>
+                          <SelectItem value="Administrator">Administrator - manage users and settings</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
                         <PencilIcon className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -421,22 +444,25 @@ export default function AdminUsers() {
                           <div>
                             <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Department *</label>
                             <div className="relative">
-                              <NativeSelect
-                                className="pr-9"
-                                value={entry.department}
+                              <Select
+                                value={entry.department || undefined}
+                                onValueChange={(v) => updateDepartmentCard(cardIndex, { department: v })}
                                 disabled={!editable[`department-${cardIndex}`]}
-                                onChange={(e) => updateDepartmentCard(cardIndex, { department: e.target.value })}
                               >
-                                <NativeSelectOption value="">Select unit / department</NativeSelectOption>
-                                {UNIT_DEPARTMENT_OPTIONS.map((option) => (
-                                  <NativeSelectOption key={option} value={option}>
-                                    {option}
-                                  </NativeSelectOption>
-                                ))}
-                              </NativeSelect>
-                              <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
+                                <SelectTrigger className="w-full pr-9">
+                                  <SelectValue placeholder="Select unit / department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {UNIT_DEPARTMENT_OPTIONS.map((option) => (
+                                    <SelectItem key={option} value={option}>
+                                      {option}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
                                 <PencilIcon className="h-3 w-3" />
-                              </button>
+                              </Button>
                             </div>
                           </div>
                           <div>
@@ -457,14 +483,16 @@ export default function AdminUsers() {
                                       onChange={(e) => updateSubUnit(cardIndex, subIndex, e.target.value)}
                                       placeholder="e.g. Practical Training and Career Guidance Section"
                                     />
-                                    <button
+                                    <Button
                                       type="button"
-                                      className="absolute right-2 top-1/2 -translate-y-1/2 text-primary"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary"
                                       onClick={() => toggleFieldEdit(`sub-${cardIndex}-${subIndex}`)}
                                       aria-label="Edit sub-unit"
                                     >
                                       <PencilIcon className="h-3 w-3" />
-                                    </button>
+                                    </Button>
                                   </div>
                                   {subIndex > 0 ? (
                                     <Button type="button" variant="outline" size="sm" onClick={() => removeSubUnit(cardIndex, subIndex)}>
@@ -481,9 +509,9 @@ export default function AdminUsers() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ) : null}
+            </DialogContent>
+          ) : null}
+        </Dialog>
     </div>
   )
 }

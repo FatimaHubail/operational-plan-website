@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { ScrollToTop } from "@/components/scroll-to-top"
 import AppLayout from "@/routes/AppLayout"
 import Dashboard from "@/routes/dashboards/Dashboard"
 import Calendar from "@/routes/Calendar"
@@ -36,6 +37,7 @@ import EditTask from "@/routes/proposals/EditTask"
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Navigate to="/dashboard-admin" replace />} />

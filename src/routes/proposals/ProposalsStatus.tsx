@@ -270,12 +270,13 @@ export default function SubmissionStatus() {
           {statusOverview.map((row) => {
             const isActive = toneFilter === row.tone
             return (
-              <button
+              <Button
                 key={row.tone}
                 type="button"
+                variant="ghost"
                 onClick={() => toggleToneCard(row.tone)}
                 className={cn(
-                  "min-h-[8.5rem] cursor-pointer rounded-xl border bg-background p-3 text-left transition hover:bg-muted/40",
+                  "h-auto min-h-[8.5rem] w-full cursor-pointer justify-start rounded-xl border border-border bg-background p-3 text-left font-normal shadow-none transition hover:bg-muted/40",
                   isActive ? "border-primary ring-2 ring-primary/30" : "border-border"
                 )}
                 aria-pressed={isActive}
@@ -297,7 +298,7 @@ export default function SubmissionStatus() {
                   Tasks: <span className="font-semibold text-foreground">{row.tasks}</span>
                 </p>
                 <p className="mt-2 text-[11px] font-medium text-primary">Click to filter table</p>
-              </button>
+              </Button>
             )
           })}
         </div>
@@ -307,13 +308,14 @@ export default function SubmissionStatus() {
             Showing proposals in:{" "}
             <span className="font-semibold text-foreground">{statusRows.find((s) => s.tone === toneFilter)?.label}</span>
             .{" "}
-            <button
+            <Button
               type="button"
-              className="font-medium text-primary decoration-primary/60 underline-offset-4 hover:underline"
+              variant="link"
+              className="h-auto p-0 font-medium text-primary decoration-primary/60 underline-offset-4"
               onClick={() => setToneFilter("all")}
             >
               Clear status filter
-            </button>
+            </Button>
           </p>
         )}
 

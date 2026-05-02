@@ -15,8 +15,9 @@ import { resolveActionPlanContext } from "@/lib/actionPlanResolve"
 import {
   type ActionPlanAction,
   type ActionPlanTask,
-  ACH_COLORS,
-  BAR_COLORS,
+  CHART_LABEL_TEXT,
+  CHART_LEGEND_BG,
+  CHART_SEGMENT_FILL,
   aggregateActionAchievementPercent,
   computeObjectiveAchievementPercent,
   flattenTasksFromActions,
@@ -28,6 +29,17 @@ import {
   taskBucket,
   taskStatusPillClass,
 } from "@/routes/actions/actionPlanModel"
+import { ProposedByBlock } from "@/components/proposed-by"
+import { HorizontalPercentFill, HorizontalRatioStack } from "@/components/ratio-bars"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
 
@@ -188,9 +200,9 @@ export default function ActionPlan() {
     const totalTasks = tasks.length
 
     const buckets = {
-      in_progress: { label: "In progress", color: "bg-amber-400", names: [] as string[] },
-      completed: { label: "Completed", color: "bg-emerald-500", names: [] as string[] },
-      not_started: { label: "Not started", color: "bg-slate-300", names: [] as string[] },
+      in_progress: { label: "In progress", color: "bg-muted-foreground", names: [] as string[] },
+      completed: { label: "Completed", color: "bg-primary", names: [] as string[] },
+      not_started: { label: "Not started", color: "bg-muted", names: [] as string[] },
     }
     const order = ["in_progress", "completed", "not_started"] as const
     tasks.forEach((t) => {
@@ -377,16 +389,6 @@ export default function ActionPlan() {
     setTaskEditMode(false)
   }
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return
-      if (actionDetails) setActionDetails(null)
-      else if (taskModal) closeTaskModal()
-    }
-    document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [actionDetails, taskModal])
-
   if (!isValidSection(planSection)) {
     return <Navigate to={isContributorArea ? "/contributor/catalysts/action-plan" : "/catalysts/action-plan"} replace />
   }
@@ -416,21 +418,21 @@ export default function ActionPlan() {
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
-            className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200/70 backdrop-blur-sm sm:hidden sm:text-sm"
+            className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border/70 backdrop-blur-sm sm:hidden sm:text-sm"
           >
-            <Link to={dashboardHref} className="text-orange-600 transition hover:text-orange-700">
+            <Link to={dashboardHref} className="text-primary transition hover:text-primary/90">
               Dashboard
             </Link>
-            <span className="text-slate-300" aria-hidden="true">
+            <span className="text-muted-foreground/50" aria-hidden="true">
               /
             </span>
-            <Link to={sectionHref} className="text-orange-600 transition hover:text-orange-700">
+            <Link to={sectionHref} className="text-primary transition hover:text-primary/90">
               {parentLabel}
             </Link>
-            <span className="text-slate-300" aria-hidden="true">
+            <span className="text-muted-foreground/50" aria-hidden="true">
               /
             </span>
-            <span className="text-slate-800">Action plan</span>
+            <span className="text-foreground">Action plan</span>
           </nav>
           <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Action Plan</p>
           <p className="mt-1 text-sm text-muted-foreground">Plan and track actions, tasks, their resources, and due dates</p>
@@ -440,69 +442,76 @@ export default function ActionPlan() {
           className={cn("mb-8 max-w-full min-w-0 overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/40", shadowLift)}
           aria-labelledby="action-plan-glance-heading"
         >
-          <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-5 py-4 sm:px-6">
+          <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-border bg-primary px-5 py-4 sm:px-6">
             <div
               className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2760%27%20height%3D%2760%27%20viewBox%3D%270%200%2060%2060%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cg%20fill%3D%27none%27%20fill-rule%3D%27evenodd%27%3E%3Cg%20fill%3D%27%23ffffff%27%20fill-opacity%3D%270.06%27%3E%3Cpath%20d%3D%27M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%27%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-90"
               aria-hidden="true"
             />
             <div className="relative">
-              <h2 id="action-plan-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
+              <h2 id="action-plan-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/80">
                 Plan Overview
               </h2>
-              <p className="mt-1 text-sm font-semibold text-white">Actions and tasks execution progress and achievement rates</p>
+              <p className="mt-1 text-sm font-semibold text-primary-foreground">Actions and tasks execution progress and achievement rates</p>
             </div>
             <div className="relative flex flex-wrap gap-2">
-              <span className="rounded-md bg-black/20 px-2.5 py-1 text-xs font-bold tabular-nums text-white">
+              <span className="rounded-md bg-primary-foreground/15 px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
                 {actionsData.length === 1 ? "1 action" : `${actionsData.length} actions`}
               </span>
-              <span className="rounded-md bg-black/20 px-2.5 py-1 text-xs font-bold tabular-nums text-white">
+              <span className="rounded-md bg-primary-foreground/15 px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
                 {glance.totalTasks === 1 ? "1 task" : `${glance.totalTasks} tasks`}
               </span>
             </div>
           </div>
-          <div className="grid min-w-0 max-w-full divide-y divide-slate-100 bg-slate-50/50 sm:grid-cols-2 xl:grid-cols-4 xl:divide-x xl:divide-y-0">
+          <div className="grid min-w-0 max-w-full divide-y divide-border bg-muted/50 sm:grid-cols-2 xl:grid-cols-4 xl:divide-x xl:divide-y-0">
             <div className="p-5 sm:p-6 xl:col-span-2" role="group" aria-label="Task status">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Task status</p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Task status</p>
               {glance.totalTasks === 0 ? (
-                <div className="mt-3 flex h-6 min-h-[1.5rem] items-center justify-center rounded-full bg-slate-100 text-[11px] text-slate-500 ring-1 ring-slate-200/80">
+                <div className="mt-3 flex h-6 min-h-[1.5rem] items-center justify-center rounded-full bg-muted text-[11px] text-muted-foreground ring-1 ring-border/80">
                   No tasks
                 </div>
               ) : (
-                <div className="mt-3 flex h-2 overflow-hidden rounded-full ring-1 ring-slate-200/70">
-                  {glance.order.map((key) => {
-                    const n = glance.buckets[key].names.length
-                    if (n === 0) return null
-                    return (
-                      <div
-                        key={key}
-                        className={glance.buckets[key].color}
-                        style={{ width: `${(n / glance.totalTasks) * 100}%` }}
-                        title={`${glance.buckets[key].label}: ${n}`}
-                      />
-                    )
-                  })}
+                <div className="mt-3 h-2 overflow-hidden rounded-full ring-1 ring-border/70">
+                  <HorizontalRatioStack
+                    segments={glance.order
+                      .map((key) => {
+                        const n = glance.buckets[key].names.length
+                        if (n === 0) return null
+                        const fillClass =
+                          key === "in_progress"
+                            ? "fill-muted-foreground"
+                            : key === "completed"
+                              ? "fill-primary"
+                              : "fill-muted"
+                        return {
+                          ratio: n,
+                          className: fillClass,
+                          title: `${glance.buckets[key].label}: ${n}`,
+                        }
+                      })
+                      .filter((x): x is NonNullable<typeof x> => x != null)}
+                  />
                 </div>
               )}
               <div className="mt-4 space-y-4">
                 {glance.totalTasks === 0 ? (
-                  <p className="mt-2 text-[11px] text-slate-500">No tasks in this objective.</p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">No tasks in this objective.</p>
                 ) : (
                   glance.order.map((key) => {
                     const info = glance.buckets[key]
                     if (!info.names.length) return null
                     return (
                       <div key={key}>
-                        <p className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-700">
+                        <p className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-foreground">
                           <span
                             className={cn(
                               "h-2 w-2 shrink-0 rounded-sm",
-                              key === "in_progress" ? "bg-amber-400" : key === "completed" ? "bg-emerald-500" : "bg-slate-300"
+                              key === "in_progress" ? "bg-muted-foreground" : key === "completed" ? "bg-primary" : "bg-muted"
                             )}
                           />
                           {info.label}{" "}
-                          <span className="font-normal text-slate-500">({info.names.length})</span>
+                          <span className="font-normal text-muted-foreground">({info.names.length})</span>
                         </p>
-                        <ul className="mt-1.5 list-none space-y-1 pl-4 text-[11px] leading-snug text-slate-600">
+                        <ul className="mt-1.5 list-none space-y-1 pl-4 text-[11px] leading-snug text-muted-foreground">
                           {info.names.map((name) => (
                             <li key={name}>· {name}</li>
                           ))}
@@ -514,19 +523,21 @@ export default function ActionPlan() {
               </div>
             </div>
             <div className="p-5 sm:p-6" role="group" aria-label="Total achievement">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Total achievement</p>
-              <p className="mt-2 text-4xl font-bold tabular-nums text-emerald-700">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Total achievement</p>
+              <p className="mt-2 text-4xl font-bold tabular-nums text-foreground">
                 {glance.objAch != null ? `${glance.objAch}%` : "—"}
               </p>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all"
-                  style={{ width: `${glance.objAch != null ? Math.min(100, Math.max(0, glance.objAch)) : 0}%` }}
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                <HorizontalPercentFill
+                  percent={glance.objAch != null ? Math.min(100, Math.max(0, glance.objAch)) : 0}
+                  fillClassName="fill-primary"
+                  trackClassName="fill-muted"
+                  className="h-full"
                 />
               </div>
               <div className="mt-4 min-w-0">
                 {glance.objAch == null ? (
-                  <p className="text-xs text-slate-500">—</p>
+                  <p className="text-xs text-muted-foreground">—</p>
                 ) : (
                   <div className="space-y-2.5">
                     {actionsData.map((action, idx) => {
@@ -536,29 +547,28 @@ export default function ActionPlan() {
                       return (
                         <div
                           key={`${action.title}-${idx}`}
-                          className="rounded-xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/50 to-white p-2.5 ring-1 ring-emerald-100/40"
+                          className="rounded-xl border border-border bg-gradient-to-br from-muted/50 to-card p-2.5 ring-1 ring-border/40"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-1.5 gap-y-0">
                             <div className="min-w-0 flex-1">
-                              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-800/70">
+                              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                                 Action {idx + 1}
                               </p>
-                              <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-slate-800">
+                              <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-foreground">
                                 {action.title || "Untitled"}
                               </p>
                             </div>
-                            <p className="shrink-0 text-right text-sm font-bold tabular-nums text-emerald-700">
+                            <p className="shrink-0 text-right text-sm font-bold tabular-nums text-foreground">
                               {achStr || "—"}
                             </p>
                           </div>
                           <div className="mt-2 flex items-center gap-2">
-                            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-200/90">
-                              <div
-                                className="h-full rounded-full transition-all"
-                                style={{
-                                  width: `${achNum != null ? Math.min(100, Math.max(0, achNum)) : 0}%`,
-                                  backgroundColor: ACH_COLORS[idx % ACH_COLORS.length],
-                                }}
+                            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted/80">
+                              <HorizontalPercentFill
+                                percent={achNum != null ? Math.min(100, Math.max(0, achNum)) : 0}
+                                fillClassName={CHART_SEGMENT_FILL[idx % CHART_SEGMENT_FILL.length]}
+                                trackClassName="fill-muted/80"
+                                className="h-full"
                               />
                             </div>
                           </div>
@@ -570,41 +580,41 @@ export default function ActionPlan() {
               </div>
             </div>
             <div className="p-5 sm:p-6" role="group" aria-label="Schedule">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">About to start</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">About to start</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-foreground">
                 {glance.firstStartIso ? formatDate(glance.firstStartIso) : "—"}
               </p>
               <div className="mt-1.5 space-y-1">
                 {glance.tasksOnFirstStart.length === 0 ? (
-                  <p className="text-sm font-medium text-slate-500">—</p>
+                  <p className="text-sm font-medium text-muted-foreground">—</p>
                 ) : (
                   glance.tasksOnFirstStart.map((r) => (
-                    <p key={r.name} className="text-sm font-semibold leading-snug text-slate-800">
+                    <p key={r.name} className="text-sm font-semibold leading-snug text-foreground">
                       {r.name}
                     </p>
                   ))
                 )}
               </div>
-              <p className="mt-1 text-xs text-slate-600">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {glance.startRowsLength === 0
                   ? "No open tasks with a start date on or after today."
                   : glance.tasksOnFirstStart.length === 1
                     ? "Next start date · 1 task"
                     : `Next start date · ${glance.tasksOnFirstStart.length} tasks`}
               </p>
-              <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-slate-500">About to end</p>
+              <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">About to end</p>
               <div className="mt-1 space-y-1.5">
                 {glance.openEnding.length === 0 ? (
-                  <p className="text-[11px] font-medium text-slate-500">—</p>
+                  <p className="text-[11px] font-medium text-muted-foreground">—</p>
                 ) : (
                   glance.openEnding.slice(0, 6).map((x) => (
-                    <p key={x.name + x.iso} className="text-[11px] font-medium leading-snug text-slate-700">
+                    <p key={x.name + x.iso} className="text-[11px] font-medium leading-snug text-foreground">
                       {x.name} · ends {formatDate(x.iso || "")}
                     </p>
                   ))
                 )}
                 {glance.openEnding.length > 6 ? (
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-[10px] text-muted-foreground">
                     and {glance.openEnding.length - 6} more open task(s) with end dates…
                   </p>
                 ) : null}
@@ -612,7 +622,7 @@ export default function ActionPlan() {
               <p
                 className={cn(
                   "mt-3 font-mono text-[11px] font-semibold",
-                  glance.overdueCount === 0 ? "text-slate-600" : "text-amber-800"
+                  glance.overdueCount === 0 ? "text-muted-foreground" : "text-destructive"
                 )}
               >
                 {glance.overdueCount === 0
@@ -623,13 +633,13 @@ export default function ActionPlan() {
               </p>
             </div>
             <div
-              className="border-t border-slate-100 bg-gradient-to-b from-white to-slate-50/40 px-4 py-3 sm:px-5 sm:py-4 sm:col-span-2 xl:col-span-4 xl:border-t xl:border-slate-100"
+              className="border-t border-border bg-gradient-to-b from-background to-muted/40 px-4 py-3 sm:px-5 sm:py-4 sm:col-span-2 xl:col-span-4 xl:border-t xl:border-border"
               role="group"
               aria-label="Action weight distribution"
             >
               <div className="flex flex-wrap items-end justify-between gap-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Action weight balance</p>
-                <p className="text-[11px] font-medium tabular-nums text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Action weight balance</p>
+                <p className="text-[11px] font-medium tabular-nums text-muted-foreground">
                   {actionsData.length > 0
                     ? (() => {
                         const rounded = Math.round(glance.weightSumParsed * 10) / 10
@@ -641,49 +651,37 @@ export default function ActionPlan() {
               {actionsData.length > 0 ? (
                 <>
                   <div
-                    className="mt-2 flex h-2 w-full min-w-0 overflow-hidden rounded-full bg-slate-200/90 shadow-inner ring-1 ring-slate-200/80"
+                    className="mt-2 h-2 w-full min-w-0 overflow-hidden rounded-full bg-muted/80 shadow-inner ring-1 ring-border/80"
                     role="img"
                     aria-hidden="true"
                   >
-                    {glance.weightSegs.map((w, idx, arr) => {
-                      const scale = glance.weightSumParsed > 0 ? glance.weightSumParsed : 0
-                      const flexGrow = scale > 0 ? w.pct : 100 / arr.length
-                      return (
-                        <div
-                          key={`${w.i}-${idx}`}
-                          className="min-w-0"
-                          style={{
-                            flex: `${flexGrow} 1 0%`,
-                            backgroundColor: BAR_COLORS[w.i % BAR_COLORS.length],
-                            borderTopLeftRadius: idx === 0 ? 9999 : 0,
-                            borderBottomLeftRadius: idx === 0 ? 9999 : 0,
-                            borderTopRightRadius: idx === arr.length - 1 ? 9999 : 0,
-                            borderBottomRightRadius: idx === arr.length - 1 ? 9999 : 0,
-                          }}
-                          title={`${w.title} — ${w.pct}%`}
-                        />
-                      )
-                    })}
+                    <HorizontalRatioStack
+                      segments={glance.weightSegs.map((w) => ({
+                        ratio: glance.weightSumParsed > 0 ? w.pct : 1,
+                        className: CHART_SEGMENT_FILL[w.i % CHART_SEGMENT_FILL.length],
+                        title: `${w.title} — ${w.pct}%`,
+                      }))}
+                    />
                   </div>
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {glance.weightSegs.map((w, idx) => {
-                      const color = BAR_COLORS[w.i % BAR_COLORS.length]
+                      const bgClass = CHART_LEGEND_BG[w.i % CHART_LEGEND_BG.length]
+                      const textClass = CHART_LABEL_TEXT[w.i % CHART_LABEL_TEXT.length]
                       return (
                         <div
                           key={`leg-${w.i}-${idx}`}
-                          className="flex min-w-0 gap-2 rounded-xl border border-slate-200/80 bg-white p-2 shadow-sm ring-1 ring-slate-100/60"
+                          className="flex min-w-0 gap-2 rounded-xl border border-border/80 bg-card p-2 shadow-sm ring-1 ring-border/60"
                         >
                           <div
-                            className="mt-0.5 h-7 w-1 shrink-0 rounded-full shadow-sm"
-                            style={{ backgroundColor: color }}
+                            className={cn("mt-0.5 h-7 w-1 shrink-0 rounded-full shadow-sm", bgClass)}
                             aria-hidden="true"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                               Action {idx + 1}
                             </p>
-                            <p className="mt-0.5 text-xs font-semibold leading-snug text-slate-900 sm:text-sm">{w.title}</p>
-                            <p className="mt-1 text-base font-bold leading-none tabular-nums" style={{ color }}>
+                            <p className="mt-0.5 text-xs font-semibold leading-snug text-foreground sm:text-sm">{w.title}</p>
+                            <p className={cn("mt-1 text-base font-bold leading-none tabular-nums", textClass)}>
                               {w.pct}%
                             </p>
                           </div>
@@ -698,14 +696,14 @@ export default function ActionPlan() {
         </section>
 
         <div className="w-full min-w-0">
-          <div className={cn("relative overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200/60", shadowLift)} aria-labelledby="ap-heading">
-            <div className="pointer-events-none absolute -right-24 -top-24 h-64 rounded-full bg-orange-300/15 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 rounded-full bg-amber-200/20 blur-3xl" aria-hidden="true" />
-            <div className="relative border-b border-slate-100 bg-gradient-to-r from-slate-50/95 via-white to-orange-50/30 px-6 py-8 sm:px-10 sm:py-10">
+          <div className={cn("relative overflow-hidden rounded-3xl bg-card ring-1 ring-border/60", shadowLift)} aria-labelledby="ap-heading">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 rounded-full bg-muted/30 blur-3xl" aria-hidden="true" />
+            <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-background to-muted/30 px-6 py-8 sm:px-10 sm:py-10">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
                 <div className="flex min-w-0 flex-1 gap-4 sm:gap-5">
                   <div
-                    className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-500/30 sm:flex"
+                    className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg sm:flex"
                     aria-hidden="true"
                   >
                     <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -717,42 +715,49 @@ export default function ActionPlan() {
                     </svg>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-orange-800/60">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       Operational objective
                     </p>
                     <h1
                       id="ap-heading"
-                      className="mt-1.5 text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl lg:text-[1.85rem] lg:leading-snug"
+                      className="mt-1.5 text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl lg:text-[1.85rem] lg:leading-snug"
                     >
                       {headingText}
                     </h1>
-                    <p className="mt-3 max-w-3xl border-l-2 border-orange-300/80 pl-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+                    <p className="mt-3 max-w-3xl border-l-2 border-primary/25 pl-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
                       {objectiveLead}
                     </p>
+                    <ProposedByBlock
+                      name={resolved?.proposedByName}
+                      department={resolved?.proposedByDepartment}
+                      subUnit={resolved?.proposedBySubUnit}
+                      className="mt-3 max-w-3xl pl-4"
+                    />
                   </div>
                 </div>
                 <div className="shrink-0 lg:pt-8">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 lg:text-right">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground lg:text-right">
                     Objective status
                   </p>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     disabled
                     className={statusStyles.btn}
                     aria-label={`Objective status: ${status}`}
                   >
                     <span className={statusStyles.dot} aria-hidden="true" />
                     <span>{status}</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
 
-            <div className="relative bg-gradient-to-b from-slate-50/40 to-white px-6 py-8 sm:px-10 sm:py-10">
-              <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-slate-200/60 bg-white/90 p-5 shadow-sm ring-1 ring-slate-100/80 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="relative bg-gradient-to-b from-muted/40 to-background px-6 py-8 sm:px-10 sm:py-10">
+              <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/90 p-5 shadow-sm ring-1 ring-border/80 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div className="flex min-w-0 flex-1 items-start gap-4">
                   <span
-                    className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-md"
+                    className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md"
                     aria-hidden="true"
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -764,8 +769,8 @@ export default function ActionPlan() {
                     </svg>
                   </span>
                   <div className="min-w-0">
-                    <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Actions &amp; Tasks</h2>
-                    <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-500">
+                    <h2 className="text-lg font-bold text-foreground sm:text-xl">Actions &amp; Tasks</h2>
+                    <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
                       Actions define key initiatives under each objective, and tasks break them down into executable steps with timelines and resources
                     </p>
                   </div>
@@ -773,14 +778,14 @@ export default function ActionPlan() {
                 <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                   <Link
                     to={`${parentPath}/add-action`}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/90 px-4 py-2.5 text-sm font-semibold text-orange-800 shadow-sm transition hover:border-orange-300 hover:bg-orange-100/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/45 focus-visible:ring-offset-2 sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground shadow-sm transition hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 sm:w-auto"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                     Add action
                   </Link>
-                  <div className="rounded-xl bg-slate-100/90 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 ring-1 ring-slate-200/60 sm:text-left">
+                  <div className="rounded-xl bg-muted/90 px-4 py-2.5 text-center text-sm font-semibold text-foreground ring-1 ring-border/60 sm:text-left">
                     {actionsData.length} actions · {totalTaskCount} tasks
                   </div>
                 </div>
@@ -830,31 +835,23 @@ export default function ActionPlan() {
         </div>
       </div>
 
-      {taskModal ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] transition hover:bg-slate-900/55"
-            aria-label="Close task details"
-            onClick={closeTaskModal}
-          />
-          <div className="relative z-10 flex max-h-[min(90vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
-            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-white px-5 py-4 sm:px-6">
-              <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+      <Dialog
+        open={taskModal != null}
+        onOpenChange={(open) => {
+          if (!open) closeTaskModal()
+        }}
+      >
+        {taskModal ? (
+          <DialogContent
+            className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 text-foreground shadow-lg ring-1 ring-border/80 sm:max-w-lg"
+            showCloseButton
+          >
+            <DialogHeader className="shrink-0 gap-0 border-b border-border bg-gradient-to-r from-muted/90 to-background px-5 py-4 text-left sm:px-6">
+              <DialogTitle className="text-base font-bold sm:text-lg">
                 Task {taskModal.taskIndex + 1} · Action {taskModal.actionIndex + 1}
                 {taskModal.action.title ? ` — ${taskModal.action.title}` : ""}
-              </h2>
-              <button
-                type="button"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40"
-                aria-label="Close"
-                onClick={closeTaskModal}
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+              </DialogTitle>
+            </DialogHeader>
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
               {!taskEditMode ? (
                 <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2">
@@ -876,139 +873,189 @@ export default function ActionPlan() {
                 </form>
               )}
             </div>
-            <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-5 py-3 sm:px-6">
+            <div className="shrink-0 border-t border-border bg-muted/80 px-5 py-3 sm:px-6">
               {!taskEditMode ? (
-                <button
+                <Button
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 focus-visible:ring-offset-2 sm:w-auto"
+                  variant="outline"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:w-auto"
                   onClick={() => setTaskEditMode(true)}
                 >
                   Edit details
-                </button>
+                </Button>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     type="button"
-                    className="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-600 hover:to-orange-700 sm:flex-none sm:px-6"
+                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6"
                     onClick={saveTaskEdit}
                   >
                     Save
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 sm:flex-none"
+                    variant="outline"
+                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none"
                     onClick={() => {
                       setTaskEditMode(false)
                     }}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      ) : null}
+          </DialogContent>
+        ) : null}
+      </Dialog>
 
-      {actionDetails ? (
-        <div className="fixed inset-0 z-[105] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] transition hover:bg-slate-900/55"
-            aria-label="Close action details"
-            onClick={() => setActionDetails(null)}
-          />
-          <div className="relative z-10 flex max-h-[min(90vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
-            <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-white px-5 py-4 sm:px-6">
-              <h2 className="text-base font-bold text-slate-900">
+      <Dialog
+        open={actionDetails != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setActionDetails(null)
+            setActionDetailsEditMode(false)
+          }
+        }}
+      >
+        {actionDetails ? (
+          <DialogContent
+            className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 text-foreground shadow-lg ring-1 ring-border/80 sm:max-w-lg"
+            showCloseButton
+          >
+            <DialogHeader className="shrink-0 gap-0 border-b border-border bg-gradient-to-r from-muted/90 to-background px-5 py-4 text-left sm:px-6">
+              <DialogTitle className="text-base font-bold">
                 Action {actionDetails.index + 1} - {actionDetails.action.title || "Untitled action"}
-              </h2>
-              <button
-                type="button"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40"
-                aria-label="Close"
-                onClick={() => setActionDetails(null)}
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+              </DialogTitle>
+            </DialogHeader>
             <form id="action-details-edit-fields" onSubmit={saveActionDetails} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Action title</span>
-                <input
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Action title</span>
+                <Input
                   name="actionTitle"
                   value={actionDetailsDraft.actionTitle}
                   disabled={!actionDetailsEditMode}
                   onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionTitle: e.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
+                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
                 />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Main entity</span>
-                <input name="taskMainEntity" value={actionDetailsDraft.taskMainEntity} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskMainEntity: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Main entity</span>
+                <Input
+                  name="taskMainEntity"
+                  value={actionDetailsDraft.taskMainEntity}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskMainEntity: e.target.value }))}
+                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Supporting entities</span>
-                <input name="taskSupportingEntities" value={actionDetailsDraft.taskSupportingEntities} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskSupportingEntities: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Supporting entities</span>
+                <Input
+                  name="taskSupportingEntities"
+                  value={actionDetailsDraft.taskSupportingEntities}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskSupportingEntities: e.target.value }))}
+                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Human resources required</span>
-                <textarea name="taskHumanResources" rows={3} value={actionDetailsDraft.taskHumanResources} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskHumanResources: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Human resources required</span>
+                <Textarea
+                  name="taskHumanResources"
+                  rows={3}
+                  value={actionDetailsDraft.taskHumanResources}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskHumanResources: e.target.value }))}
+                  className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Financial resources required</span>
-                <textarea name="taskFinancialResources" rows={3} value={actionDetailsDraft.taskFinancialResources} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskFinancialResources: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Financial resources required</span>
+                <Textarea
+                  name="taskFinancialResources"
+                  rows={3}
+                  value={actionDetailsDraft.taskFinancialResources}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskFinancialResources: e.target.value }))}
+                  className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Action contribution percentage</span>
-                <input name="taskActionContributionPercentage" value={actionDetailsDraft.taskActionContributionPercentage} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskActionContributionPercentage: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Action contribution percentage</span>
+                <Input
+                  name="taskActionContributionPercentage"
+                  value={actionDetailsDraft.taskActionContributionPercentage}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskActionContributionPercentage: e.target.value }))}
+                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status</span>
-                <input name="taskStatus" value={actionDetailsDraft.taskStatus} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskStatus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Status</span>
+                <Input
+                  name="taskStatus"
+                  value={actionDetailsDraft.taskStatus}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskStatus: e.target.value }))}
+                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Action proposal status</span>
-                <input name="actionProposalStatus" value={actionDetailsDraft.actionProposalStatus} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionProposalStatus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Action proposal status</span>
+                <Input
+                  name="actionProposalStatus"
+                  value={actionDetailsDraft.actionProposalStatus}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionProposalStatus: e.target.value }))}
+                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                />
               </label>
               <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Notes</span>
-                <textarea name="taskNotes" rows={3} value={actionDetailsDraft.taskNotes} disabled={!actionDetailsEditMode} onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskNotes: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25" />
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Notes</span>
+                <Textarea
+                  name="taskNotes"
+                  rows={3}
+                  value={actionDetailsDraft.taskNotes}
+                  disabled={!actionDetailsEditMode}
+                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskNotes: e.target.value }))}
+                  className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
+                />
               </label>
             </form>
-            <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-5 py-3 sm:px-6">
+            <div className="shrink-0 border-t border-border bg-muted/80 px-5 py-3 sm:px-6">
               {!actionDetailsEditMode ? (
-                <button
+                <Button
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 focus-visible:ring-offset-2 sm:w-auto"
+                  variant="outline"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:w-auto"
                   onClick={() => setActionDetailsEditMode(true)}
                 >
                   Edit details
-                </button>
+                </Button>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     type="submit"
                     form="action-details-edit-fields"
-                    className="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition hover:from-orange-600 hover:to-orange-700 sm:flex-none sm:px-6"
+                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6"
                   >
                     Save
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 sm:flex-none"
+                    variant="outline"
+                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none"
                     onClick={() => setActionDetailsEditMode(false)}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      ) : null}
+          </DialogContent>
+        ) : null}
+      </Dialog>
     </div>
   )
 }
@@ -1021,20 +1068,20 @@ function TaskEditFields({ task }: { task: ActionPlanTask }) {
     multiline?: boolean
   ) => (
     <label key={name} className={cn("block", wide && "sm:col-span-2")}>
-      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
+      <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
       {multiline ? (
-        <textarea
+        <Textarea
           name={name}
           rows={3}
           defaultValue={task[name] as string}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
+          className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
         />
       ) : (
-        <input
+        <Input
           name={name}
           type="text"
           defaultValue={task[name] as string}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25"
+          className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
         />
       )}
     </label>
@@ -1101,84 +1148,91 @@ function ActionCard({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.03)] ring-1 ring-slate-200/50 backdrop-blur-sm transition duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]"
+        "relative overflow-hidden rounded-2xl border border-border/80 bg-card/80 shadow-md ring-1 ring-border/50 backdrop-blur-sm transition duration-300 hover:shadow-lg"
       )}
       aria-labelledby={`ap-action-${actionIndex}`}
     >
-      <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-400 to-amber-500" aria-hidden="true" />
+      <div className="absolute left-0 top-0 h-full w-1 bg-primary" aria-hidden="true" />
       <div className="pl-3 sm:pl-4">
-      <div className="flex flex-col items-start gap-3 border-b border-orange-100/60 bg-gradient-to-b from-orange-50/45 via-white to-white px-4 py-4 sm:gap-4 sm:px-6">
+      <div className="flex flex-col items-start gap-3 border-b border-border bg-gradient-to-b from-muted/45 via-background to-background px-4 py-4 sm:gap-4 sm:px-6">
         <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-start">
           <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-md"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md"
             aria-hidden="true"
           >
             {actionIndex + 1}
           </span>
           <div className="min-w-0 w-full">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800/55">Action</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Action</p>
             <div className="mt-0.5 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
-              <h2 id={`ap-action-${actionIndex}`} className="min-w-0 flex-1 text-base font-bold leading-snug text-slate-900 sm:text-lg">
+              <h2 id={`ap-action-${actionIndex}`} className="min-w-0 flex-1 text-base font-bold leading-snug text-foreground sm:text-lg">
                 {action.title || "Untitled action"}
               </h2>
               <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-stretch lg:justify-end lg:gap-2">
-                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-sky-200/90 bg-gradient-to-b from-sky-50/90 to-white px-3 py-2 text-xs shadow-sm ring-1 ring-sky-100/70 lg:w-auto lg:py-1.5 lg:text-sm">
-                  <span className="font-semibold text-sky-800/70">Total weight</span>
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-border bg-gradient-to-b from-muted/90 to-background px-3 py-2 text-xs shadow-sm ring-1 ring-border/70 lg:w-auto lg:py-1.5 lg:text-sm">
+                  <span className="font-semibold text-muted-foreground">Total weight</span>
                   {editingMetric === "weight" ? (
                     <>
-                      <input
+                      <Input
                         value={metricDraft.weight}
                         onChange={(e) => setMetricDraft((d) => ({ ...d, weight: e.target.value }))}
-                        className="h-7 w-24 rounded border border-sky-200 bg-white px-2 text-xs text-slate-900 outline-none ring-1 ring-transparent focus:border-sky-400 focus:ring-sky-200"
+                        className="h-7 w-24 px-2 text-xs"
                       />
-                      <button type="button" onClick={() => saveMetric("weight")} className="rounded p-1 text-sky-700 hover:bg-sky-100" aria-label="Save total weight edit">
+                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => saveMetric("weight")} aria-label="Save total weight edit">
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.415l-7.37 7.37a1 1 0 01-1.414 0L3.296 9.45a1 1 0 111.415-1.414l3.916 3.915 6.662-6.66a1 1 0 011.415 0z" clipRule="evenodd" /></svg>
-                      </button>
-                      <button type="button" onClick={() => setEditingMetric(null)} className="rounded p-1 text-sky-700 hover:bg-sky-100" aria-label="Cancel total weight edit">
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric(null)} aria-label="Cancel total weight edit">
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                      </button>
+                      </Button>
                     </>
                   ) : (
                     <>
-                      <span className="font-bold tabular-nums text-sky-700">{weightDisplay}</span>
-                      <button type="button" onClick={() => setEditingMetric("weight")} className="rounded p-1 text-sky-700 hover:bg-sky-100" aria-label="Edit total weight">
+                      <span className="font-bold tabular-nums text-foreground">{weightDisplay}</span>
+                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric("weight")} aria-label="Edit total weight">
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>
-                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-emerald-200/90 bg-gradient-to-b from-emerald-50/90 to-white px-3 py-2 text-xs shadow-sm ring-1 ring-emerald-100/70 lg:w-auto lg:py-1.5 lg:text-sm">
-                  <span className="font-semibold text-emerald-800/70">Total achievement</span>
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-border bg-gradient-to-b from-muted/90 to-background px-3 py-2 text-xs shadow-sm ring-1 ring-border/70 lg:w-auto lg:py-1.5 lg:text-sm">
+                  <span className="font-semibold text-muted-foreground">Total achievement</span>
                   {editingMetric === "achievement" ? (
                     <>
-                      <input
+                      <Input
                         value={metricDraft.achievement}
                         onChange={(e) => setMetricDraft((d) => ({ ...d, achievement: e.target.value }))}
-                        className="h-7 w-24 rounded border border-emerald-200 bg-white px-2 text-xs text-slate-900 outline-none ring-1 ring-transparent focus:border-emerald-400 focus:ring-emerald-200"
+                        className="h-7 w-24 px-2 text-xs"
                       />
-                      <button type="button" onClick={() => saveMetric("achievement")} className="rounded p-1 text-emerald-700 hover:bg-emerald-100" aria-label="Save total achievement edit">
+                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => saveMetric("achievement")} aria-label="Save total achievement edit">
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.415l-7.37 7.37a1 1 0 01-1.414 0L3.296 9.45a1 1 0 111.415-1.414l3.916 3.915 6.662-6.66a1 1 0 011.415 0z" clipRule="evenodd" /></svg>
-                      </button>
-                      <button type="button" onClick={() => setEditingMetric(null)} className="rounded p-1 text-emerald-700 hover:bg-emerald-100" aria-label="Cancel total achievement edit">
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric(null)} aria-label="Cancel total achievement edit">
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                      </button>
+                      </Button>
                     </>
                   ) : (
                     <>
-                      <span className="font-bold tabular-nums text-emerald-700">{achievementDisplay}</span>
-                      <button type="button" onClick={() => setEditingMetric("achievement")} className="rounded p-1 text-emerald-700 hover:bg-emerald-100" aria-label="Edit total achievement">
+                      <span className="font-bold tabular-nums text-foreground">{achievementDisplay}</span>
+                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric("achievement")} aria-label="Edit total achievement">
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>
               </div>
             </div>
-            <p className="mt-1 text-xs font-medium text-slate-500">
+            <ProposedByBlock
+              density="compact"
+              name={action.proposedByName}
+              department={action.proposedByDepartment}
+              subUnit={action.proposedBySubUnit}
+              className="mt-2"
+            />
+            <p className="mt-1 text-xs font-medium text-muted-foreground">
               {tasks.length === 1 ? "1 task" : `${tasks.length} tasks`}
             </p>
             <div className="mt-2 flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Action Proposal status
               </span>
               <div className="min-w-0 flex-1">
@@ -1186,61 +1240,49 @@ function ActionCard({
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 sm:text-sm"
-                onClick={onViewActionDetails}
-              >
+              <Button type="button" variant="outline" className="rounded-xl px-3 py-2 text-xs font-semibold shadow-sm sm:text-sm" onClick={onViewActionDetails}>
                 View details
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-orange-200 bg-orange-50/90 px-3 py-2 text-xs font-semibold text-orange-800 shadow-sm transition hover:border-orange-300 hover:bg-orange-100/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 sm:text-sm"
-                onClick={onAddTask}
-              >
+              </Button>
+              <Button type="button" variant="secondary" className="rounded-xl px-3 py-2 text-xs font-semibold shadow-sm sm:text-sm" onClick={onAddTask}>
                 Add task
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/80 px-3 py-2 text-xs font-semibold text-rose-800 shadow-sm transition hover:border-rose-300 hover:bg-rose-100/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 sm:text-sm"
-                onClick={onDeleteAction}
-              >
+              </Button>
+              <Button type="button" variant="destructive" className="rounded-xl px-3 py-2 text-xs font-semibold shadow-sm sm:text-sm" onClick={onDeleteAction}>
                 Delete action
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-3 bg-slate-50/20 p-3 lg:grid-cols-2 lg:gap-4 lg:items-start lg:p-4">
+      <div className="grid grid-cols-1 gap-3 bg-muted/20 p-3 lg:grid-cols-2 lg:gap-4 lg:items-start lg:p-4">
         {!tasks.length ? (
-          <p className="col-span-full rounded-xl border border-dashed border-slate-200/80 bg-white/80 px-4 py-8 text-center text-sm text-slate-500 ring-1 ring-slate-100/60">
+          <p className="col-span-full rounded-xl border border-dashed border-border/80 bg-card/80 px-4 py-8 text-center text-sm text-muted-foreground ring-1 ring-border/60">
             No tasks under this action yet.
           </p>
         ) : (
           tasks.map((task, taskIndex) => (
             <article
               key={`${task.name}-${taskIndex}`}
-              className="group flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/65 bg-white shadow-sm ring-1 ring-slate-100/45 transition duration-300 hover:border-orange-200/50 hover:shadow-md"
+              className="group flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-border/45 transition duration-300 hover:border-primary/30 hover:shadow-md"
             >
               <div className="flex items-start gap-3 px-3 pb-1 pt-3 sm:gap-3 sm:px-4 sm:pt-4">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 text-sm font-bold text-white shadow-md shadow-orange-500/25"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md"
                     aria-hidden="true"
                   >
                     {taskIndex + 1}
                   </span>
                   <div className="min-w-0 flex-1 pt-0.5">
-                    <p className="text-[11px] font-bold text-slate-600">Task {taskIndex + 1}</p>
-                    <h3 className="mt-0.5 line-clamp-2 text-sm font-bold text-slate-900 sm:text-base">
+                    <p className="text-[11px] font-bold text-muted-foreground">Task {taskIndex + 1}</p>
+                    <h3 className="mt-0.5 line-clamp-2 text-sm font-bold text-foreground sm:text-base">
                       {task.name || "—"}
                     </h3>
                   </div>
                 </div>
               </div>
-              <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-slate-100 bg-gradient-to-br from-slate-50/95 via-white to-orange-50/25 px-3 py-3 sm:mt-3 sm:px-4 sm:py-3.5">
+              <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-border bg-gradient-to-br from-muted/95 via-background to-muted/25 px-3 py-3 sm:mt-3 sm:px-4 sm:py-3.5">
                 <div className="flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                  <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                  <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                     Task Proposal status
                   </span>
                   <div className="min-w-0 flex-1">
@@ -1248,20 +1290,22 @@ function ActionCard({
                   </div>
                 </div>
                 <div className="grid min-w-0 w-full grid-cols-1 gap-2 sm:grid-cols-2">
-                  <button
+                  <Button
                     type="button"
-                    className="inline-flex min-h-[2.5rem] w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40 focus-visible:ring-offset-2"
+                    variant="outline"
+                    className="min-h-[2.5rem] w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2"
                     onClick={() => onOpenTask(task, taskIndex)}
                   >
                     View details
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="inline-flex min-h-[2.5rem] w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50/80 px-4 py-2.5 text-sm font-semibold text-rose-800 shadow-sm transition hover:border-rose-300 hover:bg-rose-100/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 focus-visible:ring-offset-2"
+                    variant="destructive"
+                    className="min-h-[2.5rem] w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2"
                     onClick={() => onDeleteTask(taskIndex)}
                   >
                     Delete task
-                  </button>
+                  </Button>
                 </div>
               </div>
             </article>
