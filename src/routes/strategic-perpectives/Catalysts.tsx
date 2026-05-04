@@ -12,10 +12,12 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { XIcon } from "lucide-react"
 import { HorizontalRatioStack } from "@/components/ratio-bars"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -494,7 +496,7 @@ export default function Catalysts() {
   const [currentSubIndex, setCurrentSubIndex] = useState(0)
   const [selectedObjectiveIndex, setSelectedObjectiveIndex] = useState<number | null>(null)
   const [isObjectiveModalOpen, setIsObjectiveModalOpen] = useState(false)
-  const [isObjectiveEditing, setIsObjectiveEditing] = useState(false)
+  const [editingObjectiveField, setEditingObjectiveField] = useState<ObjectiveField | null>(null)
   const [objectiveDraft, setObjectiveDraft] = useState<Record<ObjectiveField, string>>({
     regulatoryEntity: "",
     objective: "",
@@ -586,7 +588,7 @@ export default function Catalysts() {
     if (selectedObjectiveIndex === objectiveIndex) {
       setSelectedObjectiveIndex(null)
       setIsObjectiveModalOpen(false)
-      setIsObjectiveEditing(false)
+      setEditingObjectiveField(null)
     }
   }
 
@@ -603,7 +605,7 @@ export default function Catalysts() {
       indicatorOwnerWithinEntity: objective.indicatorOwnerWithinEntity,
       targetValue: objective.targetValue,
     })
-    setIsObjectiveEditing(false)
+    setEditingObjectiveField(null)
     setIsObjectiveModalOpen(true)
   }
 
@@ -627,7 +629,24 @@ export default function Catalysts() {
       return updated
     })
 
-    setIsObjectiveEditing(false)
+    setEditingObjectiveField(null)
+  }
+
+  const cancelObjectiveFieldEdit = (field: ObjectiveField) => {
+    if (!selectedObjective) return
+    setObjectiveDraft((prev) => ({ ...prev, [field]: selectedObjective[field] }))
+    setEditingObjectiveField(null)
+  }
+
+  const startEditObjectiveField = (field: ObjectiveField) => {
+    if (editingObjectiveField === field) {
+      cancelObjectiveFieldEdit(field)
+      return
+    }
+    if (editingObjectiveField) {
+      cancelObjectiveFieldEdit(editingObjectiveField)
+    }
+    setEditingObjectiveField(field)
   }
 
   return (
@@ -860,8 +879,9 @@ export default function Catalysts() {
                             <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Achievement rate</p>
                             <Button
                               type="button"
+                              variant="outline"
                               onClick={() => openAchievementEditor("sub")}
-                              className="shrink-0 rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-semibold text-primary shadow-sm transition hover:border-border hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                              className="h-auto shrink-0 rounded-lg border-border bg-card px-2.5 py-1 text-xs font-semibold text-primary shadow-sm focus-visible:ring-2 focus-visible:ring-ring/40"
                             >
                               Edit achievement
                             </Button>
@@ -898,7 +918,7 @@ export default function Catalysts() {
                   {activeSub ? (
                     <section className="relative mt-8 overflow-hidden rounded-2xl border border-border bg-card/90 p-5 shadow-md ring-1 ring-border/50 backdrop-blur-sm sm:p-6">
                       <div
-                        className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-chart-3"
+                        className="absolute left-0 top-0 h-full w-1 bg-orange-500"
                         aria-hidden="true"
                       />
                       <div className="pl-3 sm:pl-4">
@@ -1006,7 +1026,7 @@ export default function Catalysts() {
                                           type="button"
                                           variant="outline"
                                           onClick={() => openObjectiveDetails(index)}
-                                          className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                                          className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
                                         >
                                           View details
                                         </Button>
@@ -1014,7 +1034,7 @@ export default function Catalysts() {
                                           type="button"
                                           variant="destructive"
                                           onClick={() => deleteObjective(index)}
-                                          className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                                          className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
                                         >
                                           Delete objective
                                         </Button>
@@ -1060,24 +1080,77 @@ export default function Catalysts() {
         open={isObjectiveModalOpen && selectedObjective != null}
         onOpenChange={(open) => {
           setIsObjectiveModalOpen(open)
-          if (!open) setIsObjectiveEditing(false)
+          if (!open) setEditingObjectiveField(null)
         }}
       >
         {selectedObjective ? (
         <DialogContent
-          className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 ring-1 ring-border/80 sm:max-w-lg"
-          showCloseButton
+          className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl bg-white p-0 text-zinc-950 ring-1 ring-border/80 sm:max-w-lg dark:bg-white dark:text-zinc-950"
+          showCloseButton={false}
         >
-          <DialogHeader className="shrink-0 gap-0 border-b border-border bg-gradient-to-r from-muted/90 to-background px-5 py-4 text-left sm:px-6">
-            <DialogTitle className="text-base font-bold sm:text-lg">Objective details</DialogTitle>
-          </DialogHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
-              {isObjectiveEditing ? (
-                <div className="space-y-3">
-                  {objectiveFieldConfigs.map(({ field, label, multiline }) => (
-                    <label className="block" key={field}>
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
-                      {multiline ? (
+          <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+            <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between gap-3 border-b border-border bg-white px-5 py-4 text-left sm:px-6">
+              <DialogTitle className="min-w-0 flex-1 text-base font-bold sm:text-lg">Objective details</DialogTitle>
+              <DialogClose
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                    aria-label="Close"
+                  />
+                }
+              >
+                <XIcon className="size-4" />
+                <span className="sr-only">Close</span>
+              </DialogClose>
+            </DialogHeader>
+            <div className="space-y-2.5 px-5 py-4 sm:space-y-3 sm:px-6 sm:py-5">
+              {objectiveFieldConfigs.map(({ field, label, multiline }) => {
+                const isEditing = editingObjectiveField === field
+                const displayValue = selectedObjective[field]?.trim() ? selectedObjective[field] : "—"
+                return (
+                  <div
+                    key={field}
+                    className="rounded-xl border border-border/80 bg-white px-3 py-2.5 shadow-md ring-1 ring-border/25 sm:px-4"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="min-w-0 flex-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
+                      {isEditing ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => cancelObjectiveFieldEdit(field)}
+                          aria-label={`Cancel editing ${label}`}
+                          className="shrink-0 text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        >
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => startEditObjectiveField(field)}
+                          aria-label={`Edit ${label}`}
+                          className="shrink-0 text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        >
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                            <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" />
+                          </svg>
+                        </Button>
+                      )}
+                    </div>
+                    {isEditing ? (
+                      multiline ? (
                         <Textarea
                           rows={3}
                           value={objectiveDraft[field]}
@@ -1087,7 +1160,7 @@ export default function Catalysts() {
                               [field]: event.target.value,
                             }))
                           }
-                          className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
+                          className="mt-2 min-h-[4.5rem] w-full text-sm shadow-sm"
                         />
                       ) : (
                         <Input
@@ -1099,49 +1172,38 @@ export default function Catalysts() {
                               [field]: event.target.value,
                             }))
                           }
-                          className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                          className="mt-2 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
                         />
-                      )}
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2.5 sm:space-y-3">
-                  {[
-                    ["Regulatory entity", selectedObjective.regulatoryEntity],
-                    ["Operational objective", selectedObjective.objective],
-                    ["objective execution Indicator", selectedObjective.objectiveExecutionIndicator],
-                    ["execution Indicator description", selectedObjective.executionIndicatorDescription],
-                    ["Indicator owner within the entity", selectedObjective.indicatorOwnerWithinEntity],
-                    ["Target value", selectedObjective.targetValue],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="rounded-xl border border-border bg-muted/80 px-3 py-2.5 transition hover:border-border hover:bg-card sm:px-4"
-                    >
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
-                      <div className="mt-1 text-sm leading-relaxed text-foreground">{value || "-"}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      )
+                    ) : (
+                      <div className="mt-1 text-sm leading-relaxed text-foreground">{displayValue}</div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-            <div className="shrink-0 border-t border-border bg-muted/80 px-5 py-3 sm:px-6">
-              {isObjectiveEditing ? (
-                <div className="flex flex-wrap gap-2">
-                  <Button type="button" onClick={saveObjectiveDetails} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6">
-                    Save
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsObjectiveEditing(false)} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none">
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button type="button" variant="outline" onClick={() => setIsObjectiveEditing(true)} className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:w-auto">
-                  Edit details
-                </Button>
-              )}
+          </div>
+          <div className="shrink-0 border-t border-border bg-white px-5 py-3 sm:px-6">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={saveObjectiveDetails}
+                className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+              >
+                Save
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (editingObjectiveField !== null) cancelObjectiveFieldEdit(editingObjectiveField)
+                }}
+                className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+              >
+                Cancel
+              </Button>
             </div>
+          </div>
         </DialogContent>
         ) : null}
       </Dialog>
@@ -1152,7 +1214,7 @@ export default function Catalysts() {
           showCloseButton
         >
           <DialogHeader className="shrink-0 gap-0 border-b border-border px-5 py-4 text-left sm:px-6">
-            <DialogTitle>Edit achievement rate</DialogTitle>
+            <DialogTitle className="font-bold">Edit achievement rate</DialogTitle>
           </DialogHeader>
             <form
               className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-4 sm:px-6 sm:py-5"

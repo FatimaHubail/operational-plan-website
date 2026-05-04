@@ -12,10 +12,12 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { XIcon } from "lucide-react"
 import { HorizontalRatioStack } from "@/components/ratio-bars"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -231,7 +233,7 @@ export default function Beneficiary() {
   const [currentSubIndex, setCurrentSubIndex] = useState(0)
   const [selectedObjectiveIndex, setSelectedObjectiveIndex] = useState<number | null>(null)
   const [isObjectiveModalOpen, setIsObjectiveModalOpen] = useState(false)
-  const [isObjectiveEditing, setIsObjectiveEditing] = useState(false)
+  const [editingObjectiveField, setEditingObjectiveField] = useState<ObjectiveField | null>(null)
   const [objectiveDraft, setObjectiveDraft] = useState<Record<ObjectiveField, string>>({
     regulatoryEntity: "",
     objective: "",
@@ -323,7 +325,7 @@ export default function Beneficiary() {
     if (selectedObjectiveIndex === objectiveIndex) {
       setSelectedObjectiveIndex(null)
       setIsObjectiveModalOpen(false)
-      setIsObjectiveEditing(false)
+      setEditingObjectiveField(null)
     }
   }
 
@@ -340,7 +342,7 @@ export default function Beneficiary() {
       indicatorOwnerWithinEntity: objective.indicatorOwnerWithinEntity,
       targetValue: objective.targetValue,
     })
-    setIsObjectiveEditing(false)
+    setEditingObjectiveField(null)
     setIsObjectiveModalOpen(true)
   }
 
@@ -364,7 +366,24 @@ export default function Beneficiary() {
       return updated
     })
 
-    setIsObjectiveEditing(false)
+    setEditingObjectiveField(null)
+  }
+
+  const cancelObjectiveFieldEdit = (field: ObjectiveField) => {
+    if (!selectedObjective) return
+    setObjectiveDraft((prev) => ({ ...prev, [field]: selectedObjective[field] }))
+    setEditingObjectiveField(null)
+  }
+
+  const startEditObjectiveField = (field: ObjectiveField) => {
+    if (editingObjectiveField === field) {
+      cancelObjectiveFieldEdit(field)
+      return
+    }
+    if (editingObjectiveField) {
+      cancelObjectiveFieldEdit(editingObjectiveField)
+    }
+    setEditingObjectiveField(field)
   }
 
   return (
@@ -384,11 +403,11 @@ export default function Beneficiary() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg shadow-primary/30"
               aria-hidden="true"
             >
               <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -401,32 +420,30 @@ export default function Beneficiary() {
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Beneficiary</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Impact measurement and inclusive beneficiary engagement
+              </p>
             </div>
           </div>
         </header>
 
         <section
-          className="mb-8 overflow-hidden rounded-3xl border border-border/80 bg-primary shadow-lg ring-1 ring-primary/10"
+          className="mb-8 overflow-hidden rounded-3xl border border-border bg-card shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-border/60"
           aria-labelledby="beneficiaries-glance-heading"
         >
-          <div className="relative flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-primary via-primary to-primary px-5 py-4 sm:px-6">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-foreground/10 via-transparent to-transparent" aria-hidden="true" />
+          <div className="relative flex flex-wrap items-center justify-between gap-4 bg-sidebar px-5 py-4 sm:px-6">
+            <div
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/15 via-transparent to-transparent"
+              aria-hidden="true"
+            />
             <div className="relative">
-              <h2 id="beneficiaries-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/90">
+              <h2 id="beneficiaries-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
                 Overview
               </h2>
-              <p className="mt-1 text-sm font-semibold text-primary-foreground">Beneficiary layer - 2026 operational plan</p>
-            </div>
-            <div className="relative flex flex-wrap items-center gap-3">
-              <time
-                className="rounded-lg bg-primary-foreground/15 px-3 py-1.5 text-xs font-semibold tabular-nums text-primary-foreground ring-1 ring-primary-foreground/30"
-                dateTime="2026-03-28"
-              >
-                28 Mar 2026
-              </time>
+              <p className="mt-1 text-sm font-semibold text-sidebar-foreground">Beneficiary layer · 2026 operational plan</p>
             </div>
           </div>
-          <div className="grid divide-y divide-border/80 bg-gradient-to-b from-muted to-background sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+          <div className="grid divide-y divide-border bg-gradient-to-b from-muted/90 to-card sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
             <div className="p-5 sm:p-6" role="group" aria-label="Beneficiary coverage">
               <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Beneficiary groups modeled</p>
               <p className="mt-2 flex items-baseline gap-2">
@@ -434,7 +451,7 @@ export default function Beneficiary() {
                 <span className="text-sm font-medium text-muted-foreground">B1</span>
               </p>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full w-full rounded-full bg-gradient-to-r from-primary to-primary" />
+                <div className="h-full w-full rounded-full bg-gradient-to-r from-primary to-chart-3" />
               </div>
               <p className="mt-2 text-[11px] font-medium text-muted-foreground">Model coverage 100%</p>
             </div>
@@ -459,9 +476,18 @@ export default function Beneficiary() {
                 />
               </div>
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
-                <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-destructive align-middle" />Below target {summary.counts.below}</span>
-                <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-primary align-middle" />On target {summary.counts.on_target}</span>
-                <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-muted-foreground align-middle" />Above target {summary.counts.above}</span>
+                <span>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-destructive align-middle" aria-hidden />
+                  Below target {summary.counts.below}
+                </span>
+                <span>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-primary align-middle" aria-hidden />
+                  On target {summary.counts.on_target}
+                </span>
+                <span>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-muted-foreground align-middle" aria-hidden />
+                  Above target {summary.counts.above}
+                </span>
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
                 {summary.objectiveCount > 0
@@ -474,11 +500,14 @@ export default function Beneficiary() {
 
         <div className="w-full min-w-0">
           <div
-            className="overflow-hidden rounded-3xl bg-card shadow-lg ring-1 ring-border/60"
+            className="overflow-hidden rounded-3xl bg-card shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-border/60"
             aria-labelledby="beneficiaries-nav-heading"
           >
-            <div className="border-b border-border bg-gradient-to-r from-muted/90 via-background to-muted/30 px-6 py-4 sm:px-8 sm:py-5">
+            <div className="border-b border-border bg-gradient-to-r from-muted/90 via-card to-primary/[0.06] px-6 py-4 sm:px-8 sm:py-5">
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Strategic perspective</p>
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                Choose <span className="font-semibold text-foreground">B1</span>. Each beneficiary group includes sub-sections, indicator detail, and linked operational objectives.
+              </p>
             </div>
             <div className="p-6 sm:p-8">
               <h2 id="beneficiaries-nav-heading" className="sr-only">Beneficiary sections</h2>
@@ -502,9 +531,9 @@ export default function Beneficiary() {
                           setCurrentSubIndex(0)
                           setSelectedObjectiveIndex(null)
                         }}
-                        className={`min-w-[3.25rem] rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 ${
+                        className={`min-w-[3.25rem] rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 ${
                           isActive
-                            ? "bg-card text-primary shadow-md shadow-sm ring-1 ring-border/70"
+                            ? "bg-card text-primary shadow-md shadow-primary/10 ring-1 ring-border/70"
                             : "text-muted-foreground hover:bg-card/80 hover:text-foreground hover:shadow-sm"
                         }`}
                       >
@@ -515,13 +544,13 @@ export default function Beneficiary() {
                 </div>
               </nav>
 
-              <article className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-muted/90 via-background to-muted/40 p-5 shadow-inner ring-1 ring-border/40 sm:p-7">
-                <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-                <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-muted/30 blur-3xl" aria-hidden="true" />
+              <article className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.08] via-card to-primary/[0.05] p-5 shadow-inner ring-1 ring-primary/15 sm:p-7">
+                <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+                <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-chart-3/15 blur-3xl" aria-hidden="true" />
                 <div className="relative">
-                  <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+                  <div className="flex flex-col gap-4 border-b border-primary/25 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Current perspective</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary/70">Current perspective</p>
                       <h3 className="mt-1.5 text-lg font-bold leading-snug text-foreground sm:text-xl">
                         {activeBeneficiary.title}
                       </h3>
@@ -533,18 +562,21 @@ export default function Beneficiary() {
                           Sub-section
                         </label>
                         <Select
-                          value={String(currentSubIndex)}
-                          onValueChange={(value) => setCurrentSubIndex(Number(value))}
+                          value={activeBeneficiary.subs[currentSubIndex]?.label ?? ""}
+                          onValueChange={(label) => {
+                            const idx = activeBeneficiary.subs?.findIndex((s) => s.label === label) ?? -1
+                            if (idx >= 0) setCurrentSubIndex(idx)
+                          }}
                         >
                           <SelectTrigger
                             id="beneficiary-sub"
-                            className="w-full rounded-xl border-border/90 bg-card py-2.5 text-sm font-semibold shadow-sm"
+                            className="w-full rounded-xl border-border bg-card py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/30 hover:shadow-md focus:ring-2 focus:ring-primary/20"
                           >
                             <SelectValue placeholder="Sub-section" />
                           </SelectTrigger>
                           <SelectContent>
-                            {activeBeneficiary.subs.map((sub, index) => (
-                              <SelectItem key={sub.label} value={String(index)}>
+                            {activeBeneficiary.subs.map((sub) => (
+                              <SelectItem key={sub.label} value={sub.label}>
                                 {sub.label}
                               </SelectItem>
                             ))}
@@ -555,37 +587,38 @@ export default function Beneficiary() {
                   </div>
 
                   <div className="relative mt-6">
-                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Key indicator</p>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-primary/55">Key indicator</p>
                     {activeSub ? (
                       <div className="space-y-3 sm:space-y-4">
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Indicator</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">
                             <span className="font-semibold text-primary">{activeSub.label}: </span>
                             {activeSub.definition}
                           </div>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Indicator Description</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">
                             {activeSub.indicatorDescription || "-"}
                           </div>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Indicator owner</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">{activeSub.owner}</div>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Target value</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">{activeSub.targetValue}</div>
                         </div>
-                        <div className="rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-primary/15 bg-gradient-to-b from-card to-muted/40 p-4 shadow-sm ring-1 ring-border/40">
                           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                             <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Achievement rate</p>
                             <Button
                               type="button"
+                              variant="outline"
                               onClick={() => openAchievementEditor("sub")}
-                              className="shrink-0 rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-semibold text-primary shadow-sm transition hover:border-border hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                              className="h-auto shrink-0 rounded-lg border-border bg-card px-2.5 py-1 text-xs font-semibold text-primary shadow-sm focus-visible:ring-2 focus-visible:ring-ring/40"
                             >
                               Edit achievement
                             </Button>
@@ -601,11 +634,13 @@ export default function Beneficiary() {
                                 )}
                                 title={achievementStatusLabel(year, activeSub.achievement[year], activeSub.targetValue)}
                               >
-                                <p className="text-[11px] font-semibold uppercase tracking-wide opacity-80">{year}</p>
-                                <p className="mt-0.5 text-[10px] font-semibold leading-snug opacity-90">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-foreground opacity-80">
+                                  {year}
+                                </p>
+                                <p className="mt-0.5 text-[10px] font-semibold leading-snug text-foreground opacity-90">
                                   {achievementStatusLabel(year, activeSub.achievement[year], activeSub.targetValue)}
                                 </p>
-                                <p className="mt-1 text-sm font-bold sm:text-base">{activeSub.achievement[year]}</p>
+                                <p className="mt-1 text-sm font-bold text-foreground sm:text-base">{activeSub.achievement[year]}</p>
                               </div>
                             ))}
                           </div>
@@ -619,12 +654,15 @@ export default function Beneficiary() {
                   </div>
 
                   {activeSub ? (
-                    <section className="relative mt-8 overflow-hidden rounded-2xl border border-border/80 bg-card/80 p-5 shadow-md ring-1 ring-border/50 backdrop-blur-sm sm:p-6">
-                      <div className="absolute left-0 top-0 h-full w-1 bg-primary" aria-hidden="true" />
+                    <section className="relative mt-8 overflow-hidden rounded-2xl border border-border bg-card/90 p-5 shadow-md ring-1 ring-border/50 backdrop-blur-sm sm:p-6">
+                      <div
+                        className="absolute left-0 top-0 h-full w-1 bg-orange-500"
+                        aria-hidden="true"
+                      />
                       <div className="pl-3 sm:pl-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                           <div className="flex items-start gap-3">
-                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md" aria-hidden="true">
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar text-sidebar-foreground shadow-md" aria-hidden="true">
                               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path
                                   strokeLinecap="round"
@@ -642,7 +680,7 @@ export default function Beneficiary() {
                           </div>
                           <Link
                             to={`${routePrefix}/beneficiary/add-objective`}
-                            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground shadow-sm transition hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 sm:w-auto"
+                            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-[oklch(0.22_0.04_265)] px-4 py-2.5 text-sm font-semibold text-[oklch(0.965_0.003_250)] shadow-sm transition hover:bg-[oklch(0.30_0.05_265)] hover:text-[oklch(0.99_0_0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 sm:w-auto dark:border-white/15 dark:bg-[oklch(0.32_0.06_265)] dark:text-[oklch(0.96_0.003_250)] dark:hover:bg-[oklch(0.42_0.07_265)] dark:hover:text-[oklch(0.99_0_0)]"
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -656,11 +694,11 @@ export default function Beneficiary() {
                             <ul className="flex flex-col gap-5 sm:gap-6">
                               {activeObjectives.map((objective, index) => (
                                 <li className="list-none" key={`${objective.objective}-${index}`}>
-                                  <article className="group relative overflow-hidden rounded-2xl border border-border/80 bg-card p-4 shadow-md ring-1 ring-border/40 transition duration-300 hover:border-primary/30 hover:shadow-lg sm:p-5">
+                                  <article className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-md ring-1 ring-border/40 transition duration-300 hover:border-primary/35 hover:shadow-lg sm:p-5">
                                     <div className="relative">
                                       <header className="mb-4 flex items-start justify-between gap-3 border-b border-border pb-4">
                                         <div className="flex min-w-0 flex-1 items-start gap-3">
-                                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary text-sm font-bold text-primary-foreground shadow-md">
+                                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary text-sm font-bold text-primary-foreground shadow-md shadow-primary/25">
                                             {index + 1}
                                           </span>
                                           <div className="min-w-0 flex-1 pt-0.5">
@@ -726,7 +764,7 @@ export default function Beneficiary() {
                                           type="button"
                                           variant="outline"
                                           onClick={() => openObjectiveDetails(index)}
-                                          className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                                          className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
                                         >
                                           View details
                                         </Button>
@@ -734,7 +772,7 @@ export default function Beneficiary() {
                                           type="button"
                                           variant="destructive"
                                           onClick={() => deleteObjective(index)}
-                                          className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                                          className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
                                         >
                                           Delete objective
                                         </Button>
@@ -780,24 +818,77 @@ export default function Beneficiary() {
         open={isObjectiveModalOpen && selectedObjective != null}
         onOpenChange={(open) => {
           setIsObjectiveModalOpen(open)
-          if (!open) setIsObjectiveEditing(false)
+          if (!open) setEditingObjectiveField(null)
         }}
       >
         {selectedObjective ? (
         <DialogContent
-          className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 ring-1 ring-border/80 sm:max-w-lg"
-          showCloseButton
+          className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl bg-white p-0 text-zinc-950 ring-1 ring-border/80 sm:max-w-lg dark:bg-white dark:text-zinc-950"
+          showCloseButton={false}
         >
-          <DialogHeader className="shrink-0 gap-0 border-b border-border bg-gradient-to-r from-muted/90 to-background px-5 py-4 text-left sm:px-6">
-            <DialogTitle className="text-base font-bold sm:text-lg">Objective details</DialogTitle>
-          </DialogHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
-              {isObjectiveEditing ? (
-                <div className="space-y-3">
-                  {objectiveFieldConfigs.map(({ field, label, multiline }) => (
-                    <label className="block" key={field}>
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
-                      {multiline ? (
+          <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+            <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between gap-3 border-b border-border bg-white px-5 py-4 text-left sm:px-6">
+              <DialogTitle className="min-w-0 flex-1 text-base font-bold sm:text-lg">Objective details</DialogTitle>
+              <DialogClose
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                    aria-label="Close"
+                  />
+                }
+              >
+                <XIcon className="size-4" />
+                <span className="sr-only">Close</span>
+              </DialogClose>
+            </DialogHeader>
+            <div className="space-y-2.5 px-5 py-4 sm:space-y-3 sm:px-6 sm:py-5">
+              {objectiveFieldConfigs.map(({ field, label, multiline }) => {
+                const isEditing = editingObjectiveField === field
+                const displayValue = selectedObjective[field]?.trim() ? selectedObjective[field] : "—"
+                return (
+                  <div
+                    key={field}
+                    className="rounded-xl border border-border/80 bg-white px-3 py-2.5 shadow-md ring-1 ring-border/25 sm:px-4"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="min-w-0 flex-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
+                      {isEditing ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => cancelObjectiveFieldEdit(field)}
+                          aria-label={`Cancel editing ${label}`}
+                          className="shrink-0 text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        >
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => startEditObjectiveField(field)}
+                          aria-label={`Edit ${label}`}
+                          className="shrink-0 text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        >
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                            <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" />
+                          </svg>
+                        </Button>
+                      )}
+                    </div>
+                    {isEditing ? (
+                      multiline ? (
                         <Textarea
                           rows={3}
                           value={objectiveDraft[field]}
@@ -807,7 +898,7 @@ export default function Beneficiary() {
                               [field]: event.target.value,
                             }))
                           }
-                          className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
+                          className="mt-2 min-h-[4.5rem] w-full text-sm shadow-sm"
                         />
                       ) : (
                         <Input
@@ -819,49 +910,38 @@ export default function Beneficiary() {
                               [field]: event.target.value,
                             }))
                           }
-                          className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
+                          className="mt-2 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
                         />
-                      )}
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2.5 sm:space-y-3">
-                  {[
-                    ["Regulatory entity", selectedObjective.regulatoryEntity],
-                    ["Operational objective", selectedObjective.objective],
-                    ["objective execution Indicator", selectedObjective.objectiveExecutionIndicator],
-                    ["execution Indicator description", selectedObjective.executionIndicatorDescription],
-                    ["Indicator owner within the entity", selectedObjective.indicatorOwnerWithinEntity],
-                    ["Target value", selectedObjective.targetValue],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="rounded-xl border border-border bg-muted/80 px-3 py-2.5 transition hover:border-border hover:bg-card sm:px-4"
-                    >
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
-                      <div className="mt-1 text-sm leading-relaxed text-foreground">{value || "-"}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      )
+                    ) : (
+                      <div className="mt-1 text-sm leading-relaxed text-foreground">{displayValue}</div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-            <div className="shrink-0 border-t border-border bg-muted/80 px-5 py-3 sm:px-6">
-              {isObjectiveEditing ? (
-                <div className="flex flex-wrap gap-2">
-                  <Button type="button" onClick={saveObjectiveDetails} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6">
-                    Save
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsObjectiveEditing(false)} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none">
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button type="button" variant="outline" onClick={() => setIsObjectiveEditing(true)} className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:w-auto">
-                  Edit details
-                </Button>
-              )}
+          </div>
+          <div className="shrink-0 border-t border-border bg-white px-5 py-3 sm:px-6">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={saveObjectiveDetails}
+                className="h-auto min-h-8 flex-1 rounded-lg px-3 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-4"
+              >
+                Save
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (editingObjectiveField !== null) cancelObjectiveFieldEdit(editingObjectiveField)
+                }}
+                className="h-auto min-h-8 flex-1 rounded-lg border-0 px-3 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-4"
+              >
+                Cancel
+              </Button>
             </div>
+          </div>
         </DialogContent>
         ) : null}
       </Dialog>
@@ -872,7 +952,7 @@ export default function Beneficiary() {
           showCloseButton
         >
           <DialogHeader className="shrink-0 gap-0 border-b border-border px-5 py-4 text-left sm:px-6">
-            <DialogTitle>Edit achievement rate</DialogTitle>
+            <DialogTitle className="font-bold">Edit achievement rate</DialogTitle>
           </DialogHeader>
             <form
               className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-4 sm:px-6 sm:py-5"
