@@ -8,7 +8,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -20,7 +19,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { proposalStatusToneSurfaceClass } from "@/lib/proposalStatusChip"
 import { cn } from "@/lib/utils"
+
+/** Hover treatment aligned with Latest in Queue links (`AuditorDashboard.tsx` → `latestQueueEntryLinkClassName`). */
+const statusOverviewCardHoverClassName =
+  "border border-border transition-colors hover:border-[oklch(0.72_0.145_48)] hover:bg-[color-mix(in_oklch,oklch(0.7_0.2_25)_5%,white)]"
+
+/** Active filter: same border/background as hover (no primary ring). */
+const statusOverviewCardActiveClassName =
+  "border-[oklch(0.72_0.145_48)] bg-[color-mix(in_oklch,oklch(0.7_0.2_25)_5%,white)]"
 
 type SubmissionFilter = "all" | "action" | "objective" | "task"
 type ProposalType = Exclude<SubmissionFilter, "all">
@@ -142,18 +150,19 @@ const rows: SubmissionRow[] = [
   },
 ]
 
-function statusBadgeClass(tone: SubmissionRow["statusTone"]) {
-  switch (tone) {
-    case "pending":
-      return "border-border bg-muted text-foreground"
-    case "review":
-      return "border-border bg-accent text-accent-foreground"
-    case "changes":
-      return "border-border bg-secondary text-secondary-foreground"
-    case "accepted":
-      return "border-border bg-primary/10 text-foreground"
+/** Same mapping as Dashboard.tsx → Strategic Perspectives (`strategic-perspective-bg-chart-*` in index.css). */
+function perspectiveStrategicClass(perspective: string) {
+  switch (perspective) {
+    case "Catalysts":
+      return "strategic-perspective-bg-chart-1"
+    case "Enablers":
+      return "strategic-perspective-bg-chart-2"
+    case "Beneficiary":
+      return "strategic-perspective-bg-chart-4"
+    case "Stakeholders":
+      return "strategic-perspective-bg-chart-5"
     default:
-      return ""
+      return "strategic-perspective-bg-chart-1"
   }
 }
 
@@ -266,39 +275,71 @@ export default function SubmissionStatus() {
           </p>
         </header>
 
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
           {statusOverview.map((row) => {
             const isActive = toneFilter === row.tone
             return (
-              <Button
+              <Card
                 key={row.tone}
-                type="button"
-                variant="ghost"
-                onClick={() => toggleToneCard(row.tone)}
-                className={cn(
-                  "h-auto min-h-[8.5rem] w-full cursor-pointer justify-start rounded-xl border border-border bg-background p-3 text-left font-normal shadow-none transition hover:bg-muted/40",
-                  isActive ? "border-primary ring-2 ring-primary/30" : "border-border"
-                )}
+                role="button"
+                tabIndex={0}
                 aria-pressed={isActive}
                 aria-label={`Filter table by ${row.label}`}
+                onClick={() => toggleToneCard(row.tone)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    toggleToneCard(row.tone)
+                  }
+                }}
+                className={cn(
+                  "h-full cursor-pointer py-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  statusOverviewCardHoverClassName,
+                  isActive && statusOverviewCardActiveClassName
+                )}
               >
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-muted-foreground">{row.label}</p>
-                  <Badge variant="outline" className={cn("rounded-full px-2 font-bold tabular-nums", statusBadgeClass(row.tone))}>
-                    {row.total}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Objectives: <span className="font-semibold text-foreground">{row.objectives}</span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Actions: <span className="font-semibold text-foreground">{row.actions}</span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Tasks: <span className="font-semibold text-foreground">{row.tasks}</span>
-                </p>
-                <p className="mt-2 text-[11px] font-medium text-primary">Click to filter table</p>
-              </Button>
+                <CardContent className="p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-muted-foreground">{row.label}</p>
+                    <span
+                      className={cn(
+                        "inline-flex max-w-full flex-wrap items-center gap-x-1.5 rounded-lg px-2.5 py-1 text-sm font-medium tabular-nums text-secondary-foreground transition",
+                        proposalStatusToneSurfaceClass(row.tone)
+                      )}
+                    >
+                      {row.total}
+                    </span>
+                  </div>
+                  <p className="flex items-center gap-1.5 text-xs leading-tight text-muted-foreground">
+                    <span
+                      className="proposal-stat-swatch-pending size-1.5 shrink-0 rounded-full"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Objectives: <span className="font-semibold text-foreground">{row.objectives}</span>
+                    </span>
+                  </p>
+                  <p className="flex items-center gap-1.5 text-xs leading-tight text-muted-foreground">
+                    <span
+                      className="proposal-stat-swatch-chart-4 size-1.5 shrink-0 rounded-full"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Actions: <span className="font-semibold text-foreground">{row.actions}</span>
+                    </span>
+                  </p>
+                  <p className="flex items-center gap-1.5 text-xs leading-tight text-muted-foreground">
+                    <span
+                      className="proposal-stat-swatch-chart-2 size-1.5 shrink-0 rounded-full"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Tasks: <span className="font-semibold text-foreground">{row.tasks}</span>
+                    </span>
+                  </p>
+                  <p className="mt-2 text-[11px] font-medium text-primary">Click to filter table</p>
+                </CardContent>
+              </Card>
             )
           })}
         </div>
@@ -319,11 +360,11 @@ export default function SubmissionStatus() {
           </p>
         )}
 
-        <Card className="overflow-hidden shadow-sm ring-1 ring-border/60">
+        <Card className="gap-0 overflow-hidden rounded-3xl bg-card py-0 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-border/60">
           <CardHeader className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <CardTitle id="submissions-table-heading" className="text-lg">
+                <CardTitle id="submissions-table-heading" className="text-lg font-bold text-foreground">
                   Your Recent Proposals
                 </CardTitle>
               </div>
@@ -333,7 +374,7 @@ export default function SubmissionStatus() {
                     { key: "all" as const, label: "All" },
                     { key: "action" as const, label: "Actions" },
                     { key: "objective" as const, label: "Objectives" },
-                        { key: "task" as const, label: "Tasks" },
+                    { key: "task" as const, label: "Tasks" },
                   ] as const
                 ).map(({ key, label }) => (
                   <Button
@@ -355,7 +396,7 @@ export default function SubmissionStatus() {
             <div className="max-h-[23rem] overflow-x-auto overflow-y-auto">
             <Table className="min-w-[720px]">
               <TableHeader>
-                <TableRow className="border-border bg-muted/50 hover:bg-muted/50">
+                <TableRow className="border-b border-border bg-muted/80 hover:bg-muted/80">
                   <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:px-6">
                     Request
                   </TableHead>
@@ -376,10 +417,14 @@ export default function SubmissionStatus() {
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="divide-y divide-border">
                 {limitedRows.map((row) => (
-                  <TableRow key={row.id} className="border-border" data-submission-type={row.submissionType}>
-                    <TableCell className="px-4 py-4 font-mono text-xs font-semibold text-foreground sm:px-6">
+                  <TableRow
+                    key={row.id}
+                    className="border-0 hover:bg-muted/50"
+                    data-submission-type={row.submissionType}
+                  >
+                    <TableCell className="whitespace-nowrap px-4 py-4 font-mono text-xs font-semibold text-foreground/90 sm:px-6">
                       {row.id}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-foreground">
@@ -389,26 +434,35 @@ export default function SubmissionStatus() {
                           ? "Action"
                           : "Task"}
                     </TableCell>
-                    <TableCell className="min-w-[10rem] max-w-[18rem] px-4 py-3 align-middle lg:min-w-[12rem]">
-                      <Badge
-                        variant="outline"
-                        className="inline-flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-lg px-2 py-1 text-[11px] font-normal leading-snug"
+                    <TableCell className="min-w-[10rem] max-w-[18rem] px-4 py-4 align-middle lg:min-w-[12rem]">
+                      <span
+                        className={cn(
+                          "inline-flex max-w-full flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition",
+                          perspectiveStrategicClass(row.perspective)
+                        )}
                       >
-                        <span className="font-semibold text-foreground">{row.perspective}</span>
-                        <span className="shrink-0 text-muted-foreground">-</span>
-                        <span className="font-mono font-semibold tabular-nums text-foreground">{row.perspectiveSection}</span>
-                      </Badge>
+                        <span>{row.perspective}</span>
+                        <span className="select-none text-secondary-foreground/70" aria-hidden="true">
+                          ·
+                        </span>
+                        <span className="font-mono font-semibold tabular-nums">{row.perspectiveSection}</span>
+                      </span>
                     </TableCell>
                     <TableCell className="max-w-xs whitespace-normal px-4 py-4 text-muted-foreground">{row.summary}</TableCell>
                     <TableCell className="px-4 py-4">
-                      <Badge variant="outline" className={cn("font-semibold", statusBadgeClass(row.statusTone))}>
+                      <span
+                        className={cn(
+                          "inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition",
+                          proposalStatusToneSurfaceClass(row.statusTone)
+                        )}
+                      >
                         {row.status}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell className="px-4 py-4 sm:px-6">
                       <Link
                         to={followUpHref(row)}
-                        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                        className="text-sm font-medium text-primary transition hover:text-[oklch(0.22_0.04_265)]"
                       >
                         {row.followUpLabel}
                       </Link>

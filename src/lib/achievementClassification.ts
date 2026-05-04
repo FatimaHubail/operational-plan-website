@@ -110,15 +110,15 @@ export function achievementStatusLabel(year: string, achievementRaw: string, tar
 function bandSurfaceClassName(band: AchievementBand): string {
   switch (band) {
     case "notMeasured":
-      return "bg-rose-50 text-rose-950 ring-rose-200/90 dark:bg-rose-950/40 dark:text-rose-50 dark:ring-rose-800/55"
+      return "bg-rose-50 text-foreground ring-rose-200/90 dark:bg-rose-950/40 dark:text-foreground dark:ring-rose-800/55"
     case "slow":
-      return "bg-amber-50 text-amber-950 ring-amber-200/90 dark:bg-amber-950/40 dark:text-amber-50 dark:ring-amber-800/55"
+      return "bg-amber-50 text-foreground ring-amber-200/90 dark:bg-amber-950/40 dark:text-foreground dark:ring-amber-800/55"
     case "good":
-      return "bg-emerald-50 text-emerald-950 ring-emerald-200/90 dark:bg-emerald-950/40 dark:text-emerald-50 dark:ring-emerald-800/55"
+      return "bg-emerald-50 text-foreground ring-emerald-200/90 dark:bg-emerald-950/40 dark:text-foreground dark:ring-emerald-800/55"
     case "excellent":
-      return "bg-sky-50 text-sky-950 ring-sky-200/90 dark:bg-sky-950/40 dark:text-sky-50 dark:ring-sky-800/55"
+      return "bg-sky-50 text-foreground ring-sky-200/90 dark:bg-sky-950/40 dark:text-foreground dark:ring-sky-800/55"
     case "achieved":
-      return "bg-violet-50 text-violet-950 ring-violet-200/90 dark:bg-violet-950/40 dark:text-violet-50 dark:ring-violet-800/55"
+      return "bg-violet-50 text-foreground ring-violet-200/90 dark:bg-violet-950/40 dark:text-foreground dark:ring-violet-800/55"
     default:
       return ""
   }

@@ -29,6 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { ProposedByBlock } from "@/components/proposed-by"
 import { achievementStatusLabel, achievementSubsectionCellClassName } from "@/lib/achievementClassification"
+import { proposalStatusToneSurfaceClass, requestStatusToProposalTone } from "@/lib/proposalStatusChip"
 
 type AchievementMap = Record<string, string>
 
@@ -468,15 +469,16 @@ function getStatusBucket(status: string) {
   return "below"
 }
 
+/** Matches Dashboard strategic chips + notification “new” badge (`index.css`). */
 function getStatusClasses(status: string) {
   const bucket = getStatusBucket(status)
   if (bucket === "above") {
-    return "border-border bg-secondary text-secondary-foreground ring-1 ring-border/70"
+    return "border-0 strategic-perspective-bg-chart-1 text-secondary-foreground shadow-sm"
   }
   if (bucket === "on_target") {
-    return "border-border bg-muted text-foreground ring-1 ring-border/70"
+    return "border-0 strategic-perspective-bg-chart-2 text-secondary-foreground shadow-sm"
   }
-  return "border-border bg-accent text-accent-foreground ring-1 ring-border/70"
+  return "notif-new-badge border-0 shadow-sm"
 }
 
 function flattenObjectives(item: CatalystItem) {
@@ -645,11 +647,11 @@ export default function Catalysts() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg shadow-primary/30"
               aria-hidden="true"
             >
               <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -670,27 +672,22 @@ export default function Catalysts() {
         </header>
 
         <section
-          className="mb-8 overflow-hidden rounded-3xl border border-border/80 bg-primary shadow-lg ring-1 ring-primary/10"
+          className="mb-8 overflow-hidden rounded-3xl border border-border bg-card shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-border/60"
           aria-labelledby="catalysts-glance-heading"
         >
-          <div className="relative flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-primary via-primary to-primary px-5 py-4 sm:px-6">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-foreground/10 via-transparent to-transparent" aria-hidden="true" />
+          <div className="relative flex flex-wrap items-center justify-between gap-4 bg-sidebar px-5 py-4 sm:px-6">
+            <div
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/15 via-transparent to-transparent"
+              aria-hidden="true"
+            />
             <div className="relative">
-              <h2 id="catalysts-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/90">
+              <h2 id="catalysts-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
                 Overview
               </h2>
-              <p className="mt-1 text-sm font-semibold text-primary-foreground">Catalyst layer - 2026 operational plan</p>
-            </div>
-            <div className="relative flex flex-wrap items-center gap-3">
-              <time
-                className="rounded-lg bg-primary-foreground/15 px-3 py-1.5 text-xs font-semibold tabular-nums text-primary-foreground ring-1 ring-primary-foreground/30"
-                dateTime="2026-03-28"
-              >
-                28 Mar 2026
-              </time>
+              <p className="mt-1 text-sm font-semibold text-sidebar-foreground">Catalyst layer · 2026 operational plan</p>
             </div>
           </div>
-          <div className="grid divide-y divide-border/80 bg-gradient-to-b from-muted to-background sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+          <div className="grid divide-y divide-border bg-gradient-to-b from-muted/90 to-card sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
             <div className="p-5 sm:p-6" role="group" aria-label="Catalyst coverage">
               <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Catalysts modeled</p>
               <p className="mt-2 flex items-baseline gap-2">
@@ -698,7 +695,7 @@ export default function Catalysts() {
                 <span className="text-sm font-medium text-muted-foreground">C1-C5</span>
               </p>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full w-full rounded-full bg-gradient-to-r from-primary to-primary" />
+                <div className="h-full w-full rounded-full bg-gradient-to-r from-primary to-chart-3" />
               </div>
               <p className="mt-2 text-[11px] font-medium text-muted-foreground">Model coverage 100%</p>
             </div>
@@ -723,9 +720,18 @@ export default function Catalysts() {
                 />
               </div>
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
-                <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-destructive align-middle" />Below target {summary.counts.below}</span>
-                <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-primary align-middle" />On target {summary.counts.on_target}</span>
-                <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-muted-foreground align-middle" />Above target {summary.counts.above}</span>
+                <span>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-destructive align-middle" aria-hidden />
+                  Below target {summary.counts.below}
+                </span>
+                <span>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-primary align-middle" aria-hidden />
+                  On target {summary.counts.on_target}
+                </span>
+                <span>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-muted-foreground align-middle" aria-hidden />
+                  Above target {summary.counts.above}
+                </span>
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
                 {summary.objectiveCount > 0
@@ -738,11 +744,14 @@ export default function Catalysts() {
 
         <div className="w-full min-w-0">
           <div
-            className="overflow-hidden rounded-3xl bg-card shadow-lg ring-1 ring-border/60"
+            className="overflow-hidden rounded-3xl bg-card shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-border/60"
             aria-labelledby="catalysts-nav-heading"
           >
-            <div className="border-b border-border bg-gradient-to-r from-muted/90 via-background to-muted/30 px-6 py-4 sm:px-8 sm:py-5">
+            <div className="border-b border-border bg-gradient-to-r from-muted/90 via-card to-primary/[0.06] px-6 py-4 sm:px-8 sm:py-5">
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Strategic perspective</p>
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                Choose <span className="font-semibold text-foreground">C1–C5</span>. Each catalyst includes sub-sections, indicator detail, and linked operational objectives.
+              </p>
             </div>
             <div className="p-6 sm:p-8">
               <h2 id="catalysts-nav-heading" className="sr-only">Catalyst sections</h2>
@@ -766,9 +775,9 @@ export default function Catalysts() {
                           setCurrentSubIndex(0)
                           setSelectedObjectiveIndex(null)
                         }}
-                        className={`min-w-[3.25rem] rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 ${
+                        className={`min-w-[3.25rem] rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 ${
                           isActive
-                            ? "bg-card text-primary shadow-md shadow-sm ring-1 ring-border/70"
+                            ? "bg-card text-primary shadow-md shadow-primary/10 ring-1 ring-border/70"
                             : "text-muted-foreground hover:bg-card/80 hover:text-foreground hover:shadow-sm"
                         }`}
                       >
@@ -779,13 +788,13 @@ export default function Catalysts() {
                 </div>
               </nav>
 
-              <article className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-muted/90 via-background to-muted/40 p-5 shadow-inner ring-1 ring-border/40 sm:p-7">
-                <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-                <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-muted/30 blur-3xl" aria-hidden="true" />
+              <article className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.08] via-card to-primary/[0.05] p-5 shadow-inner ring-1 ring-primary/15 sm:p-7">
+                <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+                <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-chart-3/15 blur-3xl" aria-hidden="true" />
                 <div className="relative">
-                  <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+                  <div className="flex flex-col gap-4 border-b border-primary/25 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Current perspective</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary/70">Current perspective</p>
                       <h3 className="mt-1.5 text-lg font-bold leading-snug text-foreground sm:text-xl">
                         {activeCatalyst.title}
                       </h3>
@@ -797,18 +806,21 @@ export default function Catalysts() {
                           Sub-section
                         </label>
                         <Select
-                          value={String(currentSubIndex)}
-                          onValueChange={(value) => setCurrentSubIndex(Number(value))}
+                          value={activeCatalyst.subs[currentSubIndex]?.label ?? ""}
+                          onValueChange={(label) => {
+                            const idx = activeCatalyst.subs?.findIndex((s) => s.label === label) ?? -1
+                            if (idx >= 0) setCurrentSubIndex(idx)
+                          }}
                         >
                           <SelectTrigger
                             id="catalyst-sub"
-                            className="w-full rounded-xl border-border/90 bg-card py-2.5 text-sm font-semibold shadow-sm"
+                            className="w-full rounded-xl border-border bg-card py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/30 hover:shadow-md focus:ring-2 focus:ring-primary/20"
                           >
                             <SelectValue placeholder="Sub-section" />
                           </SelectTrigger>
                           <SelectContent>
-                            {activeCatalyst.subs.map((sub, index) => (
-                              <SelectItem key={sub.label} value={String(index)}>
+                            {activeCatalyst.subs.map((sub) => (
+                              <SelectItem key={sub.label} value={sub.label}>
                                 {sub.label}
                               </SelectItem>
                             ))}
@@ -819,31 +831,31 @@ export default function Catalysts() {
                   </div>
 
                   <div className="relative mt-6">
-                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Key indicator</p>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-primary/55">Key indicator</p>
                     {activeSub ? (
                       <div className="space-y-3 sm:space-y-4">
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Indicator</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">
                             <span className="font-semibold text-primary">{activeSub.label}: </span>
                             {activeSub.definition}
                           </div>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Indicator Description</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">
                             {activeSub.indicatorDescription || "-"}
                           </div>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Indicator owner</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">{activeSub.owner}</div>
                         </div>
-                        <div className="rounded-xl border border-white/60 bg-card/95 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Target value</p>
                           <div className="mt-1.5 text-sm text-foreground sm:text-base">{activeSub.targetValue}</div>
                         </div>
-                        <div className="rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 p-4 shadow-sm ring-1 ring-border/40">
+                        <div className="rounded-xl border border-primary/15 bg-gradient-to-b from-card to-muted/40 p-4 shadow-sm ring-1 ring-border/40">
                           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                             <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Achievement rate</p>
                             <Button
@@ -863,13 +875,14 @@ export default function Catalysts() {
                                   activeSub.achievement[year],
                                   activeSub.targetValue
                                 )}
-                                title={achievementStatusLabel(year, activeSub.achievement[year], activeSub.targetValue)}
                               >
-                                <p className="text-[11px] font-semibold uppercase tracking-wide opacity-80">{year}</p>
-                                <p className="mt-0.5 text-[10px] font-semibold leading-snug opacity-90">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-foreground opacity-80">
+                                  {year}
+                                </p>
+                                <p className="mt-0.5 text-[10px] font-semibold leading-snug text-foreground opacity-90">
                                   {achievementStatusLabel(year, activeSub.achievement[year], activeSub.targetValue)}
                                 </p>
-                                <p className="mt-1 text-sm font-bold sm:text-base">{activeSub.achievement[year]}</p>
+                                <p className="mt-1 text-sm font-bold text-foreground sm:text-base">{activeSub.achievement[year]}</p>
                               </div>
                             ))}
                           </div>
@@ -883,12 +896,15 @@ export default function Catalysts() {
                   </div>
 
                   {activeSub ? (
-                    <section className="relative mt-8 overflow-hidden rounded-2xl border border-border/80 bg-card/80 p-5 shadow-md ring-1 ring-border/50 backdrop-blur-sm sm:p-6">
-                      <div className="absolute left-0 top-0 h-full w-1 bg-primary" aria-hidden="true" />
+                    <section className="relative mt-8 overflow-hidden rounded-2xl border border-border bg-card/90 p-5 shadow-md ring-1 ring-border/50 backdrop-blur-sm sm:p-6">
+                      <div
+                        className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-chart-3"
+                        aria-hidden="true"
+                      />
                       <div className="pl-3 sm:pl-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                           <div className="flex items-start gap-3">
-                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md" aria-hidden="true">
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar text-sidebar-foreground shadow-md" aria-hidden="true">
                               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path
                                   strokeLinecap="round"
@@ -906,7 +922,7 @@ export default function Catalysts() {
                           </div>
                           <Link
                             to={`${routePrefix}/catalysts/add-objective`}
-                            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground shadow-sm transition hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 sm:w-auto"
+                            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-[oklch(0.22_0.04_265)] px-4 py-2.5 text-sm font-semibold text-[oklch(0.965_0.003_250)] shadow-sm transition hover:bg-[oklch(0.30_0.05_265)] hover:text-[oklch(0.99_0_0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 sm:w-auto dark:border-white/15 dark:bg-[oklch(0.32_0.06_265)] dark:text-[oklch(0.96_0.003_250)] dark:hover:bg-[oklch(0.42_0.07_265)] dark:hover:text-[oklch(0.99_0_0)]"
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -920,11 +936,11 @@ export default function Catalysts() {
                             <ul className="flex flex-col gap-5 sm:gap-6">
                               {activeObjectives.map((objective, index) => (
                                 <li className="list-none" key={`${objective.objective}-${index}`}>
-                                  <article className="group relative overflow-hidden rounded-2xl border border-border/80 bg-card p-4 shadow-md ring-1 ring-border/40 transition duration-300 hover:border-primary/30 hover:shadow-lg sm:p-5">
+                                  <article className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-md ring-1 ring-border/40 transition duration-300 hover:border-primary/35 hover:shadow-lg sm:p-5">
                                     <div className="relative">
                                       <header className="mb-4 flex items-start justify-between gap-3 border-b border-border pb-4">
                                         <div className="flex min-w-0 flex-1 items-start gap-3">
-                                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary text-sm font-bold text-primary-foreground shadow-md">
+                                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary text-sm font-bold text-primary-foreground shadow-md shadow-primary/25">
                                             {index + 1}
                                           </span>
                                           <div className="min-w-0 flex-1 pt-0.5">
@@ -934,7 +950,7 @@ export default function Catalysts() {
                                             </h5>
                                           </div>
                                         </div>
-                                        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-left text-[10px] font-semibold leading-snug shadow-sm ${getStatusClasses(objective.objectiveStatus)}`}>
+                                        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border-0 px-2.5 py-1.5 text-left text-[10px] font-semibold leading-snug ${getStatusClasses(objective.objectiveStatus)}`}>
                                           <span className="mt-0.5 h-1.5 w-1.5 shrink-0 self-start rounded-full bg-current opacity-70" />
                                           <span className="max-w-[11rem]">{objective.objectiveStatus}</span>
                                         </span>
@@ -950,7 +966,9 @@ export default function Catalysts() {
                                       <div className="space-y-2.5 sm:space-y-3">
                                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                           <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Proposal status</span>
-                                          <span className="inline-flex max-w-full items-center rounded-xl border border-border bg-gradient-to-b from-muted to-muted/60 px-2.5 py-1.5 text-[10px] font-semibold leading-snug text-foreground ring-1 ring-border/70">
+                                          <span
+                                            className={`inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition ${proposalStatusToneSurfaceClass(requestStatusToProposalTone(objective.requestStatus))}`}
+                                          >
                                             {objective.requestStatus}
                                           </span>
                                         </div>
@@ -965,7 +983,7 @@ export default function Catalysts() {
                                                 setSelectedObjectiveIndex(index)
                                                 openAchievementEditor("objective")
                                               }}
-                                              className="h-auto shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold text-primary"
+                                              className="h-auto shrink-0 rounded-lg border-border bg-card px-2.5 py-1 text-xs font-semibold text-primary shadow-sm focus-visible:ring-2 focus-visible:ring-ring/40"
                                             >
                                               Edit achievement
                                             </Button>

@@ -151,6 +151,17 @@ const filterOptions = [
 
 type FilterKey = (typeof filterOptions)[number]["key"]
 
+function itemMatchesFilter(item: NotificationItem, f: FilterKey): boolean {
+  if (f === "unread") return item.unread
+  if (f === "objective" || f === "action" || f === "task") return item.entityType === f
+  if (f === "catalysts" || f === "enablers" || f === "beneficiary" || f === "stakeholders")
+    return item.strategicPerspective === f
+  return item.category === (f as NotificationCategory)
+}
+
+const markAllReadButtonClass =
+  "shrink-0 rounded-full !bg-transparent !text-[oklch(0.70_0.18_47)] shadow-none hover:!bg-transparent hover:!text-[oklch(0.22_0.04_265)] dark:!bg-transparent dark:hover:!bg-transparent dark:hover:!text-[oklch(0.22_0.04_265)]"
+
 function categoryLabel(category: NotificationCategory) {
   switch (category) {
     case "lifecycle":
@@ -169,25 +180,31 @@ function categoryLabel(category: NotificationCategory) {
 }
 
 export default function Notifications() {
-  const [activeFilter, setActiveFilter] = useState<FilterKey>("all")
+  const [selectedFilters, setSelectedFilters] = useState<Set<FilterKey>>(() => new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [visibleTodayCount, setVisibleTodayCount] = useState(3)
   const [visibleEarlierCount, setVisibleEarlierCount] = useState(3)
 
+  const toggleFilter = (key: FilterKey) => {
+    if (key === "all") {
+      setSelectedFilters(new Set())
+      return
+    }
+    setSelectedFilters((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   const filteredNotifications = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
     return notifications.filter((item) => {
       const matchesCategoryFilter =
-        activeFilter === "all"
-          ? true
-          : activeFilter === "unread"
-            ? item.unread
-            : activeFilter === "objective" || activeFilter === "action" || activeFilter === "task"
-              ? item.entityType === activeFilter
-              : activeFilter === "catalysts" || activeFilter === "enablers" || activeFilter === "beneficiary" || activeFilter === "stakeholders"
-                ? item.strategicPerspective === activeFilter
-              : item.category === activeFilter
+        selectedFilters.size === 0 ||
+        [...selectedFilters].some((f) => itemMatchesFilter(item, f))
       const matchesSearch =
         !query ||
         item.title.toLowerCase().includes(query) ||
@@ -196,12 +213,12 @@ export default function Notifications() {
         item.strategicPerspective.toLowerCase().includes(query)
       return matchesCategoryFilter && matchesSearch
     })
-  }, [activeFilter, searchTerm])
+  }, [selectedFilters, searchTerm])
 
   useEffect(() => {
     setVisibleTodayCount(3)
     setVisibleEarlierCount(3)
-  }, [activeFilter, searchTerm])
+  }, [selectedFilters, searchTerm])
 
   const unreadCount = notifications.filter((item) => item.unread).length
   const todayNotifications = filteredNotifications.filter((item) => item.group === "today")
@@ -297,63 +314,71 @@ export default function Notifications() {
 
   return (
     <div className="min-w-0 flex-1 bg-background p-4 sm:p-6 lg:p-8">
-      <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
+      <header className="mb-6 sm:mb-8">
         <div>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Notifications</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Updates on proposal lifecycle, reminders, milestones, perspective changes, and performance thresholds
           </p>
         </div>
-        <Button variant="outline">Mark all as read</Button>
       </header>
 
       <div className="mb-5 space-y-4">
-        <div className="flex w-full max-w-3xl flex-wrap items-center gap-2">
-          <div className="relative min-w-[17rem] flex-1">
-            <Input
-              type="search"
-              placeholder="Search notifications"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className="rounded-full pr-10"
-            />
-            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground" aria-hidden="true">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
+        <div className="flex w-full min-w-0 items-center justify-between gap-3">
+          <div className="flex min-w-0 max-w-3xl flex-1 flex-wrap items-center gap-2">
+            <div className="relative min-w-[17rem] max-w-full flex-1 sm:min-w-0">
+              <Input
+                type="search"
+                placeholder="Search notifications"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="rounded-full pr-10"
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground" aria-hidden="true">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+              </span>
+            </div>
+            <Button
+              type="button"
+              variant={showFilters ? "default" : "outline"}
+              className="rounded-full"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              Filter
+              <svg className="ml-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h18M6.75 12h10.5M10.5 19.5h3" />
               </svg>
-            </span>
+            </Button>
           </div>
-          <Button
-            type="button"
-            variant={showFilters ? "default" : "outline"}
-            className="rounded-full"
-            onClick={() => setShowFilters((prev) => !prev)}
-          >
-            Filter
-            <svg className="ml-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h18M6.75 12h10.5M10.5 19.5h3" />
-            </svg>
+          <Button type="button" variant="ghost" className={markAllReadButtonClass}>
+            Mark all as read
           </Button>
         </div>
 
         {showFilters ? (
           <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3">
-            {filterOptions.map((option) => (
-              <Button
-                key={option.key}
-                type="button"
-                size="sm"
-                variant={activeFilter === option.key ? "default" : "outline"}
-                className="rounded-full"
-                onClick={() => setActiveFilter(option.key)}
-              >
-                {option.label}
-              </Button>
-            ))}
+            {filterOptions.map((option) => {
+              const isActive =
+                option.key === "all" ? selectedFilters.size === 0 : selectedFilters.has(option.key)
+              return (
+                <Button
+                  key={option.key}
+                  type="button"
+                  size="sm"
+                  variant={isActive ? "default" : "outline"}
+                  className="rounded-full"
+                  onClick={() => toggleFilter(option.key)}
+                >
+                  {option.label}
+                </Button>
+              )
+            })}
           </div>
         ) : null}
-        </div>
+      </div>
 
       <Card className="overflow-hidden rounded-3xl ring-1 ring-border/60">
         <div className="p-0">

@@ -29,6 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { ProposedByBlock } from "@/components/proposed-by"
 import { achievementStatusLabel, achievementSubsectionCellClassName } from "@/lib/achievementClassification"
+import { proposalStatusToneSurfaceClass, requestStatusToProposalTone } from "@/lib/proposalStatusChip"
 
 type AchievementMap = Record<string, string>
 
@@ -209,12 +210,12 @@ function getStatusBucket(status: string) {
 function getStatusClasses(status: string) {
   const bucket = getStatusBucket(status)
   if (bucket === "above") {
-    return "border-border bg-secondary text-secondary-foreground ring-1 ring-border/70"
+    return "border-0 strategic-perspective-bg-chart-1 text-secondary-foreground shadow-sm"
   }
   if (bucket === "on_target") {
-    return "border-border bg-muted text-foreground ring-1 ring-border/70"
+    return "border-0 strategic-perspective-bg-chart-2 text-secondary-foreground shadow-sm"
   }
-  return "border-border bg-accent text-accent-foreground ring-1 ring-border/70"
+  return "notif-new-badge border-0 shadow-sm"
 }
 
 function flattenObjectives(item: BeneficiaryItem) {
@@ -669,7 +670,7 @@ export default function Beneficiary() {
                                             </h5>
                                           </div>
                                         </div>
-                                        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-left text-[10px] font-semibold leading-snug shadow-sm ${getStatusClasses(objective.objectiveStatus)}`}>
+                                        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border-0 px-2.5 py-1.5 text-left text-[10px] font-semibold leading-snug ${getStatusClasses(objective.objectiveStatus)}`}>
                                           <span className="mt-0.5 h-1.5 w-1.5 shrink-0 self-start rounded-full bg-current opacity-70" />
                                           <span className="max-w-[11rem]">{objective.objectiveStatus}</span>
                                         </span>
@@ -685,7 +686,9 @@ export default function Beneficiary() {
                                       <div className="space-y-2.5 sm:space-y-3">
                                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                           <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Proposal status</span>
-                                          <span className="inline-flex max-w-full items-center rounded-xl border border-border bg-gradient-to-b from-muted to-muted/60 px-2.5 py-1.5 text-[10px] font-semibold leading-snug text-foreground ring-1 ring-border/70">
+                                          <span
+                                            className={`inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition ${proposalStatusToneSurfaceClass(requestStatusToProposalTone(objective.requestStatus))}`}
+                                          >
                                             {objective.requestStatus}
                                           </span>
                                         </div>
@@ -700,7 +703,7 @@ export default function Beneficiary() {
                                                 setSelectedObjectiveIndex(index)
                                                 openAchievementEditor("objective")
                                               }}
-                                              className="h-auto shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold text-primary"
+                                              className="h-auto shrink-0 rounded-lg border-border bg-card px-2.5 py-1 text-xs font-semibold text-primary shadow-sm focus-visible:ring-2 focus-visible:ring-ring/40"
                                             >
                                               Edit achievement
                                             </Button>
