@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Breadcrumb,
@@ -32,7 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PencilIcon, SearchIcon, UserPlusIcon } from "lucide-react"
+import { PencilIcon, SearchIcon, UserPlusIcon, XIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type UserRow = {
   name: string
@@ -119,16 +119,22 @@ const users: UserRow[] = [
 ]
 
 function roleClass(role: UserRow["role"]) {
-  if (role === "Administrator") return "bg-accent text-accent-foreground"
-  if (role === "Contributor") return "bg-secondary text-secondary-foreground"
-  if (role === "Indicator Owner") return "bg-primary/10 text-foreground"
-  return "bg-muted text-foreground"
+  if (role === "Administrator") return "bg-chart-5/18 text-muted-foreground"
+  if (role === "Contributor") return "bg-chart-1/18 text-muted-foreground"
+  if (role === "Indicator Owner") return "bg-chart-2/18 text-muted-foreground"
+  return "bg-chart-4/16 text-muted-foreground"
+}
+
+function statusClass(status: UserRow["status"]) {
+  if (status === "Active") return "text-[color-mix(in_oklch,var(--chart-2)_70%,var(--foreground))] [&>span]:bg-[color-mix(in_oklch,var(--chart-2)_70%,var(--foreground))]"
+  if (status === "Invited") return "text-[oklch(0.82_0.13_95)] [&>span]:bg-[oklch(0.82_0.13_95)]"
+  return "text-destructive [&>span]:bg-destructive"
 }
 
 export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState("")
   const [manageUser, setManageUser] = useState<UserRow | null>(null)
-  const [editable, setEditable] = useState<Record<string, boolean>>({})
+  const [editingField, setEditingField] = useState<string | null>(null)
   const [manageForm, setManageForm] = useState({
     fullName: "",
     email: "",
@@ -137,21 +143,25 @@ export default function AdminUsers() {
     departmentCards: [{ department: "", subUnits: [""] }] as DepartmentCard[],
   })
 
+  const buildManageForm = (user: UserRow) => ({
+    fullName: user.name,
+    email: user.email,
+    password: "********",
+    role: user.role,
+    departmentCards: [{ department: user.unit, subUnits: [""] }] as DepartmentCard[],
+  })
+
   const openManage = (user: UserRow) => {
     setManageUser(user)
-    setEditable({})
-    setManageForm({
-      fullName: user.name,
-      email: user.email,
-      password: "********",
-      role: user.role,
-      departmentCards: [{ department: user.unit, subUnits: [""] }],
-    })
+    setEditingField(null)
+    setManageForm(buildManageForm(user))
   }
 
   const toggleFieldEdit = (field: string) => {
-    setEditable((prev) => ({ ...prev, [field]: !prev[field] }))
+    setEditingField((prev) => (prev === field ? null : field))
   }
+
+  const isEditing = (field: string) => editingField === field
 
   const addDepartmentCard = () => {
     setManageForm((prev) => ({
@@ -207,13 +217,13 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
-        <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
+    <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 sm:p-6 lg:p-8">
+        <header className="mb-4">
           <div>
-            <Breadcrumb>
+            <Breadcrumb className="inline-flex rounded-full bg-card/90 px-3 py-1.5 shadow-sm ring-1 ring-border/70 backdrop-blur-sm">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink render={<Link to="/dashboard-admin" />}>Administration</BreadcrumbLink>
+                  <BreadcrumbLink className="text-primary transition hover:text-primary/90" render={<Link to="/dashboard-admin" />}>Administration</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -226,18 +236,21 @@ export default function AdminUsers() {
               Add colleagues and assign roles so they can view or contribute to the operational plan workspace
             </p>
           </div>
+        </header>
+
+        <div className="mb-6 flex justify-end sm:mb-8">
           <Link
             to="/add-user"
             state={{ from: "admin-users" }}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-xs transition hover:bg-primary/90"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
           >
             <UserPlusIcon className="h-4 w-4" />
             Add user
           </Link>
-        </header>
+        </div>
 
-        <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-border bg-muted/30 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6 lg:px-8">
+        <section className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-md ring-1 ring-border/40">
+          <div className="flex flex-col gap-4 border-b border-border/70 bg-card px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6 lg:px-8">
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold">Directory</h2>
               <p className="mt-0.5 text-sm text-muted-foreground">University accounts with access to the operational plan workspace</p>
@@ -245,14 +258,14 @@ export default function AdminUsers() {
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[20rem] sm:flex-row sm:items-center">
               <label className="relative block flex-1 sm:min-w-[12rem]">
                 <span className="sr-only">Search users</span>
-                <Input type="search" name="q" placeholder="Search name or email" className="rounded-full pr-10" />
+                <Input type="text" name="q" placeholder="Search name or email" className="rounded-full border-0 bg-card pr-10 shadow-sm ring-1 ring-border/80 focus-visible:ring-primary/30" />
                 <SearchIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </label>
               <label className="sr-only" htmlFor="filter-role">
                 Filter by role
               </label>
               <Select value={roleFilter || undefined} onValueChange={setRoleFilter}>
-                <SelectTrigger id="filter-role" className="w-full min-w-[10rem] rounded-full sm:w-auto">
+                <SelectTrigger id="filter-role" className="w-full min-w-[10rem] rounded-full border-0 bg-card shadow-sm ring-1 ring-border/80 focus:ring-primary/30 sm:w-auto">
                   <SelectValue placeholder="All roles" />
                 </SelectTrigger>
                 <SelectContent>
@@ -268,7 +281,7 @@ export default function AdminUsers() {
           <div className="max-h-[22rem] overflow-x-auto overflow-y-auto">
           <Table className="min-w-[640px]">
             <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableRow className="bg-muted/65 hover:bg-muted/65">
                 <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground sm:px-6 lg:pl-8">
                   User
                 </TableHead>
@@ -287,24 +300,12 @@ export default function AdminUsers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user, i) => (
-                <TableRow key={user.email} className="transition hover:bg-muted/30">
+              {users.map((user) => (
+                <TableRow key={user.email} className="transition hover:bg-muted/45">
                   <TableCell className="px-4 py-4 sm:px-6 lg:pl-8">
-                    <div className="flex items-center gap-3">
-                      {i === 0 ? (
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" />
-                          <AvatarFallback>JR</AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback>{user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-semibold">{user.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold">{user.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-4">
@@ -314,20 +315,23 @@ export default function AdminUsers() {
                   </TableCell>
                   <TableCell className="hidden px-4 py-4 text-muted-foreground md:table-cell">{user.unit}</TableCell>
                   <TableCell className="px-4 py-4">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">{user.status}</span>
+                    <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", statusClass(user.status))}>
+                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" />
+                      {user.status}
+                    </span>
                   </TableCell>
                   <TableCell className="px-4 py-4 text-right lg:pr-8">
                     <div className="inline-flex flex-col items-end gap-1">
                       {user.actionLabel === "Manage" ? (
-                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold" onClick={() => openManage(user)}>
+                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => openManage(user)}>
                           Manage
                         </Button>
                       ) : (
                         <>
-                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold">
+                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground">
                             {user.actionLabel}
                           </Button>
-                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold" onClick={() => openManage(user)}>
+                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => openManage(user)}>
                             Manage
                           </Button>
                         </>
@@ -353,7 +357,10 @@ export default function AdminUsers() {
         <Dialog
           open={manageUser != null}
           onOpenChange={(open) => {
-            if (!open) setManageUser(null)
+            if (!open) {
+              setManageUser(null)
+              setEditingField(null)
+            }
           }}
         >
           {manageUser ? (
@@ -369,27 +376,27 @@ export default function AdminUsers() {
                   <div className="sm:col-span-2">
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Full name *</label>
                     <div className="relative">
-                      <Input className="pr-9" value={manageForm.fullName} disabled={!editable.fullName} onChange={(e) => setManageForm((p) => ({ ...p, fullName: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
-                        <PencilIcon className="h-3 w-3" />
+                      <Input className="pr-9" value={manageForm.fullName} disabled={!isEditing("fullName")} onChange={(e) => setManageForm((p) => ({ ...p, fullName: e.target.value }))} />
+                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
+                        {isEditing("fullName") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
                       </Button>
                     </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">University email *</label>
                     <div className="relative">
-                      <Input className="pr-9" value={manageForm.email} disabled={!editable.email} onChange={(e) => setManageForm((p) => ({ ...p, email: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
-                        <PencilIcon className="h-3 w-3" />
+                      <Input className="pr-9" value={manageForm.email} disabled={!isEditing("email")} onChange={(e) => setManageForm((p) => ({ ...p, email: e.target.value }))} />
+                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
+                        {isEditing("email") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
                       </Button>
                     </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Password *</label>
                     <div className="relative">
-                      <Input className="pr-9" type="password" value={manageForm.password} disabled={!editable.password} onChange={(e) => setManageForm((p) => ({ ...p, password: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
-                        <PencilIcon className="h-3 w-3" />
+                      <Input className="pr-9" type="password" value={manageForm.password} disabled={!isEditing("password")} onChange={(e) => setManageForm((p) => ({ ...p, password: e.target.value }))} />
+                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
+                        {isEditing("password") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
                       </Button>
                     </div>
                   </div>
@@ -401,7 +408,7 @@ export default function AdminUsers() {
                         onValueChange={(v) =>
                           setManageForm((p) => ({ ...p, role: v as UserRow["role"] }))
                         }
-                        disabled={!editable.role}
+                        disabled={!isEditing("role")}
                       >
                         <SelectTrigger className="w-full pr-9">
                           <SelectValue placeholder="Select a role" />
@@ -415,8 +422,8 @@ export default function AdminUsers() {
                           <SelectItem value="Administrator">Administrator - manage users and settings</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
-                        <PencilIcon className="h-3 w-3" />
+                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
+                        {isEditing("role") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
                       </Button>
                     </div>
                   </div>
@@ -447,7 +454,7 @@ export default function AdminUsers() {
                               <Select
                                 value={entry.department || undefined}
                                 onValueChange={(v) => updateDepartmentCard(cardIndex, { department: v })}
-                                disabled={!editable[`department-${cardIndex}`]}
+                                disabled={!isEditing(`department-${cardIndex}`)}
                               >
                                 <SelectTrigger className="w-full pr-9">
                                   <SelectValue placeholder="Select unit / department" />
@@ -460,8 +467,8 @@ export default function AdminUsers() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
-                                <PencilIcon className="h-3 w-3" />
+                              <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
+                                {isEditing(`department-${cardIndex}`) ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
                               </Button>
                             </div>
                           </div>
@@ -479,7 +486,7 @@ export default function AdminUsers() {
                                     <Input
                                       className="pr-9"
                                       value={sub}
-                                      disabled={!editable[`sub-${cardIndex}-${subIndex}`]}
+                                      disabled={!isEditing(`sub-${cardIndex}-${subIndex}`)}
                                       onChange={(e) => updateSubUnit(cardIndex, subIndex, e.target.value)}
                                       placeholder="e.g. Practical Training and Career Guidance Section"
                                     />
@@ -487,11 +494,12 @@ export default function AdminUsers() {
                                       type="button"
                                       variant="ghost"
                                       size="icon"
-                                      className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary"
+                                      aria-haspopup="dialog"
+                                      className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2"
                                       onClick={() => toggleFieldEdit(`sub-${cardIndex}-${subIndex}`)}
                                       aria-label="Edit sub-unit"
                                     >
-                                      <PencilIcon className="h-3 w-3" />
+                                      {isEditing(`sub-${cardIndex}-${subIndex}`) ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
                                     </Button>
                                   </div>
                                   {subIndex > 0 ? (
@@ -507,6 +515,29 @@ export default function AdminUsers() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+              <div className="shrink-0 border-t border-border bg-card px-5 py-3 sm:px-6">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                    onClick={() => setEditingField(null)}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                    onClick={() => {
+                      if (!manageUser) return
+                      setManageForm(buildManageForm(manageUser))
+                      setEditingField(null)
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </div>
             </DialogContent>

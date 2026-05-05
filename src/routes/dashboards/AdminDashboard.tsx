@@ -153,7 +153,7 @@ export default function AdminDashboard() {
               <div className="strategic-perspective-bg-chart-2 rounded-2xl p-4">
                 <p className="font-semibold text-secondary-foreground">Auditor</p>
                 <p className="mt-1 text-xs leading-relaxed text-secondary-foreground/85">
-                  Inspect actions and participate in approval workflows.
+                  Inspect objectives, actions, and tasks and participate in approval workflows.
                 </p>
               </div>
               <div className="strategic-perspective-bg-chart-4 rounded-2xl p-4">

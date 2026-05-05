@@ -155,7 +155,7 @@ export default function AddUser() {
                 <UserPlusIcon className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">New workspace member</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">New workspace member</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Administrators can invite users and change information later from the user directory
                 </p>
@@ -194,7 +194,7 @@ export default function AddUser() {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="auditor">Auditor - action inspection and approval</SelectItem>
+                      <SelectItem value="auditor">Auditor - inspection and approval</SelectItem>
                       <SelectItem value="owner">Indicator Owner - unit head/chief with contributor editing abilities</SelectItem>
                       <SelectItem value="contributor">Contributor - edit assigned plans</SelectItem>
                       <SelectItem value="admin">Administrator - manage users and settings</SelectItem>
@@ -204,8 +204,13 @@ export default function AddUser() {
                 <div className="min-w-0 sm:col-span-2">
                   <div className="mb-1.5 flex flex-wrap items-end justify-between gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Department &amp; Sub-unit</span>
-                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={addDepartmentCard}>
-                      Add
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={addDepartmentCard}
+                    >
+                      Add department
                     </Button>
                   </div>
                   <div className="space-y-3">
@@ -221,9 +226,12 @@ export default function AddUser() {
                         </div>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <div className="min-w-0">
-                            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                              Department <span className="text-primary">*</span>
-                            </label>
+                            <div className="mb-1.5 flex items-center justify-between gap-2">
+                              <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                                Department <span className="text-primary">*</span>
+                              </label>
+                              <span className="inline-flex h-6 w-6 shrink-0" aria-hidden="true" />
+                            </div>
                             <input type="hidden" name="unitDepartment[]" value={entry.department} required />
                             <Select
                               value={entry.department || undefined}
@@ -242,7 +250,7 @@ export default function AddUser() {
                             </Select>
                           </div>
                           <div className="min-w-0">
-                            <div className="mb-1.5 flex items-end justify-between gap-2">
+                            <div className="mb-1.5 flex items-center justify-between gap-2">
                               <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                                 Sub-unit <span className="text-primary">*</span>
                               </label>
@@ -284,7 +292,7 @@ export default function AddUser() {
             </fieldset>
 
             <fieldset className="min-w-0 space-y-4 border-0 border-t border-border pt-8 p-0">
-              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Invitation</legend>
+              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Invitation</legend>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/40 p-4 transition hover:bg-muted/60">
                 <Checkbox
                   checked={sendInvite}
@@ -303,11 +311,16 @@ export default function AddUser() {
             <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:justify-end sm:gap-4">
               <Link
                 to="/users"
-                className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-xs transition hover:bg-accent"
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-xs transition hover:bg-accent"
               >
                 Cancel
               </Link>
-              <Button type="submit">Create user</Button>
+              <Button
+                type="submit"
+                className="inline-flex h-auto items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-xs transition hover:bg-primary/90"
+              >
+                Create user
+              </Button>
             </div>
           </div>
         </form>
