@@ -54,7 +54,7 @@ function NavSubmenuPopover({ item }: { item: NavItem }) {
           side="right"
           align="start"
           sideOffset={8}
-          className="w-56 p-1"
+          className="w-56 !border-sidebar-border !bg-sidebar !text-sidebar-foreground p-1 shadow-none ring-1 ring-sidebar-border"
         >
           <PopoverTitle className="sr-only">{item.title}</PopoverTitle>
           <nav className="flex flex-col gap-0.5" aria-label={item.title}>
@@ -64,8 +64,8 @@ function NavSubmenuPopover({ item }: { item: NavItem }) {
                 to={subItem.url}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded-md px-2 py-2 text-sm text-popover-foreground outline-none ring-ring/50 transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground focus-visible:ring-2",
+                  "rounded-md px-2 py-2 text-sm !text-sidebar-foreground outline-none ring-sidebar-ring/50 transition-colors",
+                  "hover:!bg-sidebar-accent hover:!text-sidebar-accent-foreground focus-visible:!bg-sidebar-accent focus-visible:!text-sidebar-accent-foreground focus-visible:ring-2 active:!bg-sidebar-accent active:!text-sidebar-accent-foreground",
                 )}
               >
                 {subItem.title}
