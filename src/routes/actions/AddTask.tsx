@@ -1,4 +1,4 @@
-import type { FormEvent } from "react"
+import { type FormEvent, useState } from "react"
 import { Link, Navigate, useLocation, useParams } from "react-router-dom"
 import {
   Breadcrumb,
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
@@ -37,20 +39,20 @@ function SparklesIcon({ className }: { className?: string }) {
 
 function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: string; minHeightClass: string }) {
   return (
-    <div className="mt-2 rounded-xl border border-border bg-gradient-to-br from-muted/90 to-card p-3 ring-1 ring-border/50">
+    <div className="mt-2 rounded-xl border border-chart-1/25 bg-gradient-to-br from-chart-1/12 to-card p-3 ring-1 ring-chart-1/20">
       <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground" aria-hidden="true">
+        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-chart-1/20 text-chart-1" aria-hidden="true">
           <SparklesIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Suggested text</p>
-          <p className={`mt-1 text-xs leading-relaxed text-muted-foreground italic ${minHeightClass}`} data-ai-for={fieldId}>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-foreground">Suggested text</p>
+          <p className={`ai-suggestion-body mt-1 text-xs leading-relaxed text-muted-foreground italic ${minHeightClass}`} data-ai-for={fieldId}>
             Connect an assistant to show suggestions here.
           </p>
         </div>
       </div>
-      <div className="mt-2 flex justify-end border-t border-border pt-2">
-        <Button type="button" variant="outline" size="sm" disabled className="h-7 border-border text-xs">
+      <div className="mt-2 flex justify-end border-t border-chart-1/20 pt-2">
+        <Button type="button" variant="outline" size="sm" disabled className="h-7 border-chart-1/40 bg-card text-xs text-chart-1 hover:bg-chart-1/10">
           Apply to field
         </Button>
       </div>
@@ -75,9 +77,23 @@ export default function AddTask() {
   const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
   const parentLabel = SECTION_LABELS[parentPath] ?? "Planning"
   const actionPlanHref = `${sectionHref}/action-plan`
+  const [taskStartDate, setTaskStartDate] = useState<Date | undefined>(undefined)
+  const [taskExpectedEndDate, setTaskExpectedEndDate] = useState<Date | undefined>(undefined)
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+  }
+  const inputClass = "h-9 w-full border-border/80 bg-card text-foreground shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
+  const dateLabel = (value?: Date) => {
+    if (!value) return "Select date"
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(value)
+  }
+  const toIsoDate = (value?: Date) => {
+    if (!value) return ""
+    const y = value.getFullYear()
+    const m = `${value.getMonth() + 1}`.padStart(2, "0")
+    const d = `${value.getDate()}`.padStart(2, "0")
+    return `${y}-${m}-${d}`
   }
 
   return (
@@ -105,7 +121,7 @@ export default function AddTask() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Add task</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -113,7 +129,10 @@ export default function AddTask() {
           </p>
         </header>
 
-        <div className="mb-8 rounded-2xl border border-border bg-muted/40 p-4 shadow-sm ring-1 ring-border/60 sm:p-5" role="note">
+        <div
+          className="mb-8 rounded-2xl border border-chart-3/30 bg-[color-mix(in_oklch,var(--chart-3)_12%,white)] p-4 shadow-sm ring-1 ring-chart-3/18 sm:p-5"
+          role="note"
+        >
           <p className="text-xs font-bold uppercase tracking-wide text-foreground/70">After you submit</p>
           <p className="mt-1 text-sm text-muted-foreground">
             This task enters the auditor queue for inspection. The auditor may Accept your proposal or Request changes with notes on specific fields. Monitor status on{" "}
@@ -126,12 +145,12 @@ export default function AddTask() {
 
         <form
           id="add-task-form"
-          className="relative overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
+          className="relative overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground shadow-md ring-1 ring-border/40"
           onSubmit={onSubmit}
         >
-          <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-card to-muted/30 px-6 py-6 sm:px-10 sm:py-8">
+          <div className="relative border-b border-border/70 bg-card px-6 py-6 sm:px-10 sm:py-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg sm:h-14 sm:w-14">
                 <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -141,14 +160,15 @@ export default function AddTask() {
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">New task</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">New task</p>
+                <p className="mt-1 text-xs text-muted-foreground">Fill in the required fields to define a task</p>
               </div>
             </div>
           </div>
 
-          <div className="relative mx-6 mb-2 rounded-2xl border border-border bg-gradient-to-r from-muted/80 to-card px-4 py-3.5 shadow-sm ring-1 ring-border/50 sm:mx-10">
+          <div className="relative mx-6 mb-2 mt-4 rounded-2xl border border-chart-1/25 bg-gradient-to-r from-chart-1/12 to-card px-4 py-3.5 shadow-sm ring-1 ring-chart-1/20 sm:mx-10">
             <div className="flex gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-chart-1/20 text-chart-1">
                 <SparklesIcon className="h-5 w-5" />
               </span>
               <div className="min-w-0">
@@ -161,24 +181,23 @@ export default function AddTask() {
           </div>
 
           <div className="relative space-y-10 px-6 py-8 sm:px-10 sm:py-10">
-            <fieldset className="space-y-4 border-0 p-0">
-              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Task</legend>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
-                <div className="sm:col-span-2">
+            <fieldset className="min-w-0 space-y-4 border-0 p-0">
+              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
+                <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="task-name" className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     <span>Task name <span className="text-primary">*</span></span>
-                    <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">AI</span>
+                    <span className="rounded bg-chart-1/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-chart-1">AI</span>
                   </label>
                   <Input
                     id="task-name"
                     name="taskName"
                     placeholder="Short title to define the task"
-                    className="h-9 bg-background"
+                    className={inputClass}
                   />
                   <AiSuggestionBlock fieldId="task-name" minHeightClass="min-h-[2.75rem]" />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label htmlFor="task-weight" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Task weight <span className="text-primary">*</span>
                   </label>
@@ -186,24 +205,70 @@ export default function AddTask() {
                     id="task-weight"
                     name="taskWeight"
                     placeholder="Enter this task's weight"
-                    className="h-9 bg-background"
+                    className={inputClass}
                   />
                 </div>
 
-                <div className="sm:col-span-1">
-                  <label htmlFor="task-start-date" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                <div className="min-w-0 sm:col-span-1">
+                  <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Start date <span className="text-primary">*</span>
                   </label>
-                  <Input id="task-start-date" type="date" name="taskStartDate" className="h-9 bg-background" />
+                  <input type="hidden" name="taskStartDate" value={toIsoDate(taskStartDate)} />
+                  <Popover>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-9 w-full justify-start border-border/80 bg-card text-left text-sm font-normal text-foreground shadow-sm hover:bg-muted"
+                        />
+                      }
+                    >
+                      {dateLabel(taskStartDate)}
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={taskStartDate}
+                        onSelect={(date) => {
+                          setTaskStartDate(date)
+                          if (date && taskExpectedEndDate && taskExpectedEndDate < date) {
+                            setTaskExpectedEndDate(date)
+                          }
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-                <div className="sm:col-span-1">
-                  <label htmlFor="task-expected-end-date" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                <div className="min-w-0 sm:col-span-1">
+                  <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     End date <span className="text-primary">*</span>
                   </label>
-                  <Input id="task-expected-end-date" type="date" name="taskExpectedEndDate" className="h-9 bg-background" />
+                  <input type="hidden" name="taskExpectedEndDate" value={toIsoDate(taskExpectedEndDate)} />
+                  <Popover>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-9 w-full justify-start border-border/80 bg-card text-left text-sm font-normal text-foreground shadow-sm hover:bg-muted"
+                        />
+                      }
+                    >
+                      {dateLabel(taskExpectedEndDate)}
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={taskExpectedEndDate}
+                        onSelect={(date) => setTaskExpectedEndDate(date)}
+                        disabled={(date) => (taskStartDate ? date < taskStartDate : false)}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
-                <div className="sm:col-span-2">
+                <div className="min-w-0 sm:col-span-2">
                   <label
                     htmlFor="task-performance-indicators"
                     className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
@@ -215,12 +280,12 @@ export default function AddTask() {
                     name="taskPerformanceIndicators"
                     rows={4}
                     placeholder="KPI or measure used to judge execution"
-                    className="min-h-[6rem] bg-background"
+                    className="min-h-[6rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                   />
                   <AiSuggestionBlock fieldId="task-performance-indicators" minHeightClass="min-h-[5rem]" />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label htmlFor="task-target-value" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Target value <span className="text-primary">*</span>
                   </label>
@@ -229,10 +294,10 @@ export default function AddTask() {
                     name="taskTargetValue"
                     type="number"
                     placeholder="Planned percentage or number the indicator must reach"
-                    className="h-9 bg-background"
+                    className={inputClass}
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label htmlFor="task-actual-value-achieved" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Number achieved
                   </label>
@@ -241,30 +306,33 @@ export default function AddTask() {
                     name="taskActualValueAchieved"
                     type="number"
                     placeholder="Current achieved value"
-                    className="h-9 bg-background"
+                    className={inputClass}
                   />
                 </div>
-                <div className="sm:col-span-2">
+                <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="task-achievement-percentage" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Achievement percentage
                   </label>
                   <Input
                     id="task-achievement-percentage"
                     name="taskAchievementPercentage"
-                    className="h-9 bg-background font-semibold"
+                    className={`${inputClass} font-semibold`}
                   />
                 </div>
               </div>
             </fieldset>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
               <Link
                 to={actionPlanHref}
                 className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/60 transition hover:border-border hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Cancel
               </Link>
-              <Button type="submit" className="w-full sm:w-auto">
+              <Button
+                type="submit"
+                className="inline-flex h-auto items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold bg-primary text-primary-foreground shadow-md hover:bg-primary/90 sm:w-auto"
+              >
                 Save task
               </Button>
             </div>

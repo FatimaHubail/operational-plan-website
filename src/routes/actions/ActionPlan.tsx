@@ -10,14 +10,12 @@ import {
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { proposalStatusToneSurfaceClass, requestStatusToProposalTone } from "@/lib/proposalStatusChip"
 import type { ActionPlanLocationState } from "@/lib/buildActionPlanHref"
 import { resolveActionPlanContext } from "@/lib/actionPlanResolve"
 import {
   type ActionPlanAction,
   type ActionPlanTask,
-  CHART_LABEL_TEXT,
-  CHART_LEGEND_BG,
-  CHART_SEGMENT_FILL,
   aggregateActionAchievementPercent,
   computeObjectiveAchievementPercent,
   flattenTasksFromActions,
@@ -30,7 +28,7 @@ import {
   taskStatusPillClass,
 } from "@/routes/actions/actionPlanModel"
 import { ProposedByBlock } from "@/components/proposed-by"
-import { HorizontalPercentFill, HorizontalRatioStack } from "@/components/ratio-bars"
+import { HorizontalRatioStack } from "@/components/ratio-bars"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -50,40 +48,84 @@ const SECTION_LABELS: Record<`/${PlanSection}`, string> = {
   "/stakeholders": "Stakeholders",
 }
 
-const shadowLift = "shadow-sm"
+/** Segment fills for Task status overview bar (`HorizontalRatioStack`). */
+const TASK_STATUS_BAR_FILLS = {
+  /** Exact tones from `action-plan.html` summary bar. */
+  in_progress: "fill-amber-400",
+  completed: "fill-emerald-500",
+  not_started: "fill-slate-300",
+} as const
 
-function objectiveStatusButtonClass(status: string): { btn: string; dot: string } {
+/** Grey segments swapped for destructive red (action weight balance). */
+const WEIGHT_BAR_FILLS = [
+  "fill-primary",
+  "fill-destructive",
+  "fill-chart-2",
+  "fill-chart-1",
+  "fill-chart-5",
+] as const
+
+const WEIGHT_LEGEND_BG = ["bg-primary", "bg-destructive", "bg-chart-2", "bg-chart-1", "bg-chart-5"] as const
+
+const WEIGHT_LABEL_TEXT = ["text-primary", "text-destructive", "text-chart-2", "text-chart-1", "text-chart-5"] as const
+
+/** Match `action-plan.html` glance achievement column — emerald-700 headline + emerald-500/600 gradient bars + cards. */
+const ACHIEVEMENT_CARD_SURFACE =
+  "border-emerald-100/90 bg-gradient-to-br from-emerald-50/50 to-card p-2.5 ring-1 ring-emerald-100/40 dark:border-emerald-900/35 dark:from-emerald-950/20 dark:to-card dark:ring-emerald-900/25"
+
+/** Mini action achievement bars — HTML hex swatches mapped to Tailwind (`action-plan.html`). */
+const ACHIEVEMENT_MINI_SEGMENT_BG = [
+  "bg-emerald-600",
+  "bg-teal-600",
+  "bg-emerald-800",
+  "bg-sky-700",
+] as const
+
+function EmeraldGradientPercentBar({ percent }: { percent: number }) {
+  const p = Math.min(100, Math.max(0, percent))
+  return (
+    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200/90 ring-1 ring-slate-200/70 dark:bg-muted dark:ring-border/70">
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-[width] duration-300 ease-out"
+        style={{ width: `${p}%` }}
+      />
+    </div>
+  )
+}
+
+/** Same shades as HTML achievement-detail bars (solid branch colours per row). */
+function AchievementSolidMiniBar({ percent, shadeIdx }: { percent: number; shadeIdx: number }) {
+  const p = Math.min(100, Math.max(0, percent))
+  const seg = ACHIEVEMENT_MINI_SEGMENT_BG[shadeIdx % ACHIEVEMENT_MINI_SEGMENT_BG.length]
+  return (
+    <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-200/90 ring-1 ring-slate-200/65 dark:bg-muted dark:ring-border/60">
+      <div className={cn("h-full rounded-full transition-[width] duration-300 ease-out", seg)} style={{ width: `${p}%` }} />
+    </div>
+  )
+}
+
+/** Same surfaces as Catalysts `getStatusClasses` — adapted for action-plan vocabulary. */
+function actionPlanObjectiveStatusSurfaceClass(status: string): string {
   const t = normalizeStatus(status)
-  const base =
-    "inline-flex cursor-not-allowed items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold shadow-sm select-none transition disabled:opacity-100 "
-  if (t.includes("not start")) {
-    return {
-      btn:
-        base +
-        "border-border bg-muted text-foreground ring-1 ring-border/60",
-      dot: "h-2 w-2 shrink-0 rounded-full bg-muted-foreground ring-2 ring-border/60",
-    }
-  }
   if (t.includes("complete")) {
-    return {
-      btn:
-        base +
-        "border-border bg-secondary text-secondary-foreground ring-1 ring-border/60",
-      dot: "h-2 w-2 shrink-0 rounded-full bg-foreground ring-2 ring-border/60",
-    }
+    return "border-0 strategic-perspective-bg-chart-2 text-secondary-foreground shadow-sm"
   }
-  return {
-    btn:
-      base +
-      "border-border bg-accent text-accent-foreground ring-1 ring-border/60",
-    dot: "h-2 w-2 shrink-0 rounded-full bg-foreground ring-2 ring-border/60",
+  if (t.includes("not start")) {
+    return "border-0 bg-muted text-secondary-foreground shadow-sm ring-1 ring-border/60"
   }
+  return "notif-new-badge border-0 shadow-sm"
 }
 
 function RequestStatusPill({ label }: { label: string }) {
   const text = label?.trim() ? label.trim() : "—"
+  const surface = proposalStatusToneSurfaceClass(requestStatusToProposalTone(text))
   return (
-    <span className="inline-flex max-w-full min-w-0 items-center rounded-xl border border-border bg-muted px-2.5 py-1.5 text-[10px] font-semibold leading-snug text-foreground ring-1 ring-border/60">
+    <span
+      className={cn(
+        "inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition",
+        surface
+      )}
+    >
       <span className="min-w-0 break-words">{text}</span>
     </span>
   )
@@ -94,25 +136,86 @@ function FieldCell({
   value,
   wide,
   mode,
+  onEdit,
+  editing = false,
+  editValue,
+  onEditValueChange,
+  onCancelEdit,
+  multiline = false,
 }: {
   label: string
   value: string
   wide?: boolean
   mode?: "default" | "metric" | "status"
+  onEdit?: () => void
+  editing?: boolean
+  editValue?: string
+  onEditValueChange?: (next: string) => void
+  onCancelEdit?: () => void
+  multiline?: boolean
 }) {
   const display = value != null && value !== "" ? String(value) : "—"
   const base =
-    "min-w-0 rounded-lg border px-2.5 py-2 transition duration-150 sm:px-3 sm:py-2" +
+    "min-w-0 rounded-xl border border-border/80 bg-white px-3 py-2.5 shadow-md ring-1 ring-border/25 transition sm:px-4" +
     (wide ? " sm:col-span-2" : "")
   const borderClass =
     mode === "metric"
-      ? " border-border bg-accent/40 ring-1 ring-border/60 hover:border-border hover:shadow-sm"
-      : " border-border bg-card ring-1 ring-border/40 hover:border-border hover:bg-muted/40 hover:shadow-sm"
+      ? " border-border/80 bg-white ring-1 ring-border/25"
+      : " border-border/80 bg-white ring-1 ring-border/25"
   return (
     <div className={cn(base, borderClass)}>
-      <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-muted-foreground">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 flex-1 text-[9px] font-bold uppercase leading-tight tracking-wide text-muted-foreground">{label}</p>
+        {editing && onCancelEdit ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={onCancelEdit}
+            aria-label={`Cancel editing ${label}`}
+            className="shrink-0 text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Button>
+        ) : onEdit ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={onEdit}
+            aria-label={`Edit ${label}`}
+            className="shrink-0 text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+              <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" />
+            </svg>
+          </Button>
+        ) : null}
+      </div>
       <div className="mt-1 break-words text-xs leading-snug whitespace-pre-wrap text-foreground sm:text-[13px] sm:leading-snug">
-        {mode === "status" && value ? (
+        {editing ? (
+          multiline ? (
+            <Textarea
+              rows={3}
+              value={editValue ?? ""}
+              onChange={(event) => onEditValueChange?.(event.target.value)}
+              className="min-h-[4.5rem] border-border/80 bg-white text-sm text-zinc-950 shadow-sm ring-1 ring-border/25"
+            />
+          ) : (
+            <Input
+              type="text"
+              value={editValue ?? ""}
+              onChange={(event) => onEditValueChange?.(event.target.value)}
+              className="h-auto min-h-9 w-full border-border/80 bg-white py-2 text-sm text-zinc-950 shadow-sm ring-1 ring-border/25"
+            />
+          )
+        ) : mode === "status" && value ? (
           <span
             className={cn(
               "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold",
@@ -160,7 +263,6 @@ export default function ActionPlan() {
   const status = resolved?.status ?? "In progress"
 
   const headingText = `${sub} - Objective ${obj}`
-  const statusStyles = objectiveStatusButtonClass(status)
 
   const [actionsData, setActionsData] = useState<ActionPlanAction[]>(() =>
     structuredClone(initialActionsData)
@@ -173,14 +275,40 @@ export default function ActionPlan() {
     action: ActionPlanAction
   } | null>(null)
 
-  const [taskEditMode, setTaskEditMode] = useState(false)
+  const [taskEditingField, setTaskEditingField] = useState<keyof Pick<
+    ActionPlanTask,
+    "weight" | "startDate" | "expectedEndDate" | "performanceIndicators" | "targetValue" | "actualValueAchieved" | "achievementPercentage"
+  > | null>(null)
+  const [taskDraft, setTaskDraft] = useState<Pick<
+    ActionPlanTask,
+    "weight" | "startDate" | "expectedEndDate" | "performanceIndicators" | "targetValue" | "actualValueAchieved" | "achievementPercentage"
+  >>({
+    weight: "",
+    startDate: "",
+    expectedEndDate: "",
+    performanceIndicators: "",
+    targetValue: "",
+    actualValueAchieved: "",
+    achievementPercentage: "",
+  })
 
   const [actionDetails, setActionDetails] = useState<{
     action: ActionPlanAction
     index: number
   } | null>(null)
 
-  const [actionDetailsEditMode, setActionDetailsEditMode] = useState(false)
+  const [actionEditingField, setActionEditingField] = useState<
+    | "actionTitle"
+    | "taskMainEntity"
+    | "taskSupportingEntities"
+    | "taskHumanResources"
+    | "taskFinancialResources"
+    | "taskActionContributionPercentage"
+    | "taskStatus"
+    | "taskNotes"
+    | "actionProposalStatus"
+    | null
+  >(null)
   const [actionDetailsDraft, setActionDetailsDraft] = useState({
     actionTitle: "",
     totalWeight: "",
@@ -200,9 +328,9 @@ export default function ActionPlan() {
     const totalTasks = tasks.length
 
     const buckets = {
-      in_progress: { label: "In progress", color: "bg-muted-foreground", names: [] as string[] },
-      completed: { label: "Completed", color: "bg-primary", names: [] as string[] },
-      not_started: { label: "Not started", color: "bg-muted", names: [] as string[] },
+      in_progress: { label: "In progress", names: [] as string[] },
+      completed: { label: "Completed", names: [] as string[] },
+      not_started: { label: "Not started", names: [] as string[] },
     }
     const order = ["in_progress", "completed", "not_started"] as const
     tasks.forEach((t) => {
@@ -294,18 +422,27 @@ export default function ActionPlan() {
     actionIndex: number,
     action: ActionPlanAction
   ) => {
-    setTaskEditMode(false)
+    setTaskEditingField(null)
+    setTaskDraft({
+      weight: task.weight || "",
+      startDate: task.startDate || "",
+      expectedEndDate: task.expectedEndDate || "",
+      performanceIndicators: task.performanceIndicators || "",
+      targetValue: task.targetValue || "",
+      actualValueAchieved: task.actualValueAchieved || "",
+      achievementPercentage: task.achievementPercentage || "",
+    })
     setTaskModal({ task, taskIndex, actionIndex, action })
   }
 
   const closeTaskModal = () => {
     setTaskModal(null)
-    setTaskEditMode(false)
+    setTaskEditingField(null)
   }
 
   const openActionDetails = (action: ActionPlanAction, index: number) => {
     const firstTask = action.tasks?.[0]
-    setActionDetailsEditMode(false)
+    setActionEditingField(null)
     setActionDetails({ action, index })
     setActionDetailsDraft({
       actionTitle: action.title || "",
@@ -321,8 +458,7 @@ export default function ActionPlan() {
     })
   }
 
-  const saveActionDetails = (e: React.FormEvent) => {
-    e.preventDefault()
+  const saveActionDetails = () => {
     if (!actionDetails) return
     setActionsData((prev) => {
       const next = structuredClone(prev)
@@ -355,26 +491,20 @@ export default function ActionPlan() {
           }
         : null
     )
-    setActionDetailsEditMode(false)
+    setActionEditingField(null)
   }
 
   const saveTaskEdit = () => {
     if (!taskModal) return
-    const form = document.getElementById("task-inline-edit-fields") as HTMLFormElement | null
-    if (!form) return
-    const val = (name: string) =>
-      (form.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement | null)?.value.trim() ?? ""
-
     const updatedTask: ActionPlanTask = {
       ...taskModal.task,
-      name: val("name"),
-      weight: val("weight"),
-      startDate: val("startDate"),
-      expectedEndDate: val("expectedEndDate"),
-      performanceIndicators: val("performanceIndicators"),
-      targetValue: val("targetValue"),
-      actualValueAchieved: val("actualValueAchieved"),
-      achievementPercentage: val("achievementPercentage"),
+      weight: taskDraft.weight.trim(),
+      startDate: taskDraft.startDate.trim(),
+      expectedEndDate: taskDraft.expectedEndDate.trim(),
+      performanceIndicators: taskDraft.performanceIndicators.trim(),
+      targetValue: taskDraft.targetValue.trim(),
+      actualValueAchieved: taskDraft.actualValueAchieved.trim(),
+      achievementPercentage: taskDraft.achievementPercentage.trim(),
     }
 
     setActionsData((prev) => {
@@ -386,7 +516,7 @@ export default function ActionPlan() {
       return next
     })
     setTaskModal({ ...taskModal, task: updatedTask })
-    setTaskEditMode(false)
+    setTaskEditingField(null)
   }
 
   if (!isValidSection(planSection)) {
@@ -414,7 +544,7 @@ export default function ActionPlan() {
         </Breadcrumb>
       </header>
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
+      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
@@ -434,30 +564,53 @@ export default function ActionPlan() {
             </span>
             <span className="text-foreground">Action plan</span>
           </nav>
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Action Plan</p>
-          <p className="mt-1 text-sm text-muted-foreground">Plan and track actions, tasks, their resources, and due dates</p>
+          <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+            <div
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg shadow-primary/30"
+              aria-hidden="true"
+            >
+              <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664v.75h-4.5M4.5 15.75v-2.25m0 0h15m-15 0H3m9.75 0H9m9.75 0H15"
+                />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Action plan</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Track actions, task ownership, resources, and delivery dates.
+              </p>
+            </div>
+          </div>
         </header>
 
         <section
-          className={cn("mb-8 max-w-full min-w-0 overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/40", shadowLift)}
+          className="mb-8 max-w-full min-w-0 overflow-hidden rounded-3xl border border-border bg-card shadow-ap-soft ring-1 ring-border/50"
           aria-labelledby="action-plan-glance-heading"
         >
-          <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-border bg-primary px-5 py-4 sm:px-6">
+          <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-primary/25 bg-gradient-to-r from-primary via-primary to-chart-5 px-5 py-4 sm:px-6">
             <div
-              className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2760%27%20height%3D%2760%27%20viewBox%3D%270%200%2060%2060%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cg%20fill%3D%27none%27%20fill-rule%3D%27evenodd%27%3E%3Cg%20fill%3D%27%23ffffff%27%20fill-opacity%3D%270.06%27%3E%3Cpath%20d%3D%27M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%27%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-90"
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-foreground/12 via-transparent to-transparent"
               aria-hidden="true"
             />
             <div className="relative">
-              <h2 id="action-plan-glance-heading" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/80">
-                Plan Overview
+              <h2
+                id="action-plan-glance-heading"
+                className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/85"
+              >
+                Overview
               </h2>
-              <p className="mt-1 text-sm font-semibold text-primary-foreground">Actions and tasks execution progress and achievement rates</p>
+              <p className="mt-1 text-sm font-semibold text-primary-foreground">
+                Objective execution · weighted actions &amp; tasks
+              </p>
             </div>
             <div className="relative flex flex-wrap gap-2">
-              <span className="rounded-md bg-primary-foreground/15 px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
+              <span className="rounded-md bg-primary-foreground/20 px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
                 {actionsData.length === 1 ? "1 action" : `${actionsData.length} actions`}
               </span>
-              <span className="rounded-md bg-primary-foreground/15 px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
+              <span className="rounded-md bg-primary-foreground/20 px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
                 {glance.totalTasks === 1 ? "1 task" : `${glance.totalTasks} tasks`}
               </span>
             </div>
@@ -478,10 +631,10 @@ export default function ActionPlan() {
                         if (n === 0) return null
                         const fillClass =
                           key === "in_progress"
-                            ? "fill-muted-foreground"
+                            ? TASK_STATUS_BAR_FILLS.in_progress
                             : key === "completed"
-                              ? "fill-primary"
-                              : "fill-muted"
+                              ? TASK_STATUS_BAR_FILLS.completed
+                              : TASK_STATUS_BAR_FILLS.not_started
                         return {
                           ratio: n,
                           className: fillClass,
@@ -505,7 +658,11 @@ export default function ActionPlan() {
                           <span
                             className={cn(
                               "h-2 w-2 shrink-0 rounded-sm",
-                              key === "in_progress" ? "bg-muted-foreground" : key === "completed" ? "bg-primary" : "bg-muted"
+                              key === "in_progress"
+                                ? "bg-amber-400"
+                                : key === "completed"
+                                  ? "bg-emerald-500"
+                                  : "bg-slate-300"
                             )}
                           />
                           {info.label}{" "}
@@ -524,16 +681,11 @@ export default function ActionPlan() {
             </div>
             <div className="p-5 sm:p-6" role="group" aria-label="Total achievement">
               <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Total achievement</p>
-              <p className="mt-2 text-4xl font-bold tabular-nums text-foreground">
+              <p className="mt-2 text-4xl font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
                 {glance.objAch != null ? `${glance.objAch}%` : "—"}
               </p>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                <HorizontalPercentFill
-                  percent={glance.objAch != null ? Math.min(100, Math.max(0, glance.objAch)) : 0}
-                  fillClassName="fill-primary"
-                  trackClassName="fill-muted"
-                  className="h-full"
-                />
+              <div className="mt-2">
+                <EmeraldGradientPercentBar percent={glance.objAch != null ? glance.objAch : 0} />
               </div>
               <div className="mt-4 min-w-0">
                 {glance.objAch == null ? (
@@ -545,32 +697,25 @@ export default function ActionPlan() {
                       const achM = achStr?.match(/(\d+(?:\.\d+)?)/)
                       const achNum = achM ? parseFloat(achM[1]) : null
                       return (
-                        <div
-                          key={`${action.title}-${idx}`}
-                          className="rounded-xl border border-border bg-gradient-to-br from-muted/50 to-card p-2.5 ring-1 ring-border/40"
-                        >
+                        <div key={`${action.title}-${idx}`} className={cn("rounded-xl border", ACHIEVEMENT_CARD_SURFACE)}>
                           <div className="flex flex-wrap items-start justify-between gap-1.5 gap-y-0">
                             <div className="min-w-0 flex-1">
-                              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-800/70 dark:text-emerald-300/75">
                                 Action {idx + 1}
                               </p>
-                              <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-foreground">
+                              <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-snug text-slate-800 dark:text-foreground">
                                 {action.title || "Untitled"}
                               </p>
                             </div>
-                            <p className="shrink-0 text-right text-sm font-bold tabular-nums text-foreground">
+                            <p className="shrink-0 text-right text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
                               {achStr || "—"}
                             </p>
                           </div>
                           <div className="mt-2 flex items-center gap-2">
-                            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted/80">
-                              <HorizontalPercentFill
-                                percent={achNum != null ? Math.min(100, Math.max(0, achNum)) : 0}
-                                fillClassName={CHART_SEGMENT_FILL[idx % CHART_SEGMENT_FILL.length]}
-                                trackClassName="fill-muted/80"
-                                className="h-full"
-                              />
-                            </div>
+                            <AchievementSolidMiniBar
+                              percent={achNum != null ? achNum : 0}
+                              shadeIdx={idx}
+                            />
                           </div>
                         </div>
                       )
@@ -588,16 +733,20 @@ export default function ActionPlan() {
                 {glance.tasksOnFirstStart.length === 0 ? (
                   <p className="text-sm font-medium text-muted-foreground">—</p>
                 ) : (
-                  glance.tasksOnFirstStart.map((r) => (
-                    <p key={r.name} className="text-sm font-semibold leading-snug text-foreground">
-                      {r.name}
+                  glance.tasksOnFirstStart.map((r, i) => (
+                    <p key={r.name} className="flex items-center gap-2 text-sm font-semibold leading-snug text-foreground">
+                      <span
+                        className={cn("h-1.5 w-1.5 shrink-0 rounded-full", WEIGHT_LEGEND_BG[i % WEIGHT_LEGEND_BG.length])}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">{r.name}</span>
                     </p>
                   ))
                 )}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {glance.startRowsLength === 0
-                  ? "No open tasks with a start date on or after today."
+                  ? "No tasks will start soon"
                   : glance.tasksOnFirstStart.length === 1
                     ? "Next start date · 1 task"
                     : `Next start date · ${glance.tasksOnFirstStart.length} tasks`}
@@ -607,9 +756,15 @@ export default function ActionPlan() {
                 {glance.openEnding.length === 0 ? (
                   <p className="text-[11px] font-medium text-muted-foreground">—</p>
                 ) : (
-                  glance.openEnding.slice(0, 6).map((x) => (
-                    <p key={x.name + x.iso} className="text-[11px] font-medium leading-snug text-foreground">
-                      {x.name} · ends {formatDate(x.iso || "")}
+                  glance.openEnding.slice(0, 6).map((x, i) => (
+                    <p key={x.name + x.iso} className="flex items-center gap-2 text-[11px] font-medium leading-snug text-foreground">
+                      <span
+                        className={cn("h-1.5 w-1.5 shrink-0 rounded-full", WEIGHT_LEGEND_BG[i % WEIGHT_LEGEND_BG.length])}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">
+                        {x.name} · ends {formatDate(x.iso || "")}
+                      </span>
                     </p>
                   ))
                 )}
@@ -619,18 +774,7 @@ export default function ActionPlan() {
                   </p>
                 ) : null}
               </div>
-              <p
-                className={cn(
-                  "mt-3 font-mono text-[11px] font-semibold",
-                  glance.overdueCount === 0 ? "text-muted-foreground" : "text-destructive"
-                )}
-              >
-                {glance.overdueCount === 0
-                  ? "No overdue open tasks"
-                  : glance.overdueCount === 1
-                    ? "1 open task past end date"
-                    : `${glance.overdueCount} open tasks past end date`}
-              </p>
+              
             </div>
             <div
               className="border-t border-border bg-gradient-to-b from-background to-muted/40 px-4 py-3 sm:px-5 sm:py-4 sm:col-span-2 xl:col-span-4 xl:border-t xl:border-border"
@@ -658,19 +802,19 @@ export default function ActionPlan() {
                     <HorizontalRatioStack
                       segments={glance.weightSegs.map((w) => ({
                         ratio: glance.weightSumParsed > 0 ? w.pct : 1,
-                        className: CHART_SEGMENT_FILL[w.i % CHART_SEGMENT_FILL.length],
+                        className: WEIGHT_BAR_FILLS[w.i % WEIGHT_BAR_FILLS.length],
                         title: `${w.title} — ${w.pct}%`,
                       }))}
                     />
                   </div>
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {glance.weightSegs.map((w, idx) => {
-                      const bgClass = CHART_LEGEND_BG[w.i % CHART_LEGEND_BG.length]
-                      const textClass = CHART_LABEL_TEXT[w.i % CHART_LABEL_TEXT.length]
+                      const bgClass = WEIGHT_LEGEND_BG[w.i % WEIGHT_LEGEND_BG.length]
+                      const textClass = WEIGHT_LABEL_TEXT[w.i % WEIGHT_LABEL_TEXT.length]
                       return (
                         <div
                           key={`leg-${w.i}-${idx}`}
-                          className="flex min-w-0 gap-2 rounded-xl border border-border/80 bg-card p-2 shadow-sm ring-1 ring-border/60"
+                          className="flex min-w-0 gap-2 rounded-xl border border-border bg-card p-2 shadow-sm ring-1 ring-border/60"
                         >
                           <div
                             className={cn("mt-0.5 h-7 w-1 shrink-0 rounded-full shadow-sm", bgClass)}
@@ -696,14 +840,17 @@ export default function ActionPlan() {
         </section>
 
         <div className="w-full min-w-0">
-          <div className={cn("relative overflow-hidden rounded-3xl bg-card ring-1 ring-border/60", shadowLift)} aria-labelledby="ap-heading">
-            <div className="pointer-events-none absolute -right-24 -top-24 h-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 rounded-full bg-muted/30 blur-3xl" aria-hidden="true" />
-            <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-background to-muted/30 px-6 py-8 sm:px-10 sm:py-10">
+          <div
+            className="relative overflow-hidden rounded-3xl bg-card shadow-ap-soft ring-1 ring-border/60"
+            aria-labelledby="ap-heading"
+          >
+            <div className="pointer-events-none absolute -right-24 -top-24 h-64 rounded-full bg-primary/12 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 rounded-full bg-chart-3/15 blur-3xl" aria-hidden="true" />
+            <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-background to-primary/10 px-6 py-8 sm:px-10 sm:py-10">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
                 <div className="flex min-w-0 flex-1 gap-4 sm:gap-5">
                   <div
-                    className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg sm:flex"
+                    className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-chart-5 text-primary-foreground shadow-lg shadow-primary/25 sm:flex"
                     aria-hidden="true"
                   >
                     <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -715,7 +862,7 @@ export default function ActionPlan() {
                     </svg>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/65">
                       Operational objective
                     </p>
                     <h1
@@ -724,7 +871,7 @@ export default function ActionPlan() {
                     >
                       {headingText}
                     </h1>
-                    <p className="mt-3 max-w-3xl border-l-2 border-primary/25 pl-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                    <p className="mt-3 max-w-3xl border-l-2 border-primary/35 pl-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
                       {objectiveLead}
                     </p>
                     <ProposedByBlock
@@ -739,16 +886,16 @@ export default function ActionPlan() {
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground lg:text-right">
                     Objective status
                   </p>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    disabled
-                    className={statusStyles.btn}
+                  <span
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-2 rounded-xl border-0 px-3 py-2 text-left text-xs font-semibold leading-snug sm:text-sm",
+                      actionPlanObjectiveStatusSurfaceClass(status)
+                    )}
                     aria-label={`Objective status: ${status}`}
                   >
-                    <span className={statusStyles.dot} aria-hidden="true" />
-                    <span>{status}</span>
-                  </Button>
+                    <span className="mt-0.5 h-2 w-2 shrink-0 self-start rounded-full bg-current opacity-70" aria-hidden />
+                    <span className="max-w-[18rem]">{status}</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -757,7 +904,7 @@ export default function ActionPlan() {
               <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/90 p-5 shadow-sm ring-1 ring-border/80 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div className="flex min-w-0 flex-1 items-start gap-4">
                   <span
-                    className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md"
+                    className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-background shadow-md"
                     aria-hidden="true"
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -769,7 +916,7 @@ export default function ActionPlan() {
                     </svg>
                   </span>
                   <div className="min-w-0">
-                    <h2 className="text-lg font-bold text-foreground sm:text-xl">Actions &amp; Tasks</h2>
+                    <h2 className="text-lg font-bold text-foreground sm:text-xl">Actions &amp; tasks</h2>
                     <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
                       Actions define key initiatives under each objective, and tasks break them down into executable steps with timelines and resources
                     </p>
@@ -778,7 +925,7 @@ export default function ActionPlan() {
                 <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                   <Link
                     to={`${parentPath}/add-action`}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground shadow-sm transition hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 sm:w-auto"
+                    className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-[oklch(0.22_0.04_265)] px-4 py-2.5 text-sm font-semibold text-[oklch(0.965_0.003_250)] shadow-sm transition hover:bg-[oklch(0.30_0.05_265)] hover:text-[oklch(0.99_0_0)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 sm:w-auto dark:border-white/15 dark:bg-[oklch(0.32_0.06_265)] dark:text-[oklch(0.96_0.003_250)] dark:hover:bg-[oklch(0.42_0.07_265)] dark:hover:text-[oklch(0.99_0_0)]"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -843,67 +990,116 @@ export default function ActionPlan() {
       >
         {taskModal ? (
           <DialogContent
-            className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 text-foreground shadow-lg ring-1 ring-border/80 sm:max-w-lg"
+            className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl bg-white p-0 text-zinc-950 ring-1 ring-border/80 sm:max-w-lg dark:bg-white dark:text-zinc-950"
             showCloseButton
           >
-            <DialogHeader className="shrink-0 gap-0 border-b border-border bg-gradient-to-r from-muted/90 to-background px-5 py-4 text-left sm:px-6">
+            <DialogHeader className="shrink-0 gap-0 border-b border-border bg-white px-5 py-4 text-left sm:px-6">
               <DialogTitle className="text-base font-bold sm:text-lg">
                 Task {taskModal.taskIndex + 1} · Action {taskModal.actionIndex + 1}
                 {taskModal.action.title ? ` — ${taskModal.action.title}` : ""}
               </DialogTitle>
             </DialogHeader>
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
-              {!taskEditMode ? (
-                <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2">
-                  <FieldCell label="Weight" value={taskModal.task.weight} mode="metric" />
-                  <FieldCell label="Start date" value={formatDate(taskModal.task.startDate)} />
-                  <FieldCell label="Expected end date" value={formatDate(taskModal.task.expectedEndDate)} />
-                  <FieldCell label="Performance indicators" value={taskModal.task.performanceIndicators} wide />
-                  <FieldCell label="Target value" value={taskModal.task.targetValue} />
-                  <FieldCell label="Actual value achieved" value={taskModal.task.actualValueAchieved} />
-                  <FieldCell label="Achievement percentage" value={taskModal.task.achievementPercentage} mode="metric" />
-                </div>
-              ) : (
-                <form
-                  key={`${taskModal.actionIndex}-${taskModal.taskIndex}-${taskModal.task.name}`}
-                  id="task-inline-edit-fields"
-                  className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2"
-                >
-                  <TaskEditFields task={taskModal.task} />
-                </form>
-              )}
+              <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2">
+                <FieldCell
+                  label="Weight"
+                  value={taskDraft.weight}
+                  mode="metric"
+                  editing={taskEditingField === "weight"}
+                  editValue={taskDraft.weight}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, weight: next }))}
+                  onEdit={() => setTaskEditingField("weight")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+                <FieldCell
+                  label="Start date"
+                  value={formatDate(taskDraft.startDate)}
+                  editing={taskEditingField === "startDate"}
+                  editValue={taskDraft.startDate}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, startDate: next }))}
+                  onEdit={() => setTaskEditingField("startDate")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+                <FieldCell
+                  label="Expected end date"
+                  value={formatDate(taskDraft.expectedEndDate)}
+                  editing={taskEditingField === "expectedEndDate"}
+                  editValue={taskDraft.expectedEndDate}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, expectedEndDate: next }))}
+                  onEdit={() => setTaskEditingField("expectedEndDate")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+                <FieldCell
+                  label="Performance indicators"
+                  value={taskDraft.performanceIndicators}
+                  wide
+                  multiline
+                  editing={taskEditingField === "performanceIndicators"}
+                  editValue={taskDraft.performanceIndicators}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, performanceIndicators: next }))}
+                  onEdit={() => setTaskEditingField("performanceIndicators")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+                <FieldCell
+                  label="Target value"
+                  value={taskDraft.targetValue}
+                  editing={taskEditingField === "targetValue"}
+                  editValue={taskDraft.targetValue}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, targetValue: next }))}
+                  onEdit={() => setTaskEditingField("targetValue")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+                <FieldCell
+                  label="Actual value achieved"
+                  value={taskDraft.actualValueAchieved}
+                  editing={taskEditingField === "actualValueAchieved"}
+                  editValue={taskDraft.actualValueAchieved}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, actualValueAchieved: next }))}
+                  onEdit={() => setTaskEditingField("actualValueAchieved")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+                <FieldCell
+                  label="Achievement percentage"
+                  value={taskDraft.achievementPercentage}
+                  mode="metric"
+                  editing={taskEditingField === "achievementPercentage"}
+                  editValue={taskDraft.achievementPercentage}
+                  onEditValueChange={(next) => setTaskDraft((prev) => ({ ...prev, achievementPercentage: next }))}
+                  onEdit={() => setTaskEditingField("achievementPercentage")}
+                  onCancelEdit={() => setTaskEditingField(null)}
+                />
+              </div>
             </div>
-            <div className="shrink-0 border-t border-border bg-muted/80 px-5 py-3 sm:px-6">
-              {!taskEditMode ? (
+            <div className="shrink-0 border-t border-border bg-white px-5 py-3 sm:px-6">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  onClick={saveTaskEdit}
+                  disabled={taskEditingField == null}
+                >
+                  Save
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:w-auto"
-                  onClick={() => setTaskEditMode(true)}
+                  className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  onClick={() => {
+                    setTaskEditingField(null)
+                    setTaskDraft({
+                      weight: taskModal.task.weight || "",
+                      startDate: taskModal.task.startDate || "",
+                      expectedEndDate: taskModal.task.expectedEndDate || "",
+                      performanceIndicators: taskModal.task.performanceIndicators || "",
+                      targetValue: taskModal.task.targetValue || "",
+                      actualValueAchieved: taskModal.task.actualValueAchieved || "",
+                      achievementPercentage: taskModal.task.achievementPercentage || "",
+                    })
+                  }}
                 >
-                  Edit details
+                  Cancel
                 </Button>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6"
-                    onClick={saveTaskEdit}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none"
-                    onClick={() => {
-                      setTaskEditMode(false)
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
+              </div>
             </div>
           </DialogContent>
         ) : null}
@@ -914,189 +1110,73 @@ export default function ActionPlan() {
         onOpenChange={(open) => {
           if (!open) {
             setActionDetails(null)
-            setActionDetailsEditMode(false)
+            setActionEditingField(null)
           }
         }}
       >
         {actionDetails ? (
           <DialogContent
-            className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 text-foreground shadow-lg ring-1 ring-border/80 sm:max-w-lg"
+            className="flex max-h-[min(90vh,42rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl bg-white p-0 text-zinc-950 ring-1 ring-border/80 sm:max-w-lg dark:bg-white dark:text-zinc-950"
             showCloseButton
           >
-            <DialogHeader className="shrink-0 gap-0 border-b border-border bg-gradient-to-r from-muted/90 to-background px-5 py-4 text-left sm:px-6">
+            <DialogHeader className="shrink-0 gap-0 border-b border-border bg-white px-5 py-4 text-left sm:px-6">
               <DialogTitle className="text-base font-bold">
                 Action {actionDetails.index + 1} - {actionDetails.action.title || "Untitled action"}
               </DialogTitle>
             </DialogHeader>
-            <form id="action-details-edit-fields" onSubmit={saveActionDetails} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Action title</span>
-                <Input
-                  name="actionTitle"
-                  value={actionDetailsDraft.actionTitle}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionTitle: e.target.value }))}
-                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Main entity</span>
-                <Input
-                  name="taskMainEntity"
-                  value={actionDetailsDraft.taskMainEntity}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskMainEntity: e.target.value }))}
-                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Supporting entities</span>
-                <Input
-                  name="taskSupportingEntities"
-                  value={actionDetailsDraft.taskSupportingEntities}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskSupportingEntities: e.target.value }))}
-                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Human resources required</span>
-                <Textarea
-                  name="taskHumanResources"
-                  rows={3}
-                  value={actionDetailsDraft.taskHumanResources}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskHumanResources: e.target.value }))}
-                  className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Financial resources required</span>
-                <Textarea
-                  name="taskFinancialResources"
-                  rows={3}
-                  value={actionDetailsDraft.taskFinancialResources}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskFinancialResources: e.target.value }))}
-                  className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Action contribution percentage</span>
-                <Input
-                  name="taskActionContributionPercentage"
-                  value={actionDetailsDraft.taskActionContributionPercentage}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskActionContributionPercentage: e.target.value }))}
-                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Status</span>
-                <Input
-                  name="taskStatus"
-                  value={actionDetailsDraft.taskStatus}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskStatus: e.target.value }))}
-                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Action proposal status</span>
-                <Input
-                  name="actionProposalStatus"
-                  value={actionDetailsDraft.actionProposalStatus}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, actionProposalStatus: e.target.value }))}
-                  className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Notes</span>
-                <Textarea
-                  name="taskNotes"
-                  rows={3}
-                  value={actionDetailsDraft.taskNotes}
-                  disabled={!actionDetailsEditMode}
-                  onChange={(e) => setActionDetailsDraft((d) => ({ ...d, taskNotes: e.target.value }))}
-                  className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
-                />
-              </label>
-            </form>
-            <div className="shrink-0 border-t border-border bg-muted/80 px-5 py-3 sm:px-6">
-              {!actionDetailsEditMode ? (
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
+              <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-2">
+                <FieldCell label="Action title" value={actionDetailsDraft.actionTitle} editing={actionEditingField === "actionTitle"} editValue={actionDetailsDraft.actionTitle} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, actionTitle: next }))} onEdit={() => setActionEditingField("actionTitle")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Main entity" value={actionDetailsDraft.taskMainEntity} editing={actionEditingField === "taskMainEntity"} editValue={actionDetailsDraft.taskMainEntity} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskMainEntity: next }))} onEdit={() => setActionEditingField("taskMainEntity")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Supporting entities" value={actionDetailsDraft.taskSupportingEntities} editing={actionEditingField === "taskSupportingEntities"} editValue={actionDetailsDraft.taskSupportingEntities} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskSupportingEntities: next }))} onEdit={() => setActionEditingField("taskSupportingEntities")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Action contribution percentage" value={actionDetailsDraft.taskActionContributionPercentage} editing={actionEditingField === "taskActionContributionPercentage"} editValue={actionDetailsDraft.taskActionContributionPercentage} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskActionContributionPercentage: next }))} onEdit={() => setActionEditingField("taskActionContributionPercentage")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Status" value={actionDetailsDraft.taskStatus} editing={actionEditingField === "taskStatus"} editValue={actionDetailsDraft.taskStatus} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskStatus: next }))} onEdit={() => setActionEditingField("taskStatus")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Action proposal status" value={actionDetailsDraft.actionProposalStatus} editing={actionEditingField === "actionProposalStatus"} editValue={actionDetailsDraft.actionProposalStatus} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, actionProposalStatus: next }))} onEdit={() => setActionEditingField("actionProposalStatus")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Human resources required" value={actionDetailsDraft.taskHumanResources} wide multiline editing={actionEditingField === "taskHumanResources"} editValue={actionDetailsDraft.taskHumanResources} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskHumanResources: next }))} onEdit={() => setActionEditingField("taskHumanResources")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Financial resources required" value={actionDetailsDraft.taskFinancialResources} wide multiline editing={actionEditingField === "taskFinancialResources"} editValue={actionDetailsDraft.taskFinancialResources} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskFinancialResources: next }))} onEdit={() => setActionEditingField("taskFinancialResources")} onCancelEdit={() => setActionEditingField(null)} />
+                <FieldCell label="Notes" value={actionDetailsDraft.taskNotes} wide multiline editing={actionEditingField === "taskNotes"} editValue={actionDetailsDraft.taskNotes} onEditValueChange={(next) => setActionDetailsDraft((d) => ({ ...d, taskNotes: next }))} onEdit={() => setActionEditingField("taskNotes")} onCancelEdit={() => setActionEditingField(null)} />
+              </div>
+            </div>
+            <div className="shrink-0 border-t border-border bg-white px-5 py-3 sm:px-6">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  onClick={saveActionDetails}
+                  disabled={actionEditingField == null}
+                >
+                  Save
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:w-auto"
-                  onClick={() => setActionDetailsEditMode(true)}
+                  className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  onClick={() => {
+                    if (!actionDetails) return
+                    const firstTask = actionDetails.action.tasks?.[0]
+                    setActionDetailsDraft({
+                      actionTitle: actionDetails.action.title || "",
+                      totalWeight: actionDetails.action.totalWeight || "",
+                      taskMainEntity: firstTask?.mainEntity || "",
+                      taskSupportingEntities: firstTask?.supportingEntities || "",
+                      taskHumanResources: firstTask?.humanResources || "",
+                      taskFinancialResources: firstTask?.financialResources || "",
+                      taskActionContributionPercentage: firstTask?.actionContributionPercentage || "",
+                      taskStatus: firstTask?.status || "Not started",
+                      taskNotes: firstTask?.notes || "",
+                      actionProposalStatus: firstTask?.requestStatus || "—",
+                    })
+                    setActionEditingField(null)
+                  }}
                 >
-                  Edit details
+                  Cancel
                 </Button>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="submit"
-                    form="action-details-edit-fields"
-                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none"
-                    onClick={() => setActionDetailsEditMode(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
+              </div>
             </div>
           </DialogContent>
         ) : null}
       </Dialog>
     </div>
-  )
-}
-
-function TaskEditFields({ task }: { task: ActionPlanTask }) {
-  const field = (
-    name: keyof ActionPlanTask,
-    label: string,
-    wide?: boolean,
-    multiline?: boolean
-  ) => (
-    <label key={name} className={cn("block", wide && "sm:col-span-2")}>
-      <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
-      {multiline ? (
-        <Textarea
-          name={name}
-          rows={3}
-          defaultValue={task[name] as string}
-          className="mt-1 min-h-[4.5rem] text-sm shadow-sm"
-        />
-      ) : (
-        <Input
-          name={name}
-          type="text"
-          defaultValue={task[name] as string}
-          className="mt-1 h-auto min-h-9 w-full py-2 text-sm shadow-sm"
-        />
-      )}
-    </label>
-  )
-  return (
-    <>
-      {field("name", "Task name")}
-      {field("weight", "Weight")}
-      {field("startDate", "Start date (YYYY-MM-DD)")}
-      {field("expectedEndDate", "Expected end date (YYYY-MM-DD)")}
-      {field("performanceIndicators", "Performance indicators", true, true)}
-      {field("targetValue", "Target value")}
-      {field("actualValueAchieved", "Actual value achieved")}
-      {field("achievementPercentage", "Achievement percentage")}
-    </>
   )
 }
 
@@ -1148,16 +1228,14 @@ function ActionCard({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/80 bg-card/80 shadow-md ring-1 ring-border/50 backdrop-blur-sm transition duration-300 hover:shadow-lg"
+        "overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-b from-white via-white to-slate-50/25 shadow-md ring-1 ring-slate-200/35 transition duration-300 hover:shadow-lg"
       )}
       aria-labelledby={`ap-action-${actionIndex}`}
     >
-      <div className="absolute left-0 top-0 h-full w-1 bg-primary" aria-hidden="true" />
-      <div className="pl-3 sm:pl-4">
-      <div className="flex flex-col items-start gap-3 border-b border-border bg-gradient-to-b from-muted/45 via-background to-background px-4 py-4 sm:gap-4 sm:px-6">
+      <div className="flex flex-col items-start gap-3 border-b border-orange-100/60 bg-gradient-to-b from-orange-50/45 via-white to-white px-4 py-4 sm:gap-4 sm:px-6">
         <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-start">
           <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-sm font-bold text-background shadow-md"
             aria-hidden="true"
           >
             {actionIndex + 1}
@@ -1169,51 +1247,97 @@ function ActionCard({
                 {action.title || "Untitled action"}
               </h2>
               <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-stretch lg:justify-end lg:gap-2">
-                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-border bg-gradient-to-b from-muted/90 to-background px-3 py-2 text-xs shadow-sm ring-1 ring-border/70 lg:w-auto lg:py-1.5 lg:text-sm">
-                  <span className="font-semibold text-muted-foreground">Total weight</span>
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border-0 proposal-stat-label-bg-chart-4 px-3 py-2 text-xs shadow-sm lg:w-auto lg:py-1.5 lg:text-sm">
+                  <span className="font-semibold text-[oklch(0.55_0.015_255)]">Total weight</span>
                   {editingMetric === "weight" ? (
                     <>
                       <Input
                         value={metricDraft.weight}
                         onChange={(e) => setMetricDraft((d) => ({ ...d, weight: e.target.value }))}
-                        className="h-7 w-24 px-2 text-xs"
+                        className="h-7 w-24 border-[oklch(0.55_0.015_255)] px-2 text-[11px] text-[oklch(0.55_0.015_255)] focus-visible:border-[oklch(0.55_0.015_255)] focus-visible:ring-[oklch(0.55_0.015_255)]/35"
                       />
-                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => saveMetric("weight")} aria-label="Save total weight edit">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        onClick={() => saveMetric("weight")}
+                        aria-label="Save total weight edit"
+                      >
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.415l-7.37 7.37a1 1 0 01-1.414 0L3.296 9.45a1 1 0 111.415-1.414l3.916 3.915 6.662-6.66a1 1 0 011.415 0z" clipRule="evenodd" /></svg>
                       </Button>
-                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric(null)} aria-label="Cancel total weight edit">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        onClick={() => setEditingMetric(null)}
+                        aria-label="Cancel total weight edit"
+                      >
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                       </Button>
                     </>
                   ) : (
                     <>
-                      <span className="font-bold tabular-nums text-foreground">{weightDisplay}</span>
-                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric("weight")} aria-label="Edit total weight">
+                      <span className="font-bold tabular-nums text-[oklch(0.55_0.015_255)]">{weightDisplay}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        onClick={() => setEditingMetric("weight")}
+                        aria-label="Edit total weight"
+                      >
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>
                       </Button>
                     </>
                   )}
                 </div>
-                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-border bg-gradient-to-b from-muted/90 to-background px-3 py-2 text-xs shadow-sm ring-1 ring-border/70 lg:w-auto lg:py-1.5 lg:text-sm">
-                  <span className="font-semibold text-muted-foreground">Total achievement</span>
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border-0 proposal-stat-label-bg-chart-2 px-3 py-2 text-xs shadow-sm lg:w-auto lg:py-1.5 lg:text-sm">
+                  <span className="font-semibold text-[oklch(0.55_0.015_255)]">Total achievement</span>
                   {editingMetric === "achievement" ? (
                     <>
                       <Input
                         value={metricDraft.achievement}
                         onChange={(e) => setMetricDraft((d) => ({ ...d, achievement: e.target.value }))}
-                        className="h-7 w-24 px-2 text-xs"
+                        className="h-7 w-24 border-[oklch(0.55_0.015_255)] px-2 text-[11px] text-[oklch(0.55_0.015_255)] focus-visible:border-[oklch(0.55_0.015_255)] focus-visible:ring-[oklch(0.55_0.015_255)]/35"
                       />
-                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => saveMetric("achievement")} aria-label="Save total achievement edit">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        onClick={() => saveMetric("achievement")}
+                        aria-label="Save total achievement edit"
+                      >
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.415l-7.37 7.37a1 1 0 01-1.414 0L3.296 9.45a1 1 0 111.415-1.414l3.916 3.915 6.662-6.66a1 1 0 011.415 0z" clipRule="evenodd" /></svg>
                       </Button>
-                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric(null)} aria-label="Cancel total achievement edit">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        onClick={() => setEditingMetric(null)}
+                        aria-label="Cancel total achievement edit"
+                      >
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                       </Button>
                     </>
                   ) : (
                     <>
-                      <span className="font-bold tabular-nums text-foreground">{achievementDisplay}</span>
-                      <Button type="button" variant="ghost" size="icon-xs" onClick={() => setEditingMetric("achievement")} aria-label="Edit total achievement">
+                      <span className="font-bold tabular-nums text-[oklch(0.55_0.015_255)]">{achievementDisplay}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
+                        onClick={() => {
+                          // Prefill with the currently visible value (stored or computed).
+                          setMetricDraft((d) => ({ ...d, achievement: achievementDisplay === "—" ? "" : achievementDisplay }))
+                          setEditingMetric("achievement")
+                        }}
+                        aria-label="Edit total achievement"
+                      >
                         <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>
                       </Button>
                     </>
@@ -1240,20 +1364,35 @@ function ActionCard({
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button type="button" variant="outline" className="rounded-xl px-3 py-2 text-xs font-semibold shadow-sm sm:text-sm" onClick={onViewActionDetails}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-1.5 text-xs font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                onClick={onViewActionDetails}
+              >
                 View details
               </Button>
-              <Button type="button" variant="secondary" className="rounded-xl px-3 py-2 text-xs font-semibold shadow-sm sm:text-sm" onClick={onAddTask}>
+              <Button
+                type="button"
+                variant="default"
+                className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 bg-[oklch(0.70_0.18_47)] px-3.5 py-1.5 text-xs font-semibold text-[oklch(1_0_0)] shadow-sm transition hover:bg-[oklch(0.62_0.17_47)] hover:text-[oklch(1_0_0)] focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 sm:w-auto dark:bg-[oklch(0.72_0.18_47)] dark:hover:bg-[oklch(0.65_0.17_47)] dark:hover:text-[oklch(1_0_0)]"
+                onClick={onAddTask}
+              >
                 Add task
               </Button>
-              <Button type="button" variant="destructive" className="rounded-xl px-3 py-2 text-xs font-semibold shadow-sm sm:text-sm" onClick={onDeleteAction}>
+              <Button
+                type="button"
+                variant="destructive"
+                className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-3.5 py-1.5 text-xs font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                onClick={onDeleteAction}
+              >
                 Delete action
               </Button>
             </div>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-3 bg-muted/20 p-3 lg:grid-cols-2 lg:gap-4 lg:items-start lg:p-4">
+      <div className="grid grid-cols-1 gap-3 bg-card p-3 lg:grid-cols-2 lg:gap-4 lg:items-start lg:p-4">
         {!tasks.length ? (
           <p className="col-span-full rounded-xl border border-dashed border-border/80 bg-card/80 px-4 py-8 text-center text-sm text-muted-foreground ring-1 ring-border/60">
             No tasks under this action yet.
@@ -1262,12 +1401,12 @@ function ActionCard({
           tasks.map((task, taskIndex) => (
             <article
               key={`${task.name}-${taskIndex}`}
-              className="group flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-border/45 transition duration-300 hover:border-primary/30 hover:shadow-md"
+              className="group flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-border/45 transition duration-300 hover:border-primary/25 hover:shadow-md"
             >
               <div className="flex items-start gap-3 px-3 pb-1 pt-3 sm:gap-3 sm:px-4 sm:pt-4">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[oklch(0.70_0.18_47)] text-sm font-bold text-[oklch(1_0_0)] shadow-md"
                     aria-hidden="true"
                   >
                     {taskIndex + 1}
@@ -1280,7 +1419,7 @@ function ActionCard({
                   </div>
                 </div>
               </div>
-              <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-border bg-gradient-to-br from-muted/95 via-background to-muted/25 px-3 py-3 sm:mt-3 sm:px-4 sm:py-3.5">
+              <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-border bg-card px-3 py-3 sm:mt-3 sm:px-4 sm:py-3.5">
                 <div className="flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                   <span className="shrink-0 pt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                     Task Proposal status
@@ -1293,7 +1432,7 @@ function ActionCard({
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-[2.5rem] w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2"
+                    className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
                     onClick={() => onOpenTask(task, taskIndex)}
                   >
                     View details
@@ -1301,7 +1440,7 @@ function ActionCard({
                   <Button
                     type="button"
                     variant="destructive"
-                    className="min-h-[2.5rem] w-full rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2"
+                    className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
                     onClick={() => onDeleteTask(taskIndex)}
                   >
                     Delete task
@@ -1311,7 +1450,6 @@ function ActionCard({
             </article>
           ))
         )}
-      </div>
       </div>
     </section>
   )

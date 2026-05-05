@@ -99,17 +99,17 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: AiFieldId; mi
   return (
     <div
       id={`ai-desc-${fieldId}`}
-      className="mt-2 rounded-xl border border-border bg-gradient-to-br from-muted/90 to-card p-3 ring-1 ring-border/50"
+      className="mt-2 rounded-xl border border-chart-1/25 bg-gradient-to-br from-chart-1/12 to-card p-3 ring-1 ring-chart-1/20"
     >
       <div className="flex items-start gap-2.5">
         <span
-          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground"
+          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-chart-1/20 text-chart-1"
           aria-hidden="true"
         >
           <SparklesIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Suggested text</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-foreground">Suggested text</p>
           <p
             className={`ai-suggestion-body mt-1 text-xs leading-relaxed text-muted-foreground italic ${minHeightClass}`}
             data-ai-for={fieldId}
@@ -118,7 +118,7 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: AiFieldId; mi
           </p>
         </div>
       </div>
-      <div className="mt-2 flex justify-end border-t border-border pt-2">
+      <div className="mt-2 flex justify-end border-t border-chart-1/20 pt-2">
         <Button
           type="button"
           disabled
@@ -126,7 +126,7 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: AiFieldId; mi
           onClick={apply}
           variant="outline"
           size="sm"
-          className="h-7 border-border text-xs text-foreground"
+          className="h-7 border-chart-1/40 bg-card text-xs text-chart-1 hover:bg-chart-1/10"
         >
           Apply to field
         </Button>
@@ -158,8 +158,7 @@ export default function AddObjective() {
     e.preventDefault()
   }
 
-  const inputClass =
-    "h-9 w-full bg-background text-foreground"
+  const inputClass = "h-9 w-full border-border/80 bg-card text-foreground shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
 
   return (
     <>
@@ -182,7 +181,7 @@ export default function AddObjective() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
@@ -202,15 +201,18 @@ export default function AddObjective() {
             </span>
             <span className="text-foreground">Add operational objectives</span>
           </nav>
-          <h1 className="mt-0 text-2xl font-bold tracking-tight text-foreground sm:mt-5 sm:text-3xl">Add operational objectives</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Add operational objectives</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Add one operational objective based on the selected strategic perspective. Each save creates a new objective
             with all required details and yearly targets (2023–2026).
           </p>
         </header>
 
-        <div className="mb-8 rounded-2xl border border-border bg-muted/40 p-4 shadow-sm ring-1 ring-border/60 sm:p-5" role="note">
-          <p className="text-xs font-bold uppercase tracking-wide text-foreground/70">After you submit</p>
+        <div
+          className="mb-8 rounded-2xl border border-chart-3/30 bg-[color-mix(in_oklch,var(--chart-3)_12%,white)] p-4 shadow-sm ring-1 ring-chart-3/18 sm:p-5"
+          role="note"
+        >
+          <p className="text-xs font-bold uppercase tracking-wide text-foreground/80">After you submit</p>
           <p className="mt-1 text-sm text-muted-foreground">
             This objective enters the auditor queue for inspection. The auditor may Accept your proposal or Request changes with notes on specific fields. Monitor status on{" "}
             <Link to={proposalsStatusHref} className="font-medium text-primary underline-offset-4 hover:underline">
@@ -223,16 +225,13 @@ export default function AddObjective() {
         <div className="w-full min-w-0">
           <form
             id="add-oo-form"
-            className="relative overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
+            className="relative overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground shadow-md ring-1 ring-border/40"
             onSubmit={onSubmit}
           >
-            <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-32 -left-20 h-56 w-56 rounded-full bg-muted/30 blur-3xl" aria-hidden="true" />
-
-            <div className="relative border-b border-border bg-gradient-to-r from-muted/95 via-card to-muted/30 px-6 py-6 sm:px-10 sm:py-8">
+            <div className="relative border-b border-border/70 bg-card px-6 py-6 sm:px-10 sm:py-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
                 <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-primary text-primary-foreground shadow-md shadow-md sm:h-14 sm:w-14"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg sm:h-14 sm:w-14"
                   aria-hidden="true"
                 >
                   <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -244,17 +243,18 @@ export default function AddObjective() {
                   </svg>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">New operational objective</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">New operational objective</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Fill in the required fields to define an operational objective</p>
                 </div>
               </div>
             </div>
 
             <div
-              className="relative mx-6 mb-2 mt-4 rounded-2xl border border-border bg-gradient-to-r from-muted/80 to-card px-4 py-3.5 shadow-sm ring-1 ring-border/50 sm:mx-10"
+              className="relative mx-6 mb-2 mt-4 rounded-2xl border border-chart-1/25 bg-gradient-to-r from-chart-1/12 to-card px-4 py-3.5 shadow-sm ring-1 ring-chart-1/20 sm:mx-10"
               role="note"
             >
               <div className="flex gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground" aria-hidden="true">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-chart-1/20 text-chart-1" aria-hidden="true">
                   <SparklesIcon className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
@@ -269,13 +269,6 @@ export default function AddObjective() {
 
             <div className="relative space-y-10 px-6 py-8 sm:px-10 sm:py-10">
               <fieldset className="min-w-0 space-y-4 border-0 p-0">
-                <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                  Operational objective
-                </legend>
-                <p className="text-xs text-muted-foreground">
-                  Fill in the required fields to define an operational objective
-                </p>
-
                 <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
                   <div className="min-w-0 sm:col-span-2">
                     <label
@@ -283,9 +276,9 @@ export default function AddObjective() {
                       className="mb-1.5 flex flex-wrap items-center gap-x-2 text-[9px] font-bold uppercase tracking-wide text-muted-foreground"
                     >
                       <span>
-                        Operational objective <span className="text-primary">*</span>
+                        Operational objective name <span className="text-primary">*</span>
                       </span>
-                      <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">
+                      <span className="rounded bg-chart-1/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-chart-1">
                         AI
                       </span>
                     </label>
@@ -309,7 +302,7 @@ export default function AddObjective() {
                     <div className="relative">
                       <input type="hidden" name="regulatoryEntity" value={regulatoryEntity} required />
                       <Select value={regulatoryEntity || undefined} onValueChange={setRegulatoryEntity}>
-                        <SelectTrigger id="oo-regulatory-entity" className="w-full">
+                        <SelectTrigger id="oo-regulatory-entity" className="w-full border-border/80 bg-card shadow-sm focus:ring-primary/25">
                           <SelectValue placeholder="Select regulatory entity" />
                         </SelectTrigger>
                         <SelectContent>
@@ -346,7 +339,7 @@ export default function AddObjective() {
                       <span>
                         objective execution Indicator <span className="text-primary">*</span>
                       </span>
-                      <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">
+                      <span className="rounded bg-chart-1/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-chart-1">
                         AI
                       </span>
                     </label>
@@ -358,7 +351,7 @@ export default function AddObjective() {
                       required
                       placeholder="KPI or measure used to judge execution"
                       aria-describedby="ai-desc-oo-objective-execution-indicator"
-                      className="min-h-[5rem] resize-y bg-background"
+                      className="min-h-[5rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                     />
                     <AiSuggestionBlock fieldId="oo-objective-execution-indicator" minHeightClass="min-h-[5rem]" />
                   </div>
@@ -371,7 +364,7 @@ export default function AddObjective() {
                       <span>
                         execution Indicator description <span className="text-primary">*</span>
                       </span>
-                      <span className="rounded bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-foreground">
+                      <span className="rounded bg-chart-1/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-chart-1">
                         AI
                       </span>
                     </label>
@@ -382,7 +375,7 @@ export default function AddObjective() {
                       required
                       placeholder="How the indicator is applied, evidenced, or calculated"
                       aria-describedby="ai-desc-oo-execution-indicator-description"
-                      className="min-h-[7rem] resize-y bg-background"
+                      className="min-h-[7rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                     />
                     <AiSuggestionBlock fieldId="oo-execution-indicator-description" minHeightClass="min-h-[5rem]" />
                   </div>
@@ -411,7 +404,7 @@ export default function AddObjective() {
                   performance or status for each calendar year (2023–2026) against its execution indicator.
                 </p>
 
-                <div className="rounded-xl border border-border/50 bg-gradient-to-b from-muted to-card p-4 ring-1 ring-border sm:p-5">
+                <div className="rounded-xl border border-border/60 bg-gradient-to-b from-muted/80 to-card p-4 ring-1 ring-border/70 sm:p-5">
                   <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">By year</p>
                   <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
                     {achievementYears.map((year) => (
@@ -440,7 +433,10 @@ export default function AddObjective() {
                 >
                   Cancel
                 </Link>
-                <Button type="submit" className="w-full sm:w-auto">
+                <Button
+                  type="submit"
+                  className="inline-flex h-auto items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold bg-primary text-primary-foreground shadow-md hover:bg-primary/90 sm:w-auto"
+                >
                   Save objective
                 </Button>
               </div>

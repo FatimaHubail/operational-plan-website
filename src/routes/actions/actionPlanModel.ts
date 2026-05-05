@@ -141,9 +141,10 @@ export function normalizeStatus(s: string): string {
 
 export function taskStatusPillClass(status: string): string {
   const t = normalizeStatus(status)
-  if (t.includes("not start")) return "bg-muted text-foreground ring-1 ring-border"
-  if (t.includes("complete")) return "bg-primary text-primary-foreground ring-1 ring-border"
-  return "bg-secondary text-secondary-foreground ring-1 ring-border"
+  if (t.includes("not start")) return "bg-muted text-foreground ring-1 ring-border/80"
+  if (t.includes("complete"))
+    return "bg-chart-2/15 text-chart-2 ring-1 ring-chart-2/30"
+  return "bg-chart-3/15 text-chart-3 ring-1 ring-chart-3/35"
 }
 
 export function sumTaskWeightsPercent(tasks: ActionPlanTask[]): string | null {
