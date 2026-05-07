@@ -123,14 +123,14 @@ const auditorNavMain: SidebarNavItem[] = [
     icon: <BellIcon />,
   },
   {
-    title: "Action queue",
-    url: "/action-queue",
-    icon: <ClipboardListIcon />,
-  },
-  {
     title: "Objective queue",
     url: "/objective-queue",
     icon: <ClipboardCheckIcon />,
+  },
+  {
+    title: "Action queue",
+    url: "/action-queue",
+    icon: <ClipboardListIcon />,
   },
   {
     title: "Task queue",

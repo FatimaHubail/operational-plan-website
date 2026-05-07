@@ -250,6 +250,11 @@ export default function SubmissionStatus() {
     setToneFilter((prev) => (prev === tone ? "all" : tone))
   }
 
+  const followUpClassName = (row: SubmissionRow) =>
+    row.followUpLabel === "Edit"
+      ? "inline-flex rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
+      : "inline-flex rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-accent"
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -412,7 +417,7 @@ export default function SubmissionStatus() {
                   <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Status
                   </TableHead>
-                  <TableHead className="px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:px-6">
+                  <TableHead className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:px-6">
                     Follow-up
                   </TableHead>
                 </TableRow>
@@ -437,32 +442,32 @@ export default function SubmissionStatus() {
                     <TableCell className="min-w-[10rem] max-w-[18rem] px-4 py-4 align-middle lg:min-w-[12rem]">
                       <span
                         className={cn(
-                          "inline-flex max-w-full flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition",
+                          "inline-flex max-w-full flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-[oklch(0.55_0.015_255)] transition",
                           perspectiveStrategicClass(row.perspective)
                         )}
                       >
                         <span>{row.perspective}</span>
-                        <span className="select-none text-secondary-foreground/70" aria-hidden="true">
+                        <span className="select-none text-[oklch(0.55_0.015_255)]/70" aria-hidden="true">
                           ·
                         </span>
                         <span className="font-mono font-semibold tabular-nums">{row.perspectiveSection}</span>
                       </span>
                     </TableCell>
-                    <TableCell className="max-w-xs whitespace-normal px-4 py-4 text-muted-foreground">{row.summary}</TableCell>
+                    <TableCell className="max-w-xs whitespace-normal px-4 py-4 text-black">{row.summary}</TableCell>
                     <TableCell className="px-4 py-4">
                       <span
                         className={cn(
-                          "inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition",
+                          "inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-[oklch(0.55_0.015_255)] transition",
                           proposalStatusToneSurfaceClass(row.statusTone)
                         )}
                       >
                         {row.status}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-4 sm:px-6">
+                    <TableCell className="px-4 py-4 text-center sm:px-6">
                       <Link
                         to={followUpHref(row)}
-                        className="text-sm font-medium text-primary transition hover:text-[oklch(0.22_0.04_265)]"
+                        className={followUpClassName(row)}
                       >
                         {row.followUpLabel}
                       </Link>

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { proposalStatusToneSurfaceClass } from "@/lib/proposalStatusChip"
 import { cn } from "@/lib/utils"
 
 const fieldOptions = [
@@ -91,7 +92,13 @@ export default function ReviewTask() {
         ? "Accepted"
         : "Pending auditor review"
   const breadcrumbStatus = isEdited ? "Edited" : isChangesRequested ? "Changes requested" : isAccepted ? "Accepted" : "Pending"
+  const headerStatusTone = isEdited ? "review" : isChangesRequested ? "changes" : isAccepted ? "accepted" : "pending"
+  const badgeClass = cn(
+    "inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold text-[oklch(0.55_0.015_255)]",
+    proposalStatusToneSurfaceClass(headerStatusTone)
+  )
   const [fieldRows, setFieldRows] = useState<FieldModRow[]>([{ id: "0", field: "", note: "" }])
+  const showNotesSection = !isProposalContext && !isAccepted && !isChangesRequested
 
   const addFieldRow = () => {
     setFieldRows((prev) => [...prev, { id: String(Date.now()), field: "", note: "" }])
@@ -106,10 +113,10 @@ export default function ReviewTask() {
   }
 
   return (
-    <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 sm:p-6 lg:p-8">
       <header className="mb-6 sm:mb-8">
-        <Breadcrumb>
-          <BreadcrumbList>
+        <Breadcrumb className="inline-flex flex-wrap items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border/70 backdrop-blur-sm sm:text-sm">
+          <BreadcrumbList className="flex-wrap">
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link to={isProposalContext ? dashboardHref : "/dashboard-auditor"} />}>
                 Dashboard
@@ -136,7 +143,7 @@ export default function ReviewTask() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="font-mono text-xs font-semibold text-muted-foreground">{requestId}</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -176,21 +183,34 @@ export default function ReviewTask() {
               )}
             </p>
           </div>
-          <span className="inline-flex w-fit items-center rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">{badgeText}</span>
+          <span className={cn("sm:mt-14", badgeClass)}>{badgeText}</span>
         </div>
       </header>
 
+      {isEdited && (
+        <div
+          className="mb-6 rounded-2xl border border-chart-3/30 bg-[color-mix(in_oklch,var(--chart-3)_12%,white)] px-4 py-3 text-sm text-foreground shadow-sm ring-1 ring-chart-3/18"
+          role="status"
+        >
+          <p className="font-semibold">Edited Resubmission</p>
+          <p className="mt-1 text-muted-foreground">
+            The submitter revised this task after your change request. Review the updated fields below, then accept
+            or request further edits.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-6">
         {isEdited && !isProposalContext && (
-          <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+          <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+            <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Requested Edits</h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
                 Previously requested changes shown for reference before reviewing this edited resubmission.
               </p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
-              <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
+              <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{taskFieldLabels.taskExpectedEndDate}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
@@ -204,12 +224,12 @@ export default function ReviewTask() {
           </section>
         )}
 
-        <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+        <section className="overflow-hidden rounded-3xl bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
             <h2 className="text-lg font-bold">Submitted Content</h2>
           </div>
           <div className="px-6 py-6 sm:px-8 sm:py-8">
-            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+            <dl className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskName}</dt><dd className="mt-1 text-sm">Complete college-level KPI worksheet</dd></div>
               <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskWeight}</dt><dd className="mt-1 text-sm">50%</dd></div>
               <div className="rounded-xl border border-border bg-muted/40 p-4"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskStartDate}</dt><dd className="mt-1 text-sm">01 Apr 2026</dd></div>
@@ -220,16 +240,26 @@ export default function ReviewTask() {
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2"><dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{taskFieldLabels.taskAchievementPercentage}</dt><dd className="mt-1 text-sm">64%</dd></div>
             </dl>
           </div>
+          {!isProposalContext && isAccepted && (
+            <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
+              <Link
+                to="/task-queue"
+                className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
+              >
+                Back to task queue
+              </Link>
+            </div>
+          )}
         </section>
 
         {showRequestedEdits && (
           <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+            <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Requested Edits</h2>
               <p className="mt-0.5 text-sm text-muted-foreground">Overview of feedback already sent to the submitter. After they resubmit,open the proposal to continue inspection</p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
-              <div className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
+              <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{taskFieldLabels.taskExpectedEndDate}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
@@ -240,12 +270,20 @@ export default function ReviewTask() {
                 </p>
               </div>
             </div>
+            <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
+              <Link
+                to="/task-queue"
+                className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
+              >
+                Back to task queue
+              </Link>
+            </div>
           </section>
         )}
 
-        {!isProposalContext && !isAccepted && !isChangesRequested && (
-          <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+        {showNotesSection && (
+          <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+            <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
               <h2 className="text-lg font-bold">Your Notes</h2>
               <p className="mt-0.5 text-sm text-muted-foreground">Select a field, then specify your modifications</p>
             </div>
@@ -259,7 +297,7 @@ export default function ReviewTask() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="text-primary text-xl leading-none"
+                    className="text-primary text-xl leading-none hover:bg-accent"
                     title="Add field modification"
                     aria-label="Add another field modification"
                     onClick={addFieldRow}
@@ -269,7 +307,7 @@ export default function ReviewTask() {
                 </div>
                 <div className="flex flex-col gap-6">
                   {fieldRows.map((row, index) => (
-                    <div key={row.id} className="rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-6">
+                    <div key={row.id} className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                       <div className="mb-4 flex items-center justify-between gap-3 border-b border-border pb-3">
                         <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                           Field modification {index + 1}
@@ -287,13 +325,13 @@ export default function ReviewTask() {
                       </div>
                       <div className="space-y-4">
                         <div>
-                          <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Field</label>
+                          <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</label>
                           <input type="hidden" name="auditorModificationField[]" value={row.field} />
                           <Select
                             value={row.field || undefined}
                             onValueChange={(v) => updateFieldRow(row.id, { field: v })}
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full border-border bg-card ring-1 ring-border/80 focus:ring-primary/30">
                               <SelectValue placeholder="Select field..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -311,7 +349,7 @@ export default function ReviewTask() {
                             name="auditorModificationNote[]"
                             rows={3}
                             placeholder="Describe the modification for this field only."
-                            className="bg-muted/40"
+                            className="border-border bg-muted/40 focus:border-primary focus:ring-primary/20"
                             value={row.note}
                             onChange={(e) => updateFieldRow(row.id, { note: e.target.value })}
                           />
@@ -323,15 +361,15 @@ export default function ReviewTask() {
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground">Additional notes</label>
-                <Textarea name="auditorGeneralNote" rows={4} />
+                <Textarea name="auditorGeneralNote" rows={4} className="border-border bg-card focus:border-primary focus:ring-primary/20" />
               </div>    
               <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-between">
-                <Link to="/task-queue" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent">
+                <Link to="/task-queue" className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent">
                   Back to task queue
                 </Link>
                 <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
-                  <Button type="submit" variant="outline">Request changes</Button>
-                  <Button type="submit">Accept submission</Button>
+                  <Button type="submit" variant="outline" className="h-8 w-40 rounded-full border-0 bg-chart-3/20 px-5 text-sm font-semibold text-foreground hover:bg-chart-3/30">Request changes</Button>
+                  <Button type="submit" className="h-8 w-40 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90">Accept submission</Button>
                 </div>
               </div>
             </form>
@@ -348,6 +386,7 @@ export default function ReviewTask() {
             </Link>
           </div>
         )}
+
       </div>
     </div>
   )

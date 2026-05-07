@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { formatFieldLabel } from "@/lib/formatFieldLabel"
+import { proposalStatusToneSurfaceClass } from "@/lib/proposalStatusChip"
 import { cn } from "@/lib/utils"
 
 const fieldOptions = [
@@ -68,12 +69,10 @@ export default function ReviewObjective() {
         : "Pending auditor review"
   const breadcrumbStatus = isEdited ? "Edited" : isChangesRequested ? "Changes requested" : isAccepted ? "Accepted" : "Pending"
 
+  const headerStatusTone = isEdited ? "review" : isChangesRequested ? "changes" : isAccepted ? "accepted" : "pending"
   const badgeClass = cn(
-    "inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold",
-    isEdited && "bg-accent text-accent-foreground",
-    isChangesRequested && "bg-muted text-foreground",
-    isAccepted && "bg-secondary text-secondary-foreground",
-    !isEdited && !isChangesRequested && !isAccepted && "bg-muted text-foreground"
+    "inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold text-[oklch(0.55_0.015_255)]",
+    proposalStatusToneSurfaceClass(headerStatusTone)
   )
 
   const [fieldRows, setFieldRows] = useState<FieldModRow[]>([{ id: "0", field: "", note: "" }])
@@ -120,10 +119,10 @@ export default function ReviewObjective() {
     : "Select a field, then specify your modifications"
 
   return (
-    <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 sm:p-6 lg:p-8">
       <header className="mb-6 sm:mb-8">
-        <Breadcrumb>
-          <BreadcrumbList>
+        <Breadcrumb className="inline-flex flex-wrap items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border/70 backdrop-blur-sm sm:text-sm">
+          <BreadcrumbList className="flex-wrap">
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link to={isProposalContext ? dashboardHref : "/dashboard-auditor"} />}>
                 Dashboard
@@ -151,7 +150,7 @@ export default function ReviewObjective() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="font-mono text-xs font-semibold text-muted-foreground">{requestId}</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{pageTitle}</h1>
@@ -178,7 +177,7 @@ export default function ReviewObjective() {
                 </>
               ) : isProposalContext ? (
                 <>
-                  Submitted on {" "}
+                  Submitted on{" "}
                   <time dateTime={submissionSubmittedOn.iso} className="font-medium text-foreground">
                     {submissionSubmittedOn.label}
                   </time>
@@ -194,13 +193,16 @@ export default function ReviewObjective() {
               )}
             </p>
           </div>
-          <span className={badgeClass}>{badgeText}</span>
+          <span className={cn("sm:mt-14", badgeClass)}>{badgeText}</span>
         </div>
       </header>
 
       {isEdited && (
-        <div className="mb-6 rounded-2xl border border-border bg-accent/40 px-4 py-3 text-sm shadow-sm" role="status">
-          <p className="font-semibold text-foreground">Edited Resubmission</p>
+        <div
+          className="mb-6 rounded-2xl border border-chart-3/30 bg-[color-mix(in_oklch,var(--chart-3)_12%,white)] px-4 py-3 text-sm text-foreground shadow-sm ring-1 ring-chart-3/18"
+          role="status"
+        >
+          <p className="font-semibold">Edited Resubmission</p>
           <p className="mt-1 text-muted-foreground">
             The submitter revised this objective after your change request. Review the updated fields below, then accept
             or request further edits.
@@ -210,8 +212,8 @@ export default function ReviewObjective() {
 
       <div className="space-y-6">
         {isEdited && !isProposalContext && (
-          <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="requested-edits-edited-oo-heading">
-            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+          <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="requested-edits-edited-oo-heading">
+            <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
               <h2 id="requested-edits-edited-oo-heading" className="text-lg font-bold text-foreground">
                 Requested Edits
               </h2>
@@ -220,7 +222,7 @@ export default function ReviewObjective() {
               </p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
-              <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
+              <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel("targetValue")}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
@@ -235,14 +237,14 @@ export default function ReviewObjective() {
           </section>
         )}
 
-        <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="submitted-oo-heading">
-          <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+        <section className="overflow-hidden rounded-3xl bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="submitted-oo-heading">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
             <h2 id="submitted-oo-heading" className="text-lg font-bold text-foreground">
               Submitted Content
             </h2>
           </div>
           <div className="px-6 py-6 sm:px-8 sm:py-8">
-            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+            <dl className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
                 <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   {formatFieldLabel("regulatoryEntity")}
@@ -278,7 +280,7 @@ export default function ReviewObjective() {
                 </dt>
                 <dd className="mt-1 text-sm text-foreground">Director, Research &amp; Graduate Studies</dd>
               </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2 sm:max-w-md">
+              <div className="rounded-xl border border-border bg-muted/40 p-4 sm:col-span-2">
                 <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   {formatFieldLabel("targetValue")}
                 </dt>
@@ -289,7 +291,7 @@ export default function ReviewObjective() {
             <h3 className="mt-8 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Achievement rate (by year)</h3>
             <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(["2023", "2024", "2025", "2026"] as const).map((year, i) => (
-                <div key={year} className="rounded-xl border border-border bg-background p-4 ring-1 ring-border/60">
+                <div key={year} className="rounded-xl border border-border bg-card p-4 ring-1 ring-border/60">
                   <dt className="text-[11px] font-bold uppercase text-muted-foreground">
                     {formatFieldLabel(`achievement_${year}`)}
                   </dt>
@@ -298,11 +300,21 @@ export default function ReviewObjective() {
               ))}
             </dl>
           </div>
+          {!isProposalContext && isAccepted && (
+            <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
+              <Link
+                to="/objective-queue"
+                className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
+              >
+                Back to objective queue
+              </Link>
+            </div>
+          )}
         </section>
 
         {showRequestedEdits && (
-          <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="requested-edits-oo-heading">
-            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+          <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="requested-edits-oo-heading">
+            <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
               <h2 id="requested-edits-oo-heading" className="text-lg font-bold text-foreground">
                 Requested Edits
               </h2>
@@ -311,7 +323,7 @@ export default function ReviewObjective() {
               </p>
             </div>
             <div className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
-              <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
+              <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel("targetValue")}</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
@@ -322,7 +334,7 @@ export default function ReviewObjective() {
                   the measurement window (e.g. calendar month), not only narrative text.
                 </p>
               </div>
-              <div className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
+              <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                 <p className="mt-1 font-mono text-sm font-semibold text-foreground">executionIndicatorDescription</p>
                 <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
@@ -335,7 +347,7 @@ export default function ReviewObjective() {
                   of the uptime calculation and cite the monitoring tool.
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-muted/40 px-4 py-3">
+              <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                 <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Additional notes</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Align wording with the IT service catalogue entry for “Digital core services” so the objective can be traced to
@@ -346,7 +358,7 @@ export default function ReviewObjective() {
             <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
               <Link
                 to="/objective-queue"
-                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
+                className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
               >
                 Back to objective queue
               </Link>
@@ -355,8 +367,8 @@ export default function ReviewObjective() {
         )}
 
         {showNotesSection && (
-          <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="auditor-notes-oo-heading">
-            <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+          <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="auditor-notes-oo-heading">
+            <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
               <h2 id="auditor-notes-oo-heading" className="text-lg font-bold text-foreground">
                 Your Notes
               </h2>
@@ -374,7 +386,7 @@ export default function ReviewObjective() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="text-primary text-xl leading-none"
+                      className="text-primary text-xl leading-none hover:bg-accent"
                     title="Add field modification"
                     aria-label="Add another field modification"
                     onClick={addFieldRow}
@@ -386,7 +398,7 @@ export default function ReviewObjective() {
                   {fieldRows.map((row, index) => (
                     <div
                       key={row.id}
-                      className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm ring-1 ring-border/60 sm:p-6"
+                      className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6"
                     >
                       <div className="mb-4 flex items-center justify-between gap-3 border-b border-border pb-3">
                         <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -415,7 +427,7 @@ export default function ReviewObjective() {
                             value={row.field || undefined}
                             onValueChange={(v) => updateFieldRow(row.id, { field: v })}
                           >
-                            <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full border-border bg-card ring-1 ring-border/80 focus:ring-primary/30">
                               <SelectValue placeholder="Select field…" />
                             </SelectTrigger>
                             <SelectContent>
@@ -441,7 +453,7 @@ export default function ReviewObjective() {
                             placeholder="Describe the modification for this field only."
                             value={row.note}
                             onChange={(e) => updateFieldRow(row.id, { note: e.target.value })}
-                            className="bg-muted/40"
+                            className="border-border bg-muted/40 focus:border-primary focus:ring-primary/20"
                           />
                         </div>
                       </div>
@@ -461,21 +473,33 @@ export default function ReviewObjective() {
                   id="auditor-general-note-objective"
                   name="auditorGeneralNote"
                   rows={4}
+                  className="border-border bg-card focus:border-primary focus:ring-primary/20"
                 />
               </div>
 
               <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-between">
                 <Link
                   to="/objective-queue"
-                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
+                  className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
                 >
                   Back to objective queue
                 </Link>
                 <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
-                  <Button type="submit" name="decision" value="request_changes" variant="outline">
+                  <Button
+                    type="submit"
+                    name="decision"
+                    value="request_changes"
+                    variant="outline"
+                    className="h-8 w-40 rounded-full border-0 bg-chart-3/20 px-5 text-sm font-semibold text-foreground hover:bg-chart-3/30"
+                  >
                     Request changes
                   </Button>
-                  <Button type="submit" name="decision" value="accept">
+                  <Button
+                    type="submit"
+                    name="decision"
+                    value="accept"
+                    className="h-8 w-40 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90"
+                  >
                     Accept submission
                   </Button>
                 </div>
@@ -494,6 +518,7 @@ export default function ReviewObjective() {
             </Link>
           </div>
         )}
+
       </div>
     </div>
   )

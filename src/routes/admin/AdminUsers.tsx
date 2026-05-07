@@ -294,7 +294,7 @@ export default function AdminUsers() {
                 <TableHead className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                   Status
                 </TableHead>
-                <TableHead className="whitespace-nowrap px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wide text-muted-foreground lg:pr-8">
+                <TableHead className="whitespace-nowrap px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wide text-muted-foreground lg:pr-8">
                   Actions
                 </TableHead>
               </TableRow>
@@ -313,26 +313,38 @@ export default function AdminUsers() {
                       {user.role}
                     </span>
                   </TableCell>
-                  <TableCell className="hidden px-4 py-4 text-muted-foreground md:table-cell">{user.unit}</TableCell>
+                  <TableCell className="hidden px-4 py-4 text-black md:table-cell">{user.unit}</TableCell>
                   <TableCell className="px-4 py-4">
                     <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", statusClass(user.status))}>
                       <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" />
                       {user.status}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 py-4 text-right lg:pr-8">
-                    <div className="inline-flex flex-col items-end gap-1">
+                  <TableCell className="px-4 py-4 text-center lg:pr-8">
+                    <div className="inline-flex flex-col items-center gap-2.5">
                       {user.actionLabel === "Manage" ? (
-                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => openManage(user)}>
+                        <Button
+                          type="button"
+                          className="inline-flex !h-6 min-h-6 w-28 justify-center rounded-full bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground transition hover:bg-primary/90"
+                          onClick={() => openManage(user)}
+                        >
                           Manage
                         </Button>
                       ) : (
                         <>
-                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground">
-                            {user.actionLabel}
-                          </Button>
-                          <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => openManage(user)}>
+                          <Button
+                            type="button"
+                            className="inline-flex !h-6 min-h-6 w-28 justify-center rounded-full bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground transition hover:bg-primary/90"
+                            onClick={() => openManage(user)}
+                          >
                             Manage
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="inline-flex !h-6 min-h-6 w-28 justify-center rounded-full border border-border px-3 py-0 text-xs font-semibold leading-none text-foreground transition hover:bg-accent"
+                          >
+                            {user.actionLabel}
                           </Button>
                         </>
                       )}
