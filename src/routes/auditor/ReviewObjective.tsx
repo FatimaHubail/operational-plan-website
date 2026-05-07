@@ -61,7 +61,7 @@ export default function ReviewObjective() {
   }, [isEdited, isChangesRequested])
 
   const badgeText = isEdited
-    ? "Edited — awaiting re-review"
+    ? "Edited - awaiting re-review"
     : isChangesRequested
       ? "Changes requested"
       : isAccepted
@@ -295,7 +295,7 @@ export default function ReviewObjective() {
                   <dt className="text-[11px] font-bold uppercase text-muted-foreground">
                     {formatFieldLabel(`achievement_${year}`)}
                   </dt>
-                  <dd className="mt-1 text-sm font-bold tabular-nums text-foreground">{i < 2 ? (i === 0 ? "1.05" : "1.12") : "—"}</dd>
+                  <dd className="mt-1 text-sm font-bold tabular-nums text-foreground">{i < 2 ? (i === 0 ? "1.05" : "1.12") : "-"}</dd>
                 </div>
               ))}
             </dl>
@@ -307,6 +307,16 @@ export default function ReviewObjective() {
                 className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
               >
                 Back to objective queue
+              </Link>
+            </div>
+          )}
+          {isProposalContext && (
+            <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
+              <Link
+                to={proposalsStatusHref}
+                className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
+              >
+                Back to proposals status
               </Link>
             </div>
           )}
@@ -506,17 +516,6 @@ export default function ReviewObjective() {
               </div>
             </form>
           </section>
-        )}
-
-        {isProposalContext && (
-          <div className="flex justify-start">
-            <Link
-              to={proposalsStatusHref}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
-            >
-              Back to proposals status
-            </Link>
-          </div>
         )}
 
       </div>

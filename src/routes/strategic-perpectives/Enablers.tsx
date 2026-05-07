@@ -697,7 +697,7 @@ export default function Enablers() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="mt-6 mb-0 flex shrink-0 items-center gap-2 pt-0 pb-0 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:pt-2">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb>
           <BreadcrumbList>
@@ -712,9 +712,9 @@ export default function Enablers() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 sm:p-6 lg:p-8">
         <header className="mb-8 w-full min-w-0">
-          <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+          <div className="mt-1 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <div
               className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg shadow-primary/30"
               aria-hidden="true"
@@ -859,7 +859,7 @@ export default function Enablers() {
                 <div className="relative">
                   <div className="flex flex-col gap-4 border-b border-primary/25 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary/70">Current perspective</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[oklch(0.70_0.18_47)]">Current perspective</p>
                       <h3 className="mt-1.5 text-lg font-bold leading-snug text-foreground sm:text-xl">
                         {activeEnabler.title}
                       </h3>
@@ -896,7 +896,7 @@ export default function Enablers() {
                   </div>
 
                   <div className="relative mt-6">
-                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-primary/55">Key indicator</p>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-[oklch(0.70_0.18_47)]">Key indicator</p>
                     {activeSub ? (
                       <div className="space-y-3 sm:space-y-4">
                         <div className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-border/50">
@@ -1027,6 +1027,7 @@ export default function Enablers() {
                                         name={objective.proposedByName}
                                         department={objective.proposedByDepartment}
                                         subUnit={objective.proposedBySubUnit}
+                                        fullBold
                                         className="mb-3"
                                       />
 
@@ -1034,7 +1035,7 @@ export default function Enablers() {
                                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                           <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Proposal status</span>
                                           <span
-                                            className={`inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition ${proposalStatusToneSurfaceClass(requestStatusToProposalTone(objective.requestStatus))}`}
+                                            className={`inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-[oklch(0.55_0.015_255)] transition ${proposalStatusToneSurfaceClass(requestStatusToProposalTone(objective.requestStatus))}`}
                                           >
                                             {objective.requestStatus}
                                           </span>
@@ -1073,7 +1074,7 @@ export default function Enablers() {
                                           type="button"
                                           variant="outline"
                                           onClick={() => openObjectiveDetails(index)}
-                                          className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                                          className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:bg-accent focus-visible:ring-offset-2 sm:w-auto"
                                         >
                                           View details
                                         </Button>
@@ -1094,7 +1095,7 @@ export default function Enablers() {
                                               oi: index,
                                             } satisfies ActionPlanLocationState
                                           }
-                                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground no-underline shadow-md transition hover:bg-primary/90 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto"
+                                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground no-underline shadow-md transition hover:from-primary/90 hover:to-primary/90 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto"
                                         >
                                           <span>Action plan</span>
                                           <svg className="h-4 w-4 shrink-0 opacity-95" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1156,7 +1157,7 @@ export default function Enablers() {
             <div className="space-y-2.5 px-5 py-4 sm:space-y-3 sm:px-6 sm:py-5">
               {objectiveFieldConfigs.map(({ field, label, multiline }) => {
                 const isEditing = editingObjectiveField === field
-                const displayValue = selectedObjective[field]?.trim() ? selectedObjective[field] : "—"
+                const displayValue = selectedObjective[field]?.trim() ? selectedObjective[field] : "-"
                 return (
                   <div
                     key={field}
@@ -1235,7 +1236,7 @@ export default function Enablers() {
               <Button
                 type="button"
                 onClick={saveObjectiveDetails}
-                className="h-auto min-h-8 flex-1 rounded-lg px-3 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-4"
+                className="h-auto min-h-8 flex-1 rounded-xl px-3 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
               >
                 Save
               </Button>
@@ -1245,7 +1246,7 @@ export default function Enablers() {
                 onClick={() => {
                   if (editingObjectiveField !== null) cancelObjectiveFieldEdit(editingObjectiveField)
                 }}
-                className="h-auto min-h-8 flex-1 rounded-lg border-0 px-3 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-4"
+                className="h-auto min-h-8 flex-1 rounded-xl border-0 px-3 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
               >
                 Cancel
               </Button>
@@ -1289,10 +1290,10 @@ export default function Enablers() {
                 ))}
               </div>
               <div className="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
-                <Button type="submit" className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:px-6">
+                <Button type="submit" className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md sm:flex-none sm:w-24">
                   Save
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setIsAchievementModalOpen(false)} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none">
+                <Button type="button" variant="outline" onClick={() => setIsAchievementModalOpen(false)} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none sm:w-24">
                   Cancel
                 </Button>
               </div>

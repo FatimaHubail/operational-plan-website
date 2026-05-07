@@ -32,7 +32,7 @@ const contributorNotificationPreviewItems: ContributorPreviewItem[] = [
   {
     id: "cd-n1",
     title: "Action returned for edits",
-    body: "Auditor left notes on REQ-2026-0112 — open My submissions to continue.",
+    body: "Auditor left notes on REQ-2026-0112 - open My submissions to continue.",
     time: "Just now",
     category: "resubmission",
     entityType: "action",
@@ -136,7 +136,7 @@ export default function ContributerDashboard() {
             <Link
               to="/contributor/notifications"
               className={cn(
-                "notif-secondary-action inline-flex w-full items-center justify-center rounded-md border border-transparent bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-xs transition-colors",
+                "notif-secondary-action inline-flex w-full items-center justify-center rounded-[18px] border border-transparent bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-xs transition-colors",
               )}
             >
               View all notifications

@@ -119,7 +119,7 @@
 /*
  * Notification icons: glyph = exact --chart-*; chip = light pastel of that hue (white mix in light, card mix in dark).
  * .notif-icon-wrap = smaller rounded rectangle behind the SVG.
- * .notif-type-badge-chart-* = category label (“Proposal lifecycle”, etc.) — no border; text mixed toward foreground for contrast on pastel fill.
+ * .notif-type-badge-chart-* = category label (“Proposal lifecycle”, etc.) - no border; text mixed toward foreground for contrast on pastel fill.
  */
 @layer components {
   .notif-icon-wrap {
@@ -138,23 +138,23 @@
   }
 
   .notif-icon-chart-1 {
-    color: var(--chart-1);
+    color: oklch(0.55 0.015 255);
     background-color: color-mix(in oklch, var(--chart-1) 18%, white);
   }
   .notif-icon-chart-2 {
-    color: var(--chart-2);
+    color: oklch(0.55 0.015 255);
     background-color: color-mix(in oklch, var(--chart-2) 18%, white);
   }
   .notif-icon-chart-3 {
-    color: var(--chart-3);
+    color: oklch(0.55 0.015 255);
     background-color: color-mix(in oklch, var(--chart-3) 16%, white);
   }
   .notif-icon-chart-4 {
-    color: var(--chart-4);
+    color: oklch(0.55 0.015 255);
     background-color: color-mix(in oklch, var(--chart-4) 18%, white);
   }
   .notif-icon-chart-5 {
-    color: var(--chart-5);
+    color: oklch(0.55 0.015 255);
     background-color: color-mix(in oklch, var(--chart-5) 18%, white);
   }
 
@@ -177,59 +177,57 @@
   .notif-type-badge-chart-1 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-1) 20%, white);
-    color: color-mix(in oklch, var(--chart-1) 42%, var(--foreground)) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .notif-type-badge-chart-2 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-2) 20%, white);
-    color: color-mix(in oklch, var(--chart-2) 54%, var(--foreground)) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .notif-type-badge-chart-3 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-3) 18%, white);
-    /* Dark yellow / olive — slightly lifted L vs before */
-    color: oklch(0.46 0.088 94) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .notif-type-badge-chart-4 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-4) 20%, white);
-    color: color-mix(in oklch, var(--chart-4) 42%, var(--foreground)) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .notif-type-badge-chart-5 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-5) 20%, white);
-    /* Match glyph color on .notif-icon-chart-5 */
-    color: var(--chart-5) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
 
   .dark .notif-type-badge-chart-1 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-1) 34%, var(--card));
-    color: color-mix(in oklch, var(--chart-1) 58%, var(--foreground)) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .dark .notif-type-badge-chart-2 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-2) 34%, var(--card));
-    color: color-mix(in oklch, var(--chart-2) 72%, var(--foreground)) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .dark .notif-type-badge-chart-3 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-3) 30%, var(--card));
-    color: oklch(0.89 0.11 96) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .dark .notif-type-badge-chart-4 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-4) 34%, var(--card));
-    color: color-mix(in oklch, var(--chart-4) 58%, var(--foreground)) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .dark .notif-type-badge-chart-5 {
     border: none !important;
     background-color: color-mix(in oklch, var(--chart-5) 34%, var(--card));
-    color: var(--chart-5) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
 
   /*
-   * Strategic Perspectives card links — catalysts/enablers/beneficiary/stakeholders use --chart-1, 2, 4, 5 (same chip mixes as .notif-icon-chart-*). Base class applies to any element (e.g. role panels); hover rules stay on anchors.
+   * Strategic Perspectives card links - catalysts/enablers/beneficiary/stakeholders use --chart-1, 2, 4, 5 (same chip mixes as .notif-icon-chart-*). Base class applies to any element (e.g. role panels); hover rules stay on anchors.
    */
   .strategic-perspective-bg-chart-1 {
     background-color: color-mix(in oklch, var(--chart-1) 18%, white) !important;
@@ -282,7 +280,7 @@
   }
 
   /*
-   * Proposal status chips — Pending: very light mix of oklch(0.55 0.015 255); Changes: same as Beneficiary (.strategic-perspective-bg-chart-4); review/accepted align with Calendar week chips (chart-1 / chart-2).
+   * Proposal status chips - Pending: very light mix of oklch(0.55 0.015 255); Changes: same as Beneficiary (.strategic-perspective-bg-chart-4); review/accepted align with Calendar week chips (chart-1 / chart-2).
    */
   .proposal-status-tone-pending {
     background-color: color-mix(in oklch, oklch(0.55 0.015 255) 10%, white) !important;
@@ -311,9 +309,9 @@
   }
 
   /*
-   * Your Proposals card numerals — palette + foreground (higher chroma share = lighter / more vivid).
+   * Your Proposals card numerals - palette + foreground (higher chroma share = lighter / more vivid).
    */
-  /* Pending: same hue (47°) as oklch(0.72 0.18 47), lower L — not mixed with --foreground (avoids navy) */
+  /* Pending: same hue (47°) as oklch(0.72 0.18 47), lower L - not mixed with --foreground (avoids navy) */
   .proposal-stat-num-pending {
     color: oklch(0.34 0.15 47) !important;
   }
@@ -329,7 +327,7 @@
   .proposal-stat-num-filed {
     color: oklch(0.16 0.02 265) !important;
   }
-  /* Objectives / actions / tasks — accent */
+  /* Objectives / actions / tasks - accent */
   .proposal-stat-num-summary {
     color: oklch(0.72 0.18 47) !important;
   }
@@ -350,7 +348,7 @@
     color: color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) !important;
   }
 
-  /* Auditor summary mix bars + swatches — pastel lifts (lighter than stat numerals) */
+  /* Auditor summary mix bars + swatches - pastel lifts (lighter than stat numerals) */
   .proposal-stat-bar-pending {
     fill: oklch(0.7 0.18 47) !important;
   }
@@ -378,15 +376,11 @@
       white
     ) !important;
   }
-  /* Same mix as swatch — use on text when the pill fill is a lighter tint. */
+  /* Same mix as swatch - use on text when the pill fill is a lighter tint. */
   .proposal-stat-label-text-chart-4 {
-    color: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
-      white
-    ) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
-  /* Lighter tint of the label text hue — pill fill behind `.proposal-stat-label-text-chart-4`. */
+  /* Lighter tint of the label text hue - pill fill behind `.proposal-stat-label-text-chart-4`. */
   .proposal-stat-label-bg-chart-4 {
     background-color: color-mix(
       in oklch,
@@ -405,13 +399,9 @@
       white
     ) !important;
   }
-  /* Tasks segment — same mixes as swatch; pill fill is lighter (matches chart-4 pattern). */
+  /* Tasks segment - same mixes as swatch; pill fill is lighter (matches chart-4 pattern). */
   .proposal-stat-label-text-chart-2 {
-    color: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
-      white
-    ) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .proposal-stat-label-bg-chart-2 {
     background-color: color-mix(
@@ -452,11 +442,7 @@
     ) !important;
   }
   .dark .proposal-stat-label-text-chart-4 {
-    color: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
-      oklch(0.98 0.006 250)
-    ) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .dark .proposal-stat-label-bg-chart-4 {
     background-color: color-mix(
@@ -477,11 +463,7 @@
     ) !important;
   }
   .dark .proposal-stat-label-text-chart-2 {
-    color: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
-      oklch(0.98 0.006 250)
-    ) !important;
+    color: oklch(0.55 0.015 255) !important;
   }
   .dark .proposal-stat-label-bg-chart-2 {
     background-color: color-mix(
@@ -495,7 +477,7 @@
     ) !important;
   }
   /*
-   * “N new” badge (notification lists + dashboard card) — accent + light fill of same hue.
+   * “N new” badge (notification lists + dashboard card) - accent + light fill of same hue.
    */
   .notif-new-badge {
     border: none !important;
@@ -508,7 +490,7 @@
   }
 
   /*
-   * Notifications secondary actions — dashboard “View all …”, list “Load more”.
+   * Notifications secondary actions - dashboard “View all …”, list “Load more”.
    * Hover: fill + border oklch(0.22 0.04 265), not light secondary/outline.
    */
   a.notif-secondary-action,

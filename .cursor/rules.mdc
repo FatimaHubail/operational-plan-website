@@ -1,6 +1,6 @@
 Always use the existing project structure without any changes.
 
-Use only components from shadcn/ui — do not use raw HTML elements like <button> or <input> unless there is no alternative.
+Use only components from shadcn/ui - do not use raw HTML elements like <button> or <input> unless there is no alternative.
 
 Use Tailwind CSS utility classes for styling.
 
@@ -17,11 +17,11 @@ Follow existing naming and folder structures exactly when creating files or comp
 
 Use cn() helper function to conditionally merge Tailwind class names.
 
-Keep logic and styling inside components — keep pages clean and declarative.
+Keep logic and styling inside components - keep pages clean and declarative.
 
 Never override the global theme or base styling set by shadcn/ui unless instructed.
 
-Reuse existing components whenever possible — do not duplicate functionality.
+Reuse existing components whenever possible - do not duplicate functionality.
 
 Do not make any changes to the ShadCN components located in src/components/ui unless explicitly instructed to do so.
 

@@ -14,13 +14,13 @@ export default function Login() {
         className="relative isolate flex min-h-[220px] w-full shrink-0 flex-col justify-between overflow-hidden px-8 py-10 sm:px-10 sm:py-12 lg:min-h-screen lg:w-[60%] lg:px-12 lg:py-14"
         aria-label="Product information"
       >
-        <div className="pointer-events-none absolute inset-0 bg-primary" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-orange-950" aria-hidden="true" />
         <div className="pointer-events-none absolute -right-24 -top-16 h-[22rem] w-[22rem] rounded-full bg-primary-foreground/15 blur-3xl" aria-hidden="true" />
         <div className="pointer-events-none absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-primary-foreground/10 blur-3xl" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-1 flex-col justify-center">
-          <p className="inline-flex w-fit items-center rounded-full bg-primary-foreground/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary-foreground ring-1 ring-primary-foreground/20">
-            Operational Plan
+          <p className="inline-flex w-fit items-center rounded-full bg-primary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[oklch(0.90_0.06_80)] ring-1 ring-primary/30">
+            Strategic Plan
           </p>
           <h1 className="mt-6 max-w-md text-3xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-4xl">
             Operational planning across university administration
@@ -63,7 +63,7 @@ export default function Login() {
                   autoComplete="username"
                   placeholder="name@uob.edu.bh"
                   required
-                  className="h-11 rounded-2xl bg-muted"
+                  className="h-9.5 rounded-2xl bg-muted"
                 />
               </div>
 
@@ -78,7 +78,7 @@ export default function Login() {
                   autoComplete="current-password"
                   placeholder="••••••••"
                   required
-                  className="h-11 rounded-2xl bg-muted"
+                  className="h-9.5 rounded-2xl bg-muted"
                 />
               </div>
 
@@ -95,7 +95,7 @@ export default function Login() {
                 </Link>
               </div>
 
-              <Button type="submit" className="mt-2 h-11 w-full rounded-2xl">
+              <Button type="submit" className="mt-2 h-9.5 w-full rounded-2xl">
                 Sign in
               </Button>
             </form>
@@ -109,10 +109,10 @@ export default function Login() {
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary">Planning</Badge>
-              <Badge className="bg-muted text-foreground hover:bg-muted">Strategy</Badge>
-              <Badge className="bg-accent text-accent-foreground hover:bg-accent">Operations</Badge>
-              <Badge className="border border-border bg-card text-foreground hover:bg-muted">Auditor review</Badge>
+              <Badge className="border-0 bg-[color-mix(in_oklch,var(--chart-1)_26%,white)] text-[oklch(0.55_0.015_255)] hover:bg-[color-mix(in_oklch,var(--chart-1)_30%,white)] dark:bg-[color-mix(in_oklch,var(--chart-1)_40%,var(--card))] dark:text-[oklch(0.55_0.015_255)]">Planning</Badge>
+              <Badge className="border-0 bg-[color-mix(in_oklch,var(--chart-1)_26%,white)] text-[oklch(0.55_0.015_255)] hover:bg-[color-mix(in_oklch,var(--chart-1)_30%,white)] dark:bg-[color-mix(in_oklch,var(--chart-1)_40%,var(--card))] dark:text-[oklch(0.55_0.015_255)]">Managing</Badge>
+              <Badge className="border-0 bg-[color-mix(in_oklch,var(--chart-1)_26%,white)] text-[oklch(0.55_0.015_255)] hover:bg-[color-mix(in_oklch,var(--chart-1)_30%,white)] dark:bg-[color-mix(in_oklch,var(--chart-1)_40%,var(--card))] dark:text-[oklch(0.55_0.015_255)]">Tracking</Badge>
+              <Badge className="border-0 bg-[color-mix(in_oklch,var(--chart-1)_26%,white)] text-[oklch(0.55_0.015_255)] hover:bg-[color-mix(in_oklch,var(--chart-1)_30%,white)] dark:bg-[color-mix(in_oklch,var(--chart-1)_40%,var(--card))] dark:text-[oklch(0.55_0.015_255)]">Auditing</Badge>
             </div>
           </div>
         </div>

@@ -137,7 +137,7 @@ export default function AddUser() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Add user</h1>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Add user</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Create an account for a colleague using their official university email. They will use this identity to sign
             in and access plans according to the role you assign

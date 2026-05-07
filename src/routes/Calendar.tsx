@@ -17,32 +17,32 @@ import { cn } from "@/lib/utils"
 
 type ChartKey = 1 | 2 | 3 | 4 | 5
 
-/** Pastel event chips — same color-mix strategy as `.notif-type-badge-chart-*` */
+/** Pastel event chips - same color-mix strategy as `.notif-type-badge-chart-*` */
 const weekEventChipClass: Record<ChartKey, string> = {
   1: cn(
     "rounded-lg px-2 py-1 text-[11px] font-semibold leading-tight shadow-sm",
-    "bg-[color-mix(in_oklch,var(--chart-1)_20%,white)] text-[color-mix(in_oklch,var(--chart-1)_42%,var(--foreground))]",
-    "dark:bg-[color-mix(in_oklch,var(--chart-1)_34%,var(--card))] dark:text-[color-mix(in_oklch,var(--chart-1)_58%,var(--foreground))]"
+    "bg-[color-mix(in_oklch,var(--chart-1)_20%,white)] text-[oklch(0.55_0.015_255)]",
+    "dark:bg-[color-mix(in_oklch,var(--chart-1)_34%,var(--card))] dark:text-[oklch(0.55_0.015_255)]"
   ),
   2: cn(
     "rounded-lg px-2 py-1 text-[11px] font-semibold leading-tight shadow-sm",
-    "bg-[color-mix(in_oklch,var(--chart-2)_20%,white)] text-[color-mix(in_oklch,var(--chart-2)_54%,var(--foreground))]",
-    "dark:bg-[color-mix(in_oklch,var(--chart-2)_34%,var(--card))] dark:text-[color-mix(in_oklch,var(--chart-2)_72%,var(--foreground))]"
+    "bg-[color-mix(in_oklch,var(--chart-2)_20%,white)] text-[oklch(0.55_0.015_255)]",
+    "dark:bg-[color-mix(in_oklch,var(--chart-2)_34%,var(--card))] dark:text-[oklch(0.55_0.015_255)]"
   ),
   3: cn(
     "rounded-lg px-2 py-1 text-[11px] font-semibold leading-tight shadow-sm",
-    "bg-[color-mix(in_oklch,var(--chart-3)_18%,white)] text-[oklch(0.46_0.088_94)]",
-    "dark:bg-[color-mix(in_oklch,var(--chart-3)_30%,var(--card))] dark:text-[oklch(0.46_0.088_94)]"
+    "bg-[color-mix(in_oklch,var(--chart-3)_18%,white)] text-[oklch(0.55_0.015_255)]",
+    "dark:bg-[color-mix(in_oklch,var(--chart-3)_30%,var(--card))] dark:text-[oklch(0.55_0.015_255)]"
   ),
   4: cn(
     "rounded-lg px-2 py-1 text-[11px] font-semibold leading-tight shadow-sm",
-    "bg-[color-mix(in_oklch,var(--chart-4)_20%,white)] text-[color-mix(in_oklch,var(--chart-4)_42%,var(--foreground))]",
-    "dark:bg-[color-mix(in_oklch,var(--chart-4)_34%,var(--card))] dark:text-[color-mix(in_oklch,var(--chart-4)_58%,var(--foreground))]"
+    "bg-[color-mix(in_oklch,var(--chart-4)_20%,white)] text-[oklch(0.55_0.015_255)]",
+    "dark:bg-[color-mix(in_oklch,var(--chart-4)_34%,var(--card))] dark:text-[oklch(0.55_0.015_255)]"
   ),
   5: cn(
-    "rounded-lg px-2 py-1 text-[11px] font-semibold leading-tight shadow-sm text-chart-5",
+    "rounded-lg px-2 py-1 text-[11px] font-semibold leading-tight shadow-sm text-[oklch(0.55_0.015_255)]",
     "bg-[color-mix(in_oklch,var(--chart-5)_20%,white)]",
-    "dark:bg-[color-mix(in_oklch,var(--chart-5)_34%,var(--card))] dark:text-chart-5"
+    "dark:bg-[color-mix(in_oklch,var(--chart-5)_34%,var(--card))] dark:text-[oklch(0.55_0.015_255)]"
   ),
 }
 
@@ -148,9 +148,7 @@ const monthCells: MonthCell[] = [
   },
 ]
 
-/** ~13:00 indicator — 9:00 origin, 48px/h → 4 × 48px (matches static HTML reference) */
-const NOW_LINE_TOP_PX = 192
-
+/** ~13:00 indicator - 9:00 origin, 48px/h → 4 × 48px (matches static HTML reference) */
 export default function Calendar() {
   const [view, setView] = useState<"week" | "month">("week")
   const [monthOffset, setMonthOffset] = useState(0)
@@ -191,7 +189,7 @@ export default function Calendar() {
 
   return (
     <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
-      <header className="mb-5 flex h-11 items-center gap-2">
+      <header className="mt-4 mb-10 flex h-9 items-center gap-2">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb>
           <BreadcrumbList>
@@ -252,7 +250,6 @@ export default function Calendar() {
 
                 <div className="relative grid grid-cols-5 gap-0 border-l border-border">
                     {[0, 1, 2, 3, 4].map((col) => {
-                      const isTodayCol = weekHeaders[col]?.isToday
                       return (
                         <div
                           key={`col-${col}`}
@@ -261,16 +258,6 @@ export default function Calendar() {
                             col < 4 ? "border-r border-border/50" : ""
                           )}
                         >
-                          {isTodayCol ? (
-                            <div
-                              className="pointer-events-none absolute inset-x-0 z-20 flex items-center"
-                              style={{ top: NOW_LINE_TOP_PX }}
-                              aria-hidden="true"
-                            >
-                              <div className="h-0.5 w-full bg-primary/90" />
-                              <span className="absolute -left-1 h-2 w-2 rounded-full bg-primary" />
-                            </div>
-                          ) : null}
                           <div className="absolute inset-0 grid grid-rows-9">
                             {weekEvents.map((row, idx) => (
                               <div key={`cell-${col}-${idx}`} className="border-b border-border/35 px-1 py-1">

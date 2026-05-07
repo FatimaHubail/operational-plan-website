@@ -5,7 +5,7 @@ export function isActionPlanPlanSection(s: string): s is ActionPlanPlanSection {
   return (PLAN_SECTIONS as readonly string[]).includes(s)
 }
 
-/** Passed with `<Link state={...} />` — keeps the URL as `/…/action-plan` only. */
+/** Passed with `<Link state={...} />` - keeps the URL as `/…/action-plan` only. */
 export type ActionPlanLocationState = {
   p: string
   si: number

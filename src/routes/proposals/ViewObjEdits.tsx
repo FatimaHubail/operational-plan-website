@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { buttonVariants } from "@/components/ui/button"
 import { formatFieldLabel } from "@/lib/formatFieldLabel"
+import { proposalStatusToneSurfaceClass } from "@/lib/proposalStatusChip"
 import { cn } from "@/lib/utils"
 import {
   Breadcrumb,
@@ -70,10 +71,10 @@ export default function ViewObjEdits() {
   }, [])
 
   return (
-    <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 sm:p-6 lg:p-8">
       <header className="mb-6 sm:mb-8">
-        <Breadcrumb>
-          <BreadcrumbList>
+        <Breadcrumb className="inline-flex flex-wrap items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border/70 backdrop-blur-sm sm:text-sm">
+          <BreadcrumbList className="flex-wrap">
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link to={dashboardHref} />}>Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
@@ -88,7 +89,7 @@ export default function ViewObjEdits() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="font-mono text-xs font-semibold text-muted-foreground">{requestId}</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -101,13 +102,13 @@ export default function ViewObjEdits() {
               </time>
             </p>
           </div>
-          <span className="inline-flex w-fit items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
-            Edited — awaiting re-review
+          <span className={cn("sm:mt-14 inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold text-[oklch(0.55_0.015_255)]", proposalStatusToneSurfaceClass("review"))}>
+            Edited - awaiting re-review
           </span>
         </div>
       </header>
 
-      <div className="mb-6 rounded-2xl border border-border bg-accent/40 px-4 py-3 text-sm shadow-sm" role="status">
+      <div className="mb-6 rounded-2xl border border-chart-3/30 bg-[color-mix(in_oklch,var(--chart-3)_12%,white)] px-4 py-3 text-sm shadow-sm ring-1 ring-chart-3/18" role="status">
         <p className="font-semibold text-foreground">Edited Resubmission</p>
         <p className="mt-1 text-muted-foreground">
           Check your old submission, auditor's requested changes, and your modifications based on those requests
@@ -115,8 +116,8 @@ export default function ViewObjEdits() {
       </div>
 
       <div className="space-y-6">
-        <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="old-submission-oo-heading">
-          <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+        <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="old-submission-oo-heading">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
             <h2 id="old-submission-oo-heading" className="text-lg font-bold text-foreground">
               Old Submission
             </h2>
@@ -161,37 +162,37 @@ export default function ViewObjEdits() {
               {(["2023", "2024", "2025", "2026"] as const).map((year, i) => (
                 <div key={year} className="rounded-xl border border-border bg-background p-4 ring-1 ring-border/60">
                   <dt className="text-[11px] font-bold uppercase text-muted-foreground">{formatFieldLabel(`achievement_${year}`)}</dt>
-                  <dd className="mt-1 text-sm font-bold tabular-nums text-foreground">{i < 2 ? (i === 0 ? "1.05" : "1.12") : "—"}</dd>
+                  <dd className="mt-1 text-sm font-bold tabular-nums text-foreground">{i < 2 ? (i === 0 ? "1.05" : "1.12") : "-"}</dd>
                 </div>
               ))}
             </dl>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm" aria-labelledby="requested-edits-view-heading">
-          <div className="border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
+        <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="requested-edits-view-heading">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-4 py-3 sm:px-5">
             <h2 id="requested-edits-view-heading" className="text-base font-bold text-foreground">
               Requested Edits
             </h2>
           </div>
           <div className="space-y-3 px-4 py-4 sm:px-5 sm:py-4">
             {requestedEdits.map((item) => (
-              <div key={item.field} className="rounded-xl border border-border bg-background p-3 shadow-sm">
-                <p className="text-[8px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
-                <p className="mt-0.5 text-xs font-semibold text-foreground">{formatFieldLabel(item.field)}</p>
-                <p className="mt-2 text-[8px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
-                <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{item.requestedChange}</p>
+              <div key={item.field} className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel(item.field)}</p>
+                <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.requestedChange}</p>
               </div>
             ))}
-            <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-              <p className="text-[8px] font-bold uppercase tracking-wide text-muted-foreground">General notes (sent with request)</p>
-              <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{generalNotesSent}</p>
+            <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">General notes (sent with request)</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{generalNotesSent}</p>
             </div>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="your-mod-obj-heading">
-          <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+        <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="your-mod-obj-heading">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
             <h2 id="your-mod-obj-heading" className="text-lg font-bold text-foreground">
               Your Modifications
             </h2>
@@ -200,7 +201,7 @@ export default function ViewObjEdits() {
             {requestedEditFields.map((key) => {
               const mod = yourModificationsByField[key]
               return (
-                <div key={key} className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm sm:p-6">
+                <div key={key} className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
                   <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
                   <p className="mt-1 text-sm font-semibold text-foreground">{formatFieldLabel(key)}</p>
                   <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Previous value</p>
@@ -211,16 +212,15 @@ export default function ViewObjEdits() {
               )
             })}
           </div>
+          <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
+            <Link
+              to={proposalsStatusHref}
+              className={cn(buttonVariants({ variant: "outline" }), "inline-flex h-8 items-center justify-center rounded-full px-5 text-sm font-semibold leading-none shadow-sm")}
+            >
+              Back to proposals status
+            </Link>
+          </div>
         </section>
-
-        <div className="flex justify-start border-t border-border pt-6">
-          <Link
-            to={proposalsStatusHref}
-            className={cn(buttonVariants({ variant: "outline" }), "rounded-full px-5")}
-          >
-            Back to proposals status
-          </Link>
-        </div>
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { proposalStatusToneSurfaceClass } from "@/lib/proposalStatusChip"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -85,10 +86,10 @@ export default function EditAction() {
   }
 
   return (
-    <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 sm:p-6 lg:p-8">
       <header className="mb-6 sm:mb-8">
-        <Breadcrumb>
-          <BreadcrumbList>
+        <Breadcrumb className="inline-flex flex-wrap items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border/70 backdrop-blur-sm sm:text-sm">
+          <BreadcrumbList className="flex-wrap">
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link to={dashboardHref} />}>Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
@@ -102,7 +103,7 @@ export default function EditAction() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="font-mono text-xs font-semibold text-muted-foreground">{requestId}</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Respond to Requested Changes</h1>
@@ -123,15 +124,15 @@ export default function EditAction() {
               </p>
             )}
           </div>
-          <span className="inline-flex w-fit items-center rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
+          <span className={cn("sm:mt-14 inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold text-[oklch(0.55_0.015_255)]", proposalStatusToneSurfaceClass("changes"))}>
             Changes requested
           </span>
         </div>
       </header>
 
       <div className="space-y-6">
-        <section className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm" aria-labelledby="requested-edits-edit-action-heading">
-          <div className="border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
+        <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="requested-edits-edit-action-heading">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-4 py-3 sm:px-5">
             <h2 id="requested-edits-edit-action-heading" className="text-base font-bold">
               Requested Edits
             </h2>
@@ -140,19 +141,19 @@ export default function EditAction() {
             )}
           </div>
           <div className="space-y-3 px-4 py-4 sm:px-5 sm:py-4">
-            <div className="rounded-xl border border-border bg-background p-3 shadow-sm">
-              <p className="text-[8px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
-              <p className="mt-0.5 text-xs font-semibold text-foreground">Total achievement</p>
-              <p className="mt-2 text-[8px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
-              <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+            <div className="rounded-2xl border-2 border-border bg-card p-5 shadow-sm ring-1 ring-border/70 sm:p-6">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Field</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">Total achievement</p>
+              <p className="mt-4 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Requested change</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 Provide a measurable total achievement value to summarize action-level progress.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm" aria-labelledby="edit-proposal-action-heading">
-          <div className="border-b border-border bg-muted/30 px-6 py-5 sm:px-8">
+        <section className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-border/70 shadow-[0_12px_40px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]" aria-labelledby="edit-proposal-action-heading">
+          <div className="border-b border-border bg-gradient-to-r from-muted/70 via-card to-muted/35 px-6 py-5 sm:px-8">
             <h2 id="edit-proposal-action-heading" className="text-lg font-bold">
               Edit your Proposal
             </h2>
@@ -258,11 +259,11 @@ export default function EditAction() {
             <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-between">
               <Link
                 to={proposalsStatusHref}
-                className={cn(buttonVariants({ variant: "outline" }), "rounded-full px-5")}
+                className={cn(buttonVariants({ variant: "outline" }), "inline-flex h-8 rounded-full px-5 text-sm font-semibold leading-none")}
               >
                 Back to proposals status
               </Link>
-              <Button type="submit" className="rounded-full">
+              <Button type="submit" className="h-8 rounded-full px-5 text-sm font-semibold">
                 Submit revised proposal
               </Button>
             </div>

@@ -76,7 +76,7 @@ const rows: SubmissionRow[] = [
     submissionType: "objective",
     perspective: "Enablers",
     perspectiveSection: "E3.2",
-    summary: "Facilities — digital core uptime",
+    summary: "Facilities - digital core uptime",
     status: "Edited - awaiting re-review",
     statusTone: "review",
     followUpLabel: "View edits",
@@ -257,7 +257,7 @@ export default function SubmissionStatus() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="mt-6 mb-0 flex shrink-0 items-center gap-2 pt-0 pb-0 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:pt-2">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb className="min-w-0">
           <BreadcrumbList className="min-w-0 flex-wrap">
@@ -274,7 +274,7 @@ export default function SubmissionStatus() {
 
       <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
         <header className="mb-8">
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Proposals Status</h1>
+          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Proposals Status</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Track the inspection status of your proposed objectives, actions, and tasks
           </p>

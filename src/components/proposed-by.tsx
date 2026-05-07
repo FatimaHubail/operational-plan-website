@@ -12,13 +12,15 @@ type ProposedByBlockProps = ProposedByFields & {
   className?: string
   /** Tighter padding for dense layouts (e.g. action plan action cards). */
   density?: "default" | "compact"
+  /** Make the entire attribution line bold, not just the name. */
+  fullBold?: boolean
 }
 
-/** Owner attribution: name — department, sub-unit with subtle accent styling. */
-export function ProposedByBlock({ name, department, subUnit, className, density = "default" }: ProposedByBlockProps) {
-  const n = name?.trim() || "—"
-  const d = department?.trim() || "—"
-  const s = subUnit?.trim() || "—"
+/** Owner attribution: name - department, sub-unit with subtle accent styling. */
+export function ProposedByBlock({ name, department, subUnit, className, density = "default", fullBold = false }: ProposedByBlockProps) {
+  const n = name?.trim() || "-"
+  const d = department?.trim() || "-"
+  const s = subUnit?.trim() || "-"
 
   const compact = density === "compact"
 
@@ -42,11 +44,11 @@ export function ProposedByBlock({ name, department, subUnit, className, density 
       <div className="min-w-0 flex-1">
         <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Proposed by</p>
         <p className={cn("mt-0.5 leading-snug tracking-tight text-foreground", compact ? "text-[11px]" : "text-[11px] sm:text-xs")}>
-          <span className="font-semibold text-foreground">{n}</span>
-          <span className="font-medium text-muted-foreground"> — </span>
-          <span className="font-normal text-muted-foreground">{d}</span>
-          <span className="text-muted-foreground/70">, </span>
-          <span className="font-normal text-muted-foreground">{s}</span>
+          <span className={cn("font-semibold", fullBold ? "text-foreground" : "text-foreground")}>{n}</span>
+          <span className={cn(fullBold ? "font-semibold text-foreground" : "font-medium text-muted-foreground")}> - </span>
+          <span className={cn(fullBold ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>{d}</span>
+          <span className={cn(fullBold ? "font-semibold text-foreground" : "text-muted-foreground/70")}>, </span>
+          <span className={cn(fullBold ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>{s}</span>
         </p>
       </div>
     </div>

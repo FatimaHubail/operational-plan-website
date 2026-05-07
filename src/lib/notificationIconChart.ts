@@ -10,7 +10,7 @@ export function notifIconChartClass(slot: ChartSlot) {
 /** Rounded rectangle chip behind notification SVG (smaller than legacy square). */
 export const NOTIF_ICON_WRAP_CLASS = "notif-icon-wrap"
 
-/** Category / type badge — matches chart hue of the row icon. */
+/** Category / type badge - matches chart hue of the row icon. */
 export function notifTypeBadgeClass(slot: ChartSlot) {
   return `notif-type-badge-chart-${slot}`
 }

@@ -59,7 +59,7 @@ const implementationRateChartConfig = {
 
 const implementationLineColor = "oklch(0.72 0.18 47)"
 
-/** Y-axis / dashed reference — annual completion target (%) */
+/** Y-axis / dashed reference - annual completion target (%) */
 const IMPLEMENTATION_TARGET_Y = 85
 
 const notificationPreviewItems: ContributorPreviewItem[] = [
@@ -160,7 +160,7 @@ export default function DashboardPage() {
               <Link
                 to="/notifications"
                 className={cn(
-                  "notif-secondary-action inline-flex w-full items-center justify-center rounded-md border border-transparent bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-xs transition-colors",
+                  "notif-secondary-action inline-flex w-full items-center justify-center rounded-lg border border-transparent bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-xs transition-colors",
                 )}
               >
                 View all notifications

@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PencilIcon, SearchIcon, UserPlusIcon, XIcon } from "lucide-react"
+import { SearchIcon, UserPlusIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type UserRow = {
@@ -231,7 +231,7 @@ export default function AdminUsers() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Users</h1>
+            <h1 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Users</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Add colleagues and assign roles so they can view or contribute to the operational plan workspace
             </p>
@@ -386,34 +386,42 @@ export default function AdminUsers() {
               <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Full name *</label>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Full name <span className="text-primary">*</span>
+                    </label>
                     <div className="relative">
                       <Input className="pr-9" value={manageForm.fullName} disabled={!isEditing("fullName")} onChange={(e) => setManageForm((p) => ({ ...p, fullName: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
-                        {isEditing("fullName") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
+                        {isEditing("fullName") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                       </Button>
                     </div>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">University email *</label>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      University email <span className="text-primary">*</span>
+                    </label>
                     <div className="relative">
                       <Input className="pr-9" value={manageForm.email} disabled={!isEditing("email")} onChange={(e) => setManageForm((p) => ({ ...p, email: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
-                        {isEditing("email") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("email")} aria-label="Edit email">
+                        {isEditing("email") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                       </Button>
                     </div>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Password *</label>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Password <span className="text-primary">*</span>
+                    </label>
                     <div className="relative">
                       <Input className="pr-9" type="password" value={manageForm.password} disabled={!isEditing("password")} onChange={(e) => setManageForm((p) => ({ ...p, password: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
-                        {isEditing("password") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("password")} aria-label="Edit password">
+                        {isEditing("password") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                       </Button>
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Role *</label>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Role <span className="text-primary">*</span>
+                    </label>
                     <div className="relative">
                       <Select
                         value={manageForm.role || undefined}
@@ -434,8 +442,8 @@ export default function AdminUsers() {
                           <SelectItem value="Administrator">Administrator - manage users and settings</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
-                        {isEditing("role") ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">
+                        {isEditing("role") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                       </Button>
                     </div>
                   </div>
@@ -443,8 +451,16 @@ export default function AdminUsers() {
 
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Department &amp; Sub-unit *</p>
-                    <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={addDepartmentCard}>
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Department &amp; Sub-unit <span className="text-primary">*</span>
+                    </p>
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      className="rounded-xl bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90"
+                      onClick={addDepartmentCard}
+                    >
                       Add
                     </Button>
                   </div>
@@ -461,7 +477,9 @@ export default function AdminUsers() {
                         </div>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <div>
-                            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Department *</label>
+                            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                              Department <span className="text-primary">*</span>
+                            </label>
                             <div className="relative">
                               <Select
                                 value={entry.department || undefined}
@@ -479,14 +497,16 @@ export default function AdminUsers() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <Button type="button" variant="ghost" size="icon" aria-haspopup="dialog" className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
-                                {isEditing(`department-${cardIndex}`) ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
+                              <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit(`department-${cardIndex}`)} aria-label="Edit department">
+                                {isEditing(`department-${cardIndex}`) ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                               </Button>
                             </div>
                           </div>
                           <div>
                             <div className="mb-1.5 flex items-end justify-between gap-2">
-                              <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Sub-unit *</label>
+                              <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                                Sub-unit <span className="text-primary">*</span>
+                              </label>
                               <Button type="button" variant="ghost" className="h-auto p-0 text-primary" onClick={() => addSubUnit(cardIndex)}>
                                 +
                               </Button>
@@ -505,13 +525,13 @@ export default function AdminUsers() {
                                     <Button
                                       type="button"
                                       variant="ghost"
-                                      size="icon"
+                                      size="icon-xs"
                                       aria-haspopup="dialog"
-                                      className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-primary active:-translate-y-1/2"
+                                      className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2"
                                       onClick={() => toggleFieldEdit(`sub-${cardIndex}-${subIndex}`)}
                                       aria-label="Edit sub-unit"
                                     >
-                                      {isEditing(`sub-${cardIndex}-${subIndex}`) ? <XIcon className="h-3 w-3" /> : <PencilIcon className="h-3 w-3" />}
+                                      {isEditing(`sub-${cardIndex}-${subIndex}`) ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                                     </Button>
                                   </div>
                                   {subIndex > 0 ? (
@@ -533,7 +553,7 @@ export default function AdminUsers() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
-                    className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                    className="h-auto min-h-8 flex-1 rounded-xl px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
                     onClick={() => setEditingField(null)}
                   >
                     Save
@@ -541,7 +561,7 @@ export default function AdminUsers() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                    className="h-auto min-h-8 flex-1 rounded-xl border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
                     onClick={() => {
                       if (!manageUser) return
                       setManageForm(buildManageForm(manageUser))

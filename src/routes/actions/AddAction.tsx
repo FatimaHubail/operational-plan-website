@@ -91,7 +91,7 @@ export default function AddAction() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="mt-6 mb-0 flex shrink-0 items-center gap-2 pt-0 pb-0 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:pt-2">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb>
           <BreadcrumbList>
@@ -114,9 +114,9 @@ export default function AddAction() {
         </Breadcrumb>
       </header>
 
-      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-secondary/60 to-chart-5/10 p-4 sm:p-6 lg:p-8">
         <header className="mb-8 w-full min-w-0">
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Add action</h1>
+          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Add action</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Add one action based on the selected objective. Each save creates a new action with all required details
             and planning fields used on the action plan

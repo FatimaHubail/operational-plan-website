@@ -307,6 +307,16 @@ export default function ReviewAction() {
               </Link>
             </div>
           )}
+          {isProposalContext && (
+            <div className="border-t border-border bg-muted/30 px-6 py-5 sm:px-8">
+              <Link
+                to={proposalsStatusHref}
+                className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold leading-none text-foreground shadow-sm transition hover:bg-accent"
+              >
+                Back to proposals status
+              </Link>
+            </div>
+          )}
         </section>
 
         {showRequestedEdits && (
@@ -444,17 +454,6 @@ export default function ReviewAction() {
               </div>
             </form>
           </section>
-        )}
-
-        {isProposalContext && (
-          <div className="flex justify-start">
-            <Link
-              to={proposalsStatusHref}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
-            >
-              Back to proposals status
-            </Link>
-          </div>
         )}
 
       </div>

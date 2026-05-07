@@ -127,7 +127,7 @@ export const initialActionsData: ActionPlanAction[] = [
 ]
 
 export function formatDate(iso: string): string {
-  if (!iso || typeof iso !== "string") return iso != null && iso !== "" ? String(iso) : "—"
+  if (!iso || typeof iso !== "string") return iso != null && iso !== "" ? String(iso) : "-"
   const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/)
   if (!m) return iso
   const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))

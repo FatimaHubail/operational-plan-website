@@ -1,5 +1,5 @@
 /**
- * Shared styling for proposal lifecycle chips — CSS classes in `index.css` (`.proposal-status-tone-*`),
+ * Shared styling for proposal lifecycle chips - CSS classes in `index.css` (`.proposal-status-tone-*`),
  * same as the Status column on Proposals Status (`ProposalsStatus.tsx`).
  */
 export type ProposalLifecycleTone = "pending" | "review" | "changes" | "accepted"
@@ -13,7 +13,7 @@ export function requestStatusToProposalTone(raw: string): ProposalLifecycleTone 
   if (
     s.includes("re-review") ||
     s.includes("awaiting re-review") ||
-    s.includes("edited —") ||
+    s.includes("edited -") ||
     s.includes("edited -")
   ) {
     return "review"

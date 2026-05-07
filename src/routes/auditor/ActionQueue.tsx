@@ -127,7 +127,7 @@ export default function ActionQueue() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Action Queue</h1>
+          <h1 className="mt-6 text-2xl font-bold tracking-tight sm:text-3xl">Action Queue</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Inspect actions proposed by contributors
           </p>

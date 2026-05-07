@@ -69,11 +69,11 @@ const WEIGHT_LEGEND_BG = ["bg-primary", "bg-destructive", "bg-chart-2", "bg-char
 
 const WEIGHT_LABEL_TEXT = ["text-primary", "text-destructive", "text-chart-2", "text-chart-1", "text-chart-5"] as const
 
-/** Match `action-plan.html` glance achievement column — emerald-700 headline + emerald-500/600 gradient bars + cards. */
+/** Match `action-plan.html` glance achievement column - emerald-700 headline + emerald-500/600 gradient bars + cards. */
 const ACHIEVEMENT_CARD_SURFACE =
   "border-emerald-100/90 bg-gradient-to-br from-emerald-50/50 to-card p-2.5 ring-1 ring-emerald-100/40 dark:border-emerald-900/35 dark:from-emerald-950/20 dark:to-card dark:ring-emerald-900/25"
 
-/** Mini action achievement bars — HTML hex swatches mapped to Tailwind (`action-plan.html`). */
+/** Mini action achievement bars - HTML hex swatches mapped to Tailwind (`action-plan.html`). */
 const ACHIEVEMENT_MINI_SEGMENT_BG = [
   "bg-emerald-600",
   "bg-teal-600",
@@ -104,7 +104,7 @@ function AchievementSolidMiniBar({ percent, shadeIdx }: { percent: number; shade
   )
 }
 
-/** Same surfaces as Catalysts `getStatusClasses` — adapted for action-plan vocabulary. */
+/** Same surfaces as Catalysts `getStatusClasses` - adapted for action-plan vocabulary. */
 function actionPlanObjectiveStatusSurfaceClass(status: string): string {
   const t = normalizeStatus(status)
   if (t.includes("complete")) {
@@ -117,12 +117,12 @@ function actionPlanObjectiveStatusSurfaceClass(status: string): string {
 }
 
 function RequestStatusPill({ label }: { label: string }) {
-  const text = label?.trim() ? label.trim() : "—"
+  const text = label?.trim() ? label.trim() : "-"
   const surface = proposalStatusToneSurfaceClass(requestStatusToProposalTone(text))
   return (
     <span
       className={cn(
-        "inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition",
+        "inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-[oklch(0.55_0.015_255)] transition",
         surface
       )}
     >
@@ -154,7 +154,7 @@ function FieldCell({
   onCancelEdit?: () => void
   multiline?: boolean
 }) {
-  const display = value != null && value !== "" ? String(value) : "—"
+  const display = value != null && value !== "" ? String(value) : "-"
   const base =
     "min-w-0 rounded-xl border border-border/80 bg-white px-3 py-2.5 shadow-md ring-1 ring-border/25 transition sm:px-4" +
     (wide ? " sm:col-span-2" : "")
@@ -454,7 +454,7 @@ export default function ActionPlan() {
       taskActionContributionPercentage: firstTask?.actionContributionPercentage || "",
       taskStatus: firstTask?.status || "Not started",
       taskNotes: firstTask?.notes || "",
-      actionProposalStatus: firstTask?.requestStatus || "—",
+      actionProposalStatus: firstTask?.requestStatus || "-",
     })
   }
 
@@ -475,7 +475,7 @@ export default function ActionPlan() {
         firstTask.actionContributionPercentage = actionDetailsDraft.taskActionContributionPercentage.trim()
         firstTask.status = actionDetailsDraft.taskStatus.trim() || "Not started"
         firstTask.notes = actionDetailsDraft.taskNotes.trim()
-        firstTask.requestStatus = actionDetailsDraft.actionProposalStatus.trim() || "—"
+        firstTask.requestStatus = actionDetailsDraft.actionProposalStatus.trim() || "-"
       }
       return next
     })
@@ -525,7 +525,7 @@ export default function ActionPlan() {
 
   return (
     <div className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
-      <header className="flex h-16 min-w-0 shrink-0 items-center gap-2 border-b border-border/60 bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="mt-6 mb-0 flex min-w-0 shrink-0 items-center gap-2 bg-background px-4 pt-0 pb-0 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:pt-2">
         <SidebarTrigger className="md:hidden" />
         <Breadcrumb className="min-w-0">
           <BreadcrumbList className="min-w-0 flex-wrap">
@@ -544,7 +544,7 @@ export default function ActionPlan() {
         </Breadcrumb>
       </header>
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pt-0">
+      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden bg-gradient-to-b from-background via-background to-primary/[0.06] p-4 sm:p-6 lg:p-8">
         <header className="mb-8 w-full min-w-0">
           <nav
             aria-label="Breadcrumb"
@@ -564,7 +564,7 @@ export default function ActionPlan() {
             </span>
             <span className="text-foreground">Action plan</span>
           </nav>
-          <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+          <div className="mt-1 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <div
               className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary text-primary-foreground shadow-lg shadow-primary/30"
               aria-hidden="true"
@@ -682,14 +682,14 @@ export default function ActionPlan() {
             <div className="p-5 sm:p-6" role="group" aria-label="Total achievement">
               <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Total achievement</p>
               <p className="mt-2 text-4xl font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
-                {glance.objAch != null ? `${glance.objAch}%` : "—"}
+                {glance.objAch != null ? `${glance.objAch}%` : "-"}
               </p>
               <div className="mt-2">
                 <EmeraldGradientPercentBar percent={glance.objAch != null ? glance.objAch : 0} />
               </div>
               <div className="mt-4 min-w-0">
                 {glance.objAch == null ? (
-                  <p className="text-xs text-muted-foreground">—</p>
+                  <p className="text-xs text-muted-foreground">-</p>
                 ) : (
                   <div className="space-y-2.5">
                     {actionsData.map((action, idx) => {
@@ -708,7 +708,7 @@ export default function ActionPlan() {
                               </p>
                             </div>
                             <p className="shrink-0 text-right text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
-                              {achStr || "—"}
+                              {achStr || "-"}
                             </p>
                           </div>
                           <div className="mt-2 flex items-center gap-2">
@@ -727,11 +727,11 @@ export default function ActionPlan() {
             <div className="p-5 sm:p-6" role="group" aria-label="Schedule">
               <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">About to start</p>
               <p className="mt-2 text-2xl font-bold tabular-nums text-foreground">
-                {glance.firstStartIso ? formatDate(glance.firstStartIso) : "—"}
+                {glance.firstStartIso ? formatDate(glance.firstStartIso) : "-"}
               </p>
               <div className="mt-1.5 space-y-1">
                 {glance.tasksOnFirstStart.length === 0 ? (
-                  <p className="text-sm font-medium text-muted-foreground">—</p>
+                  <p className="text-sm font-medium text-muted-foreground">-</p>
                 ) : (
                   glance.tasksOnFirstStart.map((r, i) => (
                     <p key={r.name} className="flex items-center gap-2 text-sm font-semibold leading-snug text-foreground">
@@ -754,7 +754,7 @@ export default function ActionPlan() {
               <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">About to end</p>
               <div className="mt-1 space-y-1.5">
                 {glance.openEnding.length === 0 ? (
-                  <p className="text-[11px] font-medium text-muted-foreground">—</p>
+                  <p className="text-[11px] font-medium text-muted-foreground">-</p>
                 ) : (
                   glance.openEnding.slice(0, 6).map((x, i) => (
                     <p key={x.name + x.iso} className="flex items-center gap-2 text-[11px] font-medium leading-snug text-foreground">
@@ -803,7 +803,7 @@ export default function ActionPlan() {
                       segments={glance.weightSegs.map((w) => ({
                         ratio: glance.weightSumParsed > 0 ? w.pct : 1,
                         className: WEIGHT_BAR_FILLS[w.i % WEIGHT_BAR_FILLS.length],
-                        title: `${w.title} — ${w.pct}%`,
+                        title: `${w.title} - ${w.pct}%`,
                       }))}
                     />
                   </div>
@@ -862,7 +862,7 @@ export default function ActionPlan() {
                     </svg>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/65">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[oklch(0.70_0.18_47)]">
                       Operational objective
                     </p>
                     <h1
@@ -871,13 +871,14 @@ export default function ActionPlan() {
                     >
                       {headingText}
                     </h1>
-                    <p className="mt-3 max-w-3xl border-l-2 border-primary/35 pl-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                    <p className="mt-3 max-w-3xl border-l-2 border-[oklch(0.70_0.18_47)] pl-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
                       {objectiveLead}
                     </p>
                     <ProposedByBlock
                       name={resolved?.proposedByName}
                       department={resolved?.proposedByDepartment}
                       subUnit={resolved?.proposedBySubUnit}
+                      fullBold
                       className="mt-3 max-w-3xl pl-4"
                     />
                   </div>
@@ -996,7 +997,7 @@ export default function ActionPlan() {
             <DialogHeader className="shrink-0 gap-0 border-b border-border bg-white px-5 py-4 text-left sm:px-6">
               <DialogTitle className="text-base font-bold sm:text-lg">
                 Task {taskModal.taskIndex + 1} · Action {taskModal.actionIndex + 1}
-                {taskModal.action.title ? ` — ${taskModal.action.title}` : ""}
+                {taskModal.action.title ? ` - ${taskModal.action.title}` : ""}
               </DialogTitle>
             </DialogHeader>
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
@@ -1074,7 +1075,7 @@ export default function ActionPlan() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  className="h-auto min-h-8 flex-1 rounded-xl px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
                   onClick={saveTaskEdit}
                   disabled={taskEditingField == null}
                 >
@@ -1083,7 +1084,7 @@ export default function ActionPlan() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  className="h-auto min-h-8 flex-1 rounded-xl border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
                   onClick={() => {
                     setTaskEditingField(null)
                     setTaskDraft({
@@ -1141,7 +1142,7 @@ export default function ActionPlan() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  className="h-auto min-h-8 flex-1 rounded-lg px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  className="h-auto min-h-8 flex-1 rounded-xl px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
                   onClick={saveActionDetails}
                   disabled={actionEditingField == null}
                 >
@@ -1150,7 +1151,7 @@ export default function ActionPlan() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-auto min-h-8 flex-1 rounded-lg border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:px-6"
+                  className="h-auto min-h-8 flex-1 rounded-xl border-0 px-4 py-2 text-xs font-semibold shadow-md sm:flex-none sm:w-24"
                   onClick={() => {
                     if (!actionDetails) return
                     const firstTask = actionDetails.action.tasks?.[0]
@@ -1164,7 +1165,7 @@ export default function ActionPlan() {
                       taskActionContributionPercentage: firstTask?.actionContributionPercentage || "",
                       taskStatus: firstTask?.status || "Not started",
                       taskNotes: firstTask?.notes || "",
-                      actionProposalStatus: firstTask?.requestStatus || "—",
+                      actionProposalStatus: firstTask?.requestStatus || "-",
                     })
                     setActionEditingField(null)
                   }}
@@ -1200,12 +1201,12 @@ function ActionCard({
   onDeleteTask: (taskIndex: number) => void
 }) {
   const tasks = action.tasks || []
-  const weightDisplay = action.totalWeight || sumTaskWeightsPercent(tasks) || "—"
+  const weightDisplay = action.totalWeight || sumTaskWeightsPercent(tasks) || "-"
   const achievementDisplay =
     action.totalAchievement != null && action.totalAchievement !== ""
       ? String(action.totalAchievement)
-      : aggregateActionAchievementPercent(tasks) || "—"
-  const actionProposalStatus = tasks[0]?.requestStatus?.trim() || "—"
+      : aggregateActionAchievementPercent(tasks) || "-"
+  const actionProposalStatus = tasks[0]?.requestStatus?.trim() || "-"
   const [editingMetric, setEditingMetric] = useState<"weight" | "achievement" | null>(null)
   const [metricDraft, setMetricDraft] = useState({ weight: action.totalWeight || "", achievement: String(action.totalAchievement || "") })
 
@@ -1247,7 +1248,7 @@ function ActionCard({
                 {action.title || "Untitled action"}
               </h2>
               <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-stretch lg:justify-end lg:gap-2">
-                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border-0 proposal-stat-label-bg-chart-4 px-3 py-2 text-xs shadow-sm lg:w-auto lg:py-1.5 lg:text-sm">
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-xl border-0 proposal-stat-label-bg-chart-4 px-3 py-2 text-xs shadow-sm lg:w-auto lg:py-1.5 lg:text-sm">
                   <span className="font-semibold text-[oklch(0.55_0.015_255)]">Total weight</span>
                   {editingMetric === "weight" ? (
                     <>
@@ -1293,7 +1294,7 @@ function ActionCard({
                     </>
                   )}
                 </div>
-                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-lg border-0 proposal-stat-label-bg-chart-2 px-3 py-2 text-xs shadow-sm lg:w-auto lg:py-1.5 lg:text-sm">
+                <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-xl border-0 proposal-stat-label-bg-chart-2 px-3 py-2 text-xs shadow-sm lg:w-auto lg:py-1.5 lg:text-sm">
                   <span className="font-semibold text-[oklch(0.55_0.015_255)]">Total achievement</span>
                   {editingMetric === "achievement" ? (
                     <>
@@ -1333,7 +1334,7 @@ function ActionCard({
                         className="text-[oklch(0.55_0.015_255)] hover:bg-muted/50 hover:text-[oklch(0.55_0.015_255)]"
                         onClick={() => {
                           // Prefill with the currently visible value (stored or computed).
-                          setMetricDraft((d) => ({ ...d, achievement: achievementDisplay === "—" ? "" : achievementDisplay }))
+                          setMetricDraft((d) => ({ ...d, achievement: achievementDisplay === "-" ? "" : achievementDisplay }))
                           setEditingMetric("achievement")
                         }}
                         aria-label="Edit total achievement"
@@ -1350,6 +1351,7 @@ function ActionCard({
               name={action.proposedByName}
               department={action.proposedByDepartment}
               subUnit={action.proposedBySubUnit}
+              fullBold
               className="mt-2"
             />
             <p className="mt-1 text-xs font-medium text-muted-foreground">
@@ -1367,7 +1369,7 @@ function ActionCard({
               <Button
                 type="button"
                 variant="outline"
-                className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-1.5 text-xs font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-1.5 text-xs font-semibold shadow-sm transition hover:bg-accent focus-visible:ring-offset-2 sm:w-auto"
                 onClick={onViewActionDetails}
               >
                 View details
@@ -1414,7 +1416,7 @@ function ActionCard({
                   <div className="min-w-0 flex-1 pt-0.5">
                     <p className="text-[11px] font-bold text-muted-foreground">Task {taskIndex + 1}</p>
                     <h3 className="mt-0.5 line-clamp-2 text-sm font-bold text-foreground sm:text-base">
-                      {task.name || "—"}
+                      {task.name || "-"}
                     </h3>
                   </div>
                 </div>
@@ -1432,7 +1434,7 @@ function ActionCard({
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm focus-visible:ring-offset-2 sm:w-auto"
+                    className="h-auto inline-flex w-full items-center justify-center rounded-xl border-0 px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:bg-accent focus-visible:ring-offset-2 sm:w-auto"
                     onClick={() => onOpenTask(task, taskIndex)}
                   >
                     View details

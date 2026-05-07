@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-/** Segmented mix bar — same structure as “Objective status” on Catalysts dashboard (flex ratios + legend). */
+/** Segmented mix bar - same structure as “Objective status” on Catalysts dashboard (flex ratios + legend). */
 function SubmissionMixBar({
   objectives,
   actions,

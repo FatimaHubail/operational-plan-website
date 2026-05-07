@@ -88,7 +88,7 @@ export function achievementStatusLabel(year: string, achievementRaw: string, tar
   if (a === null) return "Not measured/reported"
 
   const t = parseTargetMetric(targetRaw)
-  if (t === null || t <= 0) return "Target not set — cannot classify"
+  if (t === null || t <= 0) return "Target not set - cannot classify"
 
   const score = getPerformanceVsTargetPercent(achievementRaw, targetRaw)
   if (score === null) return "Not measured/reported"
@@ -124,7 +124,7 @@ function bandSurfaceClassName(band: AchievementBand): string {
   }
 }
 
-/** Year cell in sub-section indicator card — classification uses `targetValue` for that sub-section. */
+/** Year cell in sub-section indicator card - classification uses `targetValue` for that sub-section. */
 export function achievementSubsectionCellClassName(year: string, achievementRaw: string, targetRaw: string): string {
   return cn(
     "rounded-xl px-3 py-2.5 ring-1 transition-colors",

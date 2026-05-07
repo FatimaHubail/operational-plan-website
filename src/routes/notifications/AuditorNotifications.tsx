@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   chartSlotForAuditor,
   NOTIF_ICON_WRAP_CLASS,
@@ -121,7 +131,7 @@ function itemMatchesFilter(item: NotificationItem, f: FilterKey): boolean {
 }
 
 const markAllReadButtonClass =
-  "shrink-0 rounded-full !bg-transparent !text-[oklch(0.70_0.18_47)] shadow-none hover:!bg-transparent hover:!text-[oklch(0.22_0.04_265)] dark:!bg-transparent dark:hover:!bg-transparent dark:hover:!text-[oklch(0.22_0.04_265)]"
+  "shrink-0 rounded-full !bg-transparent !text-[oklch(0.70_0.18_47)] shadow-none hover:!bg-transparent hover:!text-[oklch(0.70_0.18_47)] hover:underline dark:!bg-transparent dark:hover:!bg-transparent dark:hover:!text-[oklch(0.70_0.18_47)] dark:hover:underline"
 
 function categoryLabel(category: NotificationCategory) {
   switch (category) {
@@ -262,6 +272,20 @@ export default function AuditorNotifications() {
 
   return (
     <div className="min-w-0 flex-1 bg-background p-4 sm:p-6 lg:p-8">
+      <header className="mt-4 mb-10 flex h-9 items-center gap-2">
+        <SidebarTrigger className="md:hidden" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/dashboard-auditor" />}>Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Notifications</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
       <header className="mb-6 sm:mb-8">
         <div>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Notifications</h1>
@@ -346,7 +370,7 @@ export default function AuditorNotifications() {
                       <Button
                         type="button"
                         variant="secondary"
-                        className="notif-secondary-action w-full"
+                        className="w-full rounded-full border border-border bg-background text-xs font-semibold text-foreground transition hover:bg-accent"
                         onClick={() => setVisibleTodayCount((prev) => prev + 3)}
                       >
                         Load more
@@ -367,7 +391,7 @@ export default function AuditorNotifications() {
                       <Button
                         type="button"
                         variant="secondary"
-                        className="notif-secondary-action w-full"
+                        className="w-full rounded-full border border-border bg-background text-xs font-semibold text-foreground transition hover:bg-accent"
                         onClick={() => setVisibleEarlierCount((prev) => prev + 3)}
                       >
                         Load more
