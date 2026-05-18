@@ -166,17 +166,37 @@ export default function AddUser() {
           <div className="relative space-y-8 px-6 py-8 sm:px-10 sm:py-10">
             <fieldset className="min-w-0 space-y-5 border-0 p-0">
               <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-5">
-                <div className="min-w-0 sm:col-span-2">
-                  <label htmlFor="user-full-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                    Full name <span className="text-primary">*</span>
+                <div className="min-w-0">
+                  <label htmlFor="user-first-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    First name <span className="text-primary">*</span>
                   </label>
-                  <Input id="user-full-name" name="fullName" type="text" required />
+                  <Input id="user-first-name" name="firstName" type="text" required autoComplete="given-name" />
+                </div>
+                <div className="min-w-0">
+                  <label htmlFor="user-second-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Second name <span className="text-primary">*</span>
+                  </label>
+                  <Input id="user-second-name" name="secondName" type="text" required autoComplete="additional-name" />
+                </div>
+                <div className="min-w-0 sm:col-span-2">
+                  <label htmlFor="user-last-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Last name <span className="text-primary">*</span>
+                  </label>
+                  <Input id="user-last-name" name="lastName" type="text" required autoComplete="family-name" />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="user-email" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     University email <span className="text-primary">*</span>
                   </label>
-                  <Input id="user-email" name="email" type="email" required placeholder="name@uob.edu.bh" />
+                  <Input
+                    id="user-email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="name@uob.edu.bh"
+                    pattern=".+@uob\.edu\.bh$"
+                    title="Must be a @uob.edu.bh address"
+                  />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="user-password" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">

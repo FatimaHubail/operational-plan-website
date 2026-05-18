@@ -33,9 +33,12 @@ import {
 } from "@/components/ui/table"
 import { SearchIcon, UserPlusIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatUserName } from "@/lib/formatUserName"
 
 type UserRow = {
-  name: string
+  firstName: string
+  secondName: string
+  lastName: string
   email: string
   role: "Administrator" | "Contributor" | "Auditor" | "Indicator Owner"
   unit: string
@@ -85,7 +88,9 @@ const UNIT_DEPARTMENT_OPTIONS = [
 
 const users: UserRow[] = [
   {
-    name: "Juliana Rahman",
+    firstName: "Juliana",
+    secondName: "Fatima",
+    lastName: "Rahman",
     email: "juliana.rahman@uob.edu.bh",
     role: "Administrator",
     unit: "Planning office",
@@ -93,7 +98,9 @@ const users: UserRow[] = [
     actionLabel: "Manage",
   },
   {
-    name: "Ahmed Khalil",
+    firstName: "Ahmed",
+    secondName: "Hassan",
+    lastName: "Khalil",
     email: "a.khalil@uob.edu.bh",
     role: "Contributor",
     unit: "College of Science",
@@ -101,7 +108,9 @@ const users: UserRow[] = [
     actionLabel: "Manage",
   },
   {
-    name: "Sara Al-Najjar",
+    firstName: "Sara",
+    secondName: "Mohammed",
+    lastName: "Al-Najjar",
     email: "s.alnajjar@uob.edu.bh",
     role: "Auditor",
     unit: "Finance",
@@ -109,7 +118,9 @@ const users: UserRow[] = [
     actionLabel: "Resend invite",
   },
   {
-    name: "Fatima Al-Mansoori",
+    firstName: "Fatima",
+    secondName: "Ali",
+    lastName: "Al-Mansoori",
     email: "f.almansoori@uob.edu.bh",
     role: "Indicator Owner",
     unit: "College of Engineering",
@@ -136,7 +147,9 @@ export default function AdminUsers() {
   const [manageUser, setManageUser] = useState<UserRow | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
   const [manageForm, setManageForm] = useState({
-    fullName: "",
+    firstName: "",
+    secondName: "",
+    lastName: "",
     email: "",
     password: "********",
     role: "" as UserRow["role"] | "",
@@ -144,7 +157,9 @@ export default function AdminUsers() {
   })
 
   const buildManageForm = (user: UserRow) => ({
-    fullName: user.name,
+    firstName: user.firstName,
+    secondName: user.secondName,
+    lastName: user.lastName,
     email: user.email,
     password: "********",
     role: user.role,
@@ -304,7 +319,7 @@ export default function AdminUsers() {
                 <TableRow key={user.email} className="transition hover:bg-muted/45">
                   <TableCell className="px-4 py-4 sm:px-6 lg:pl-8">
                     <div className="min-w-0">
-                      <p className="font-semibold">{user.name}</p>
+                      <p className="font-semibold">{formatUserName(user)}</p>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   </TableCell>
@@ -385,14 +400,36 @@ export default function AdminUsers() {
               </DialogHeader>
               <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
+                  <div>
                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                      Full name <span className="text-primary">*</span>
+                      First name <span className="text-primary">*</span>
                     </label>
                     <div className="relative">
-                      <Input className="pr-9" value={manageForm.fullName} disabled={!isEditing("fullName")} onChange={(e) => setManageForm((p) => ({ ...p, fullName: e.target.value }))} />
-                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("fullName")} aria-label="Edit full name">
-                        {isEditing("fullName") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
+                      <Input className="pr-9" value={manageForm.firstName} disabled={!isEditing("firstName")} onChange={(e) => setManageForm((p) => ({ ...p, firstName: e.target.value }))} />
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("firstName")} aria-label="Edit first name">
+                        {isEditing("firstName") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
+                      </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Second name <span className="text-primary">*</span>
+                    </label>
+                    <div className="relative">
+                      <Input className="pr-9" value={manageForm.secondName} disabled={!isEditing("secondName")} onChange={(e) => setManageForm((p) => ({ ...p, secondName: e.target.value }))} />
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("secondName")} aria-label="Edit second name">
+                        {isEditing("secondName") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Last name <span className="text-primary">*</span>
+                    </label>
+                    <div className="relative">
+                      <Input className="pr-9" value={manageForm.lastName} disabled={!isEditing("lastName")} onChange={(e) => setManageForm((p) => ({ ...p, lastName: e.target.value }))} />
+                      <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("lastName")} aria-label="Edit last name">
+                        {isEditing("lastName") ? <XIcon className="h-3 w-3" /> : <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.265-1.265l1-3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z" /></svg>}
                       </Button>
                     </div>
                   </div>
