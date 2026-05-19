@@ -5,21 +5,28 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function AppLayout() {
   const location = useLocation()
-  const isContributorArea = location.pathname.startsWith("/contributor")
+  const pathname = location.pathname
+  const userScope = pathname.startsWith("/president")
+    ? "president"
+    : pathname.startsWith("/contributor")
+      ? "contributor"
+      : "default"
 
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset
         className="min-w-0 overflow-x-hidden bg-background"
-        data-user-scope={isContributorArea ? "contributor" : "default"}
+        data-user-scope={userScope}
       >
         <div className="relative flex min-h-screen flex-col">
-          <img
-            src={uobLogo}
-            alt="University of Bahrain logo"
-            className="pointer-events-none absolute right-4 top-4 z-10 h-20 w-20 object-contain sm:right-6 sm:top-6 lg:right-8 lg:top-8"
-          />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 overflow-hidden sm:h-32">
+            <img
+              src={uobLogo}
+              alt="University of Bahrain logo"
+              className="absolute right-4 top-4 h-20 w-20 object-contain sm:right-6 sm:top-6 lg:right-8 lg:top-8"
+            />
+          </div>
           <Outlet />
         </div>
       </SidebarInset>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { buildActionPlanHref, type ActionPlanLocationState } from "@/lib/buildActionPlanHref"
+import { getAppRoutePrefix, getDashboardHref } from "@/lib/appRoutePrefix"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -489,8 +490,8 @@ function flattenObjectives(item: CatalystItem) {
 
 export default function Catalysts() {
   const location = useLocation()
-  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
-  const dashboardHref = location.pathname.startsWith("/contributor/") ? "/contributor/dashboard" : "/dashboard"
+  const routePrefix = getAppRoutePrefix(location.pathname)
+  const dashboardHref = getDashboardHref(location.pathname)
   const [catalystState, setCatalystState] = useState(catalystsData)
   const [activeCatalystKey, setActiveCatalystKey] = useState<keyof typeof catalystsData>("c1")
   const [currentSubIndex, setCurrentSubIndex] = useState(0)

@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getAppRoutePrefix, getDashboardHref, getProposalsStatusHref, isRoleScopedPath } from "@/lib/appRoutePrefix"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
@@ -69,18 +70,19 @@ export default function AddAction() {
   const location = useLocation()
   const [taskStatus, setTaskStatus] = useState("")
   const { planSection } = useParams<{ planSection: string }>()
-  const isContributorArea = location.pathname.startsWith("/contributor/")
-  const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
-  const proposalsStatusHref = isContributorArea ? "/contributor/proposals-status" : "/proposals-status"
+  const routePrefix = getAppRoutePrefix(location.pathname)
+  const isRoleScoped = isRoleScopedPath(location.pathname)
+  const dashboardHref = getDashboardHref(location.pathname)
+  const proposalsStatusHref = getProposalsStatusHref(location.pathname)
   const isValidSection = (s: string | undefined): s is PlanSection =>
     !!s && (PLAN_SECTIONS as readonly string[]).includes(s)
 
   if (!isValidSection(planSection)) {
-    return <Navigate to={isContributorArea ? "/contributor/catalysts/add-action" : "/catalysts/add-action"} replace />
+    return <Navigate to={isRoleScoped ? `${routePrefix}/catalysts/add-action` : "/catalysts/add-action"} replace />
   }
 
   const parentPath = `/${planSection}` as `/${PlanSection}`
-  const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
+  const sectionHref = isRoleScoped ? `${routePrefix}${parentPath}` : parentPath
   const parentLabel = SECTION_LABELS[parentPath] ?? "Planning"
   const actionPlanHref = `${sectionHref}/action-plan`
 
@@ -130,9 +132,13 @@ export default function AddAction() {
           <p className="text-xs font-bold uppercase tracking-wide text-foreground/70">After you submit</p>
           <p className="mt-1 text-sm text-muted-foreground">
             This action enters the auditor queue for inspection. The auditor may Accept your proposal or Request changes with notes on specific fields. Monitor status on{" "}
-            <Link to={proposalsStatusHref} className="font-medium text-primary underline-offset-4 hover:underline">
-              Proposals Status
-            </Link>
+            {proposalsStatusHref ? (
+              <Link to={proposalsStatusHref} className="font-medium text-primary underline-offset-4 hover:underline">
+                Proposals Status
+              </Link>
+            ) : (
+              <span className="font-medium text-foreground">your strategic perspective pages</span>
+            )}
             .
           </p>
         </div>

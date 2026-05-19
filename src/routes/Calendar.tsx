@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
+import { getDashboardHref } from "@/lib/appRoutePrefix"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import {
   Breadcrumb,
@@ -150,6 +151,8 @@ const monthCells: MonthCell[] = [
 
 /** ~13:00 indicator - 9:00 origin, 48px/h → 4 × 48px (matches static HTML reference) */
 export default function Calendar() {
+  const location = useLocation()
+  const dashboardHref = getDashboardHref(location.pathname)
   const [view, setView] = useState<"week" | "month">("week")
   const [monthOffset, setMonthOffset] = useState(0)
   const today = useMemo(() => new Date(), [])
@@ -194,7 +197,7 @@ export default function Calendar() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to={dashboardHref} />}>Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

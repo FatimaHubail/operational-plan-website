@@ -14,6 +14,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { getAppRoutePrefix, getDashboardHref, getProposalsStatusHref, isRoleScopedPath } from "@/lib/appRoutePrefix"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
 type PlanSection = (typeof PLAN_SECTIONS)[number]
@@ -63,18 +64,19 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: string; minHe
 export default function AddTask() {
   const location = useLocation()
   const { planSection } = useParams<{ planSection: string }>()
-  const isContributorArea = location.pathname.startsWith("/contributor/")
-  const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
-  const proposalsStatusHref = isContributorArea ? "/contributor/proposals-status" : "/proposals-status"
+  const routePrefix = getAppRoutePrefix(location.pathname)
+  const isRoleScoped = isRoleScopedPath(location.pathname)
+  const dashboardHref = getDashboardHref(location.pathname)
+  const proposalsStatusHref = getProposalsStatusHref(location.pathname)
   const isValidSection = (s: string | undefined): s is PlanSection =>
     !!s && (PLAN_SECTIONS as readonly string[]).includes(s)
 
   if (!isValidSection(planSection)) {
-    return <Navigate to={isContributorArea ? "/contributor/catalysts/add-task" : "/catalysts/add-task"} replace />
+    return <Navigate to={isRoleScoped ? `${routePrefix}/catalysts/add-task` : "/catalysts/add-task"} replace />
   }
 
   const parentPath = `/${planSection}` as `/${PlanSection}`
-  const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
+  const sectionHref = isRoleScoped ? `${routePrefix}${parentPath}` : parentPath
   const parentLabel = SECTION_LABELS[parentPath] ?? "Planning"
   const actionPlanHref = `${sectionHref}/action-plan`
   const [taskStartDate, setTaskStartDate] = useState<Date | undefined>(undefined)
@@ -136,9 +138,13 @@ export default function AddTask() {
           <p className="text-xs font-bold uppercase tracking-wide text-foreground/70">After you submit</p>
           <p className="mt-1 text-sm text-muted-foreground">
             This task enters the auditor queue for inspection. The auditor may Accept your proposal or Request changes with notes on specific fields. Monitor status on{" "}
-            <Link to={proposalsStatusHref} className="font-medium text-primary underline-offset-4 hover:underline">
-              Proposals Status
-            </Link>
+            {proposalsStatusHref ? (
+              <Link to={proposalsStatusHref} className="font-medium text-primary underline-offset-4 hover:underline">
+                Proposals Status
+              </Link>
+            ) : (
+              <span className="font-medium text-foreground">your strategic perspective pages</span>
+            )}
             .
           </p>
         </div>

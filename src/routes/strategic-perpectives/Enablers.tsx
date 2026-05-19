@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { buildActionPlanHref, type ActionPlanLocationState } from "@/lib/buildActionPlanHref"
+import { getAppRoutePrefix, getDashboardHref } from "@/lib/appRoutePrefix"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -535,8 +536,8 @@ function flattenObjectives(item: EnablerItem) {
 
 export default function Enablers() {
   const location = useLocation()
-  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
-  const dashboardHref = location.pathname.startsWith("/contributor/") ? "/contributor/dashboard" : "/dashboard"
+  const routePrefix = getAppRoutePrefix(location.pathname)
+  const dashboardHref = getDashboardHref(location.pathname)
   const [enablerState, setEnablerState] = useState(enablersData)
   const [activeEnablerKey, setActiveEnablerKey] = useState<keyof typeof enablersData>("e1")
   const [currentSubIndex, setCurrentSubIndex] = useState(0)

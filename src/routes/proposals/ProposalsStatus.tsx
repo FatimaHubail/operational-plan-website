@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { proposalStatusToneSurfaceClass } from "@/lib/proposalStatusChip"
+import { perspectiveStrategicClass } from "@/lib/proposalStatPalette"
 import { cn } from "@/lib/utils"
 
 /** Hover treatment aligned with Latest in Queue links (`AuditorDashboard.tsx` → `latestQueueEntryLinkClassName`). */
@@ -149,22 +150,6 @@ const rows: SubmissionRow[] = [
     followUpTo: "/stakeholders",
   },
 ]
-
-/** Same mapping as Dashboard.tsx → Strategic Perspectives (`strategic-perspective-bg-chart-*` in index.css). */
-function perspectiveStrategicClass(perspective: string) {
-  switch (perspective) {
-    case "Catalysts":
-      return "strategic-perspective-bg-chart-1"
-    case "Enablers":
-      return "strategic-perspective-bg-chart-2"
-    case "Beneficiary":
-      return "strategic-perspective-bg-chart-4"
-    case "Stakeholders":
-      return "strategic-perspective-bg-chart-5"
-    default:
-      return "strategic-perspective-bg-chart-1"
-  }
-}
 
 const statusRows: { tone: StatusTone; label: string }[] = [
   { tone: "pending", label: "Pending auditor review" },

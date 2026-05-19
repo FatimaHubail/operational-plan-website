@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import {
   Collapsible,
   CollapsibleContent,
@@ -79,6 +79,7 @@ function NavSubmenuPopover({ item }: { item: NavItem }) {
 }
 
 export function NavMain({ items }: { items: NavItem[] }) {
+  const location = useLocation()
   const { state, isMobile } = useSidebar()
   const useCollapsedSubmenu =
     state === "collapsed" && !isMobile
@@ -91,6 +92,20 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
           if (hasSubmenu && useCollapsedSubmenu) {
             return <NavSubmenuPopover key={item.title} item={item} />
+          }
+
+          if (!hasSubmenu) {
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  isActive={location.pathname === item.url}
+                  render={<Link to={item.url} />}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
           }
 
           return (

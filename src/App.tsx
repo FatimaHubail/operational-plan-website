@@ -16,6 +16,10 @@ import AddTask from "@/routes/actions/AddTask"
 import ActionPlan from "@/routes/actions/ActionPlan"
 import Login from "@/routes/Login"
 import ContributerDashboard from "@/routes/dashboards/ContributerDashboard"
+import PresidentDashboard from "@/routes/dashboards/PresidentDashboard"
+import StrategicPerspectivesOverview from "@/routes/president/StrategicPerspectivesOverview"
+import PlansOverview from "@/routes/president/PlansOverview"
+import BudgetAndFinancialResources from "@/routes/president/BudgetAndFinancialResources"
 import SubmissionStatus from "@/routes/proposals/ProposalsStatus"
 import AdminDashboard from "@/routes/dashboards/AdminDashboard"
 import AdminUsers from "@/routes/admin/AdminUsers"
@@ -85,11 +89,21 @@ export default function App() {
           <Route path="/enablers" element={<Enablers />} />
           <Route path="/beneficiary" element={<Beneficiary />} />
           <Route path="/stakeholders" element={<Stakeholders />} />
+          <Route path="/add-objective" element={<Navigate to="/catalysts/add-objective" replace />} />
+
+          <Route path="/president" element={<Navigate to="/president/dashboard" replace />} />
+          <Route path="/president/dashboard" element={<PresidentDashboard />} />
+          <Route path="/president/strategic-perspectives-overview" element={<StrategicPerspectivesOverview />} />
+          <Route path="/president/plans-overview" element={<PlansOverview />} />
+          <Route path="/president/budget" element={<BudgetAndFinancialResources />} />
+          <Route path="/strategic-perspectives-overview" element={<Navigate to="/president/strategic-perspectives-overview" replace />} />
+          <Route path="/plans-overview" element={<Navigate to="/president/plans-overview" replace />} />
+          <Route path="/budget" element={<Navigate to="/president/budget" replace />} />
+
           <Route path="/:planSection/add-objective" element={<AddObjective />} />
           <Route path="/:planSection/add-action" element={<AddAction />} />
           <Route path="/:planSection/add-task" element={<AddTask />} />
           <Route path="/:planSection/action-plan" element={<ActionPlan />} />
-          <Route path="/add-objective" element={<Navigate to="/catalysts/add-objective" replace />} />
 
           <Route path="/contributor" element={<Navigate to="/contributor/dashboard" replace />} />
           <Route path="/contributor/dashboard" element={<ContributerDashboard />} />
@@ -117,6 +131,17 @@ export default function App() {
           <Route path="/contributor/proposal/edit/action" element={<EditAction />} />
           <Route path="/contributor/proposal/edit/task" element={<EditTask />} />
           <Route path="/contributor/proposal/edit/objective" element={<EditObjective />} />
+
+          <Route path="/president/calendar" element={<Calendar />} />
+          <Route path="/president/notifications" element={<Notifications />} />
+          <Route path="/president/catalysts" element={<Catalysts />} />
+          <Route path="/president/enablers" element={<Enablers />} />
+          <Route path="/president/beneficiary" element={<Beneficiary />} />
+          <Route path="/president/stakeholders" element={<Stakeholders />} />
+          <Route path="/president/:planSection/add-objective" element={<AddObjective />} />
+          <Route path="/president/:planSection/add-action" element={<AddAction />} />
+          <Route path="/president/:planSection/add-task" element={<AddTask />} />
+          <Route path="/president/:planSection/action-plan" element={<ActionPlan />} />
         </Route>
       </Routes>
     </BrowserRouter>

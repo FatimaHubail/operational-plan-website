@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { buildActionPlanHref, type ActionPlanLocationState } from "@/lib/buildActionPlanHref"
+import { getAppRoutePrefix, getDashboardHref } from "@/lib/appRoutePrefix"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -226,8 +227,8 @@ function flattenObjectives(item: BeneficiaryItem) {
 
 export default function Beneficiary() {
   const location = useLocation()
-  const routePrefix = location.pathname.startsWith("/contributor/") ? "/contributor" : ""
-  const dashboardHref = location.pathname.startsWith("/contributor/") ? "/contributor/dashboard" : "/dashboard"
+  const routePrefix = getAppRoutePrefix(location.pathname)
+  const dashboardHref = getDashboardHref(location.pathname)
   const [beneficiaryState, setBeneficiaryState] = useState(beneficiariesData)
   const [activeBeneficiaryKey, setActiveBeneficiaryKey] = useState<keyof typeof beneficiariesData>("b1")
   const [currentSubIndex, setCurrentSubIndex] = useState(0)

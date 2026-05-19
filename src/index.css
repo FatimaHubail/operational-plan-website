@@ -81,6 +81,25 @@
   --sidebar-accent-foreground: oklch(0.99 0 0);
   --sidebar-border: oklch(0.30 0.04 265);
   --sidebar-ring: oklch(0.70 0.18 47);
+  /* Plan mix chart + legend swatches (objectives / actions / tasks) */
+  --proposal-stat-fill-objectives: oklch(0.7 0.18 47);
+  /* Matches `.proposal-stat-num-pending` (Slow progress stat numerals) */
+  --proposal-stat-fill-slow: oklch(0.34 0.15 47);
+  --proposal-stat-fill-actions: color-mix(
+    in oklch,
+    color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
+    white
+  );
+  --proposal-stat-fill-tasks: color-mix(
+    in oklch,
+    color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
+    white
+  );
+  --proposal-stat-fill-excellent: color-mix(
+    in oklch,
+    color-mix(in oklch, var(--chart-3) 48%, var(--foreground)) 68%,
+    white
+  );
 }
 
 .dark {
@@ -115,6 +134,24 @@
   --sidebar-accent-foreground: oklch(0.99 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.72 0.18 47);
+  --proposal-stat-fill-objectives: oklch(0.7 0.18 47);
+  /* Matches `.proposal-stat-num-pending` (Slow progress stat numerals) */
+  --proposal-stat-fill-slow: oklch(0.52 0.15 47);
+  --proposal-stat-fill-actions: color-mix(
+    in oklch,
+    color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
+    oklch(0.98 0.006 250)
+  );
+  --proposal-stat-fill-tasks: color-mix(
+    in oklch,
+    color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
+    oklch(0.98 0.006 250)
+  );
+  --proposal-stat-fill-excellent: color-mix(
+    in oklch,
+    color-mix(in oklch, var(--chart-3) 64%, var(--foreground)) 76%,
+    oklch(0.98 0.006 250)
+  );
 }
 /*
  * Notification icons: glyph = exact --chart-*; chip = light pastel of that hue (white mix in light, card mix in dark).
@@ -308,12 +345,32 @@
     background-color: color-mix(in oklch, var(--chart-2) 34%, var(--card)) !important;
   }
 
+  /* Indicator band stats — same tokens as pie slice fills */
+  .proposal-stat-num-match-fill-objectives {
+    color: var(--proposal-stat-fill-objectives) !important;
+  }
+  .proposal-stat-num-match-fill-slow {
+    color: var(--proposal-stat-fill-slow) !important;
+  }
+  .proposal-stat-num-match-fill-actions {
+    color: var(--proposal-stat-fill-actions) !important;
+  }
+  .proposal-stat-num-match-fill-excellent {
+    color: var(--proposal-stat-fill-excellent) !important;
+  }
+  .proposal-stat-num-match-fill-tasks {
+    color: var(--proposal-stat-fill-tasks) !important;
+  }
+
   /*
    * Your Proposals card numerals - palette + foreground (higher chroma share = lighter / more vivid).
    */
   /* Pending: same hue (47°) as oklch(0.72 0.18 47), lower L - not mixed with --foreground (avoids navy) */
   .proposal-stat-num-pending {
     color: oklch(0.34 0.15 47) !important;
+  }
+  .proposal-stat-num-chart-1 {
+    color: color-mix(in oklch, var(--chart-1) 48%, var(--foreground)) !important;
   }
   .proposal-stat-num-chart-2 {
     color: color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) !important;
@@ -338,6 +395,9 @@
   .dark .proposal-stat-num-pending {
     color: oklch(0.52 0.15 47) !important;
   }
+  .dark .proposal-stat-num-chart-1 {
+    color: color-mix(in oklch, var(--chart-1) 74%, var(--foreground)) !important;
+  }
   .dark .proposal-stat-num-chart-2 {
     color: color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) !important;
   }
@@ -348,33 +408,89 @@
     color: color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) !important;
   }
 
-  /* Auditor summary mix bars + swatches - pastel lifts (lighter than stat numerals) */
-  .proposal-stat-bar-pending {
-    fill: oklch(0.7 0.18 47) !important;
+  /* Plan volume left accent — same hues as matching `.proposal-stat-num-*` */
+  .proposal-stat-accent-pending {
+    border-left-color: oklch(0.34 0.15 47) !important;
   }
-  .proposal-stat-bar-chart-4 {
-    fill: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
-      white
-    ) !important;
+  .proposal-stat-accent-chart-4 {
+    border-left-color: color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) !important;
   }
-  .proposal-stat-bar-chart-2 {
-    fill: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
-      white
-    ) !important;
+  .proposal-stat-accent-chart-2 {
+    border-left-color: color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) !important;
   }
-  .proposal-stat-swatch-pending {
+
+  .dark .proposal-stat-accent-pending {
+    border-left-color: oklch(0.52 0.15 47) !important;
+  }
+  .dark .proposal-stat-accent-chart-4 {
+    border-left-color: color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) !important;
+  }
+  .dark .proposal-stat-accent-chart-2 {
+    border-left-color: color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) !important;
+  }
+
+  /* Progress fill — same hues as matching `.proposal-stat-num-*` (plan volume 428 / 891) */
+  .proposal-stat-progress-chart-4 [data-slot="progress-indicator"],
+  .proposal-stat-progress-fill-actions [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-actions) !important;
+  }
+  .proposal-stat-progress-chart-2 [data-slot="progress-indicator"] {
+    background-color: color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) !important;
+  }
+  .proposal-stat-progress-chart-3 [data-slot="progress-indicator"] {
+    background-color: color-mix(in oklch, var(--chart-3) 30%, var(--foreground)) !important;
+  }
+  .proposal-stat-progress-budget-utilization [data-slot="progress-indicator"] {
     background-color: oklch(0.7 0.18 47) !important;
   }
+  .proposal-stat-progress-fill-objectives [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-objectives) !important;
+  }
+  .proposal-stat-progress-fill-slow [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-slow) !important;
+  }
+  .proposal-stat-progress-fill-tasks [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-tasks) !important;
+  }
+
+  .dark .proposal-stat-progress-chart-4 [data-slot="progress-indicator"],
+  .dark .proposal-stat-progress-fill-actions [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-actions) !important;
+  }
+  .dark .proposal-stat-progress-chart-2 [data-slot="progress-indicator"] {
+    background-color: color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) !important;
+  }
+  .dark .proposal-stat-progress-chart-3 [data-slot="progress-indicator"] {
+    background-color: color-mix(in oklch, var(--chart-3) 64%, var(--foreground)) !important;
+  }
+  .dark .proposal-stat-progress-budget-utilization [data-slot="progress-indicator"] {
+    background-color: oklch(0.7 0.18 47) !important;
+  }
+  .dark .proposal-stat-progress-fill-objectives [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-objectives) !important;
+  }
+  .dark .proposal-stat-progress-fill-slow [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-slow) !important;
+  }
+  .dark .proposal-stat-progress-fill-tasks [data-slot="progress-indicator"] {
+    background-color: var(--proposal-stat-fill-tasks) !important;
+  }
+
+  /* Auditor summary mix bars + swatches - pastel lifts (lighter than stat numerals) */
+  .proposal-stat-bar-pending {
+    fill: var(--proposal-stat-fill-objectives) !important;
+  }
+  .proposal-stat-bar-chart-4 {
+    fill: var(--proposal-stat-fill-actions) !important;
+  }
+  .proposal-stat-bar-chart-2 {
+    fill: var(--proposal-stat-fill-tasks) !important;
+  }
+  .proposal-stat-swatch-pending {
+    background-color: var(--proposal-stat-fill-objectives) !important;
+  }
   .proposal-stat-swatch-chart-4 {
-    background-color: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-4) 48%, var(--foreground)) 68%,
-      white
-    ) !important;
+    background-color: var(--proposal-stat-fill-actions) !important;
   }
   /* Same mix as swatch - use on text when the pill fill is a lighter tint. */
   .proposal-stat-label-text-chart-4 {
@@ -393,11 +509,7 @@
     ) !important;
   }
   .proposal-stat-swatch-chart-2 {
-    background-color: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-2) 48%, var(--foreground)) 68%,
-      white
-    ) !important;
+    background-color: var(--proposal-stat-fill-tasks) !important;
   }
   /* Tasks segment - same mixes as swatch; pill fill is lighter (matches chart-4 pattern). */
   .proposal-stat-label-text-chart-2 {
@@ -415,21 +527,13 @@
     ) !important;
   }
   .dark .proposal-stat-bar-pending {
-    fill: oklch(0.7 0.18 47) !important;
+    fill: var(--proposal-stat-fill-objectives) !important;
   }
   .dark .proposal-stat-bar-chart-4 {
-    fill: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-4) 74%, var(--foreground)) 76%,
-      oklch(0.98 0.006 250)
-    ) !important;
+    fill: var(--proposal-stat-fill-actions) !important;
   }
   .dark .proposal-stat-bar-chart-2 {
-    fill: color-mix(
-      in oklch,
-      color-mix(in oklch, var(--chart-2) 74%, var(--foreground)) 76%,
-      oklch(0.98 0.006 250)
-    ) !important;
+    fill: var(--proposal-stat-fill-tasks) !important;
   }
   .dark .proposal-stat-swatch-pending {
     background-color: oklch(0.7 0.18 47) !important;

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { proposalStatusToneSurfaceClass, requestStatusToProposalTone } from "@/lib/proposalStatusChip"
 import type { ActionPlanLocationState } from "@/lib/buildActionPlanHref"
 import { resolveActionPlanContext } from "@/lib/actionPlanResolve"
+import { getAppRoutePrefix, getDashboardHref, isRoleScopedPath } from "@/lib/appRoutePrefix"
 import {
   type ActionPlanAction,
   type ActionPlanTask,
@@ -237,15 +238,16 @@ export default function ActionPlan() {
   const navigate = useNavigate()
   const { planSection } = useParams<{ planSection: string }>()
   const { state } = location
-  const isContributorArea = location.pathname.startsWith("/contributor/")
-  const dashboardHref = isContributorArea ? "/contributor/dashboard" : "/dashboard"
+  const routePrefix = getAppRoutePrefix(location.pathname)
+  const isRoleScoped = isRoleScopedPath(location.pathname)
+  const dashboardHref = getDashboardHref(location.pathname)
   const nav = state as ActionPlanLocationState | undefined
 
   const isValidSection = (s: string | undefined): s is PlanSection =>
     !!s && (PLAN_SECTIONS as readonly string[]).includes(s)
 
   const parentPath = (`/${planSection ?? ""}` as keyof typeof SECTION_LABELS) as `/${PlanSection}`
-  const sectionHref = isContributorArea ? `/contributor${parentPath}` : parentPath
+  const sectionHref = isRoleScoped ? `${routePrefix}${parentPath}` : parentPath
   const addTaskHref = `${sectionHref}/add-task`
   const parentLabel = isValidSection(planSection) ? SECTION_LABELS[parentPath] ?? "Planning" : "Planning"
 
@@ -520,7 +522,7 @@ export default function ActionPlan() {
   }
 
   if (!isValidSection(planSection)) {
-    return <Navigate to={isContributorArea ? "/contributor/catalysts/action-plan" : "/catalysts/action-plan"} replace />
+    return <Navigate to={isRoleScoped ? `${routePrefix}/catalysts/action-plan` : "/catalysts/action-plan"} replace />
   }
 
   return (

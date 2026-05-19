@@ -13,6 +13,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { getDashboardHref } from "@/lib/appRoutePrefix"
 import {
   chartSlotForContributor,
   NOTIF_ICON_WRAP_CLASS,
@@ -191,7 +192,7 @@ function categoryLabel(category: NotificationCategory) {
 
 export default function Notifications() {
   const location = useLocation()
-  const dashboardHref = location.pathname.startsWith("/contributor/") ? "/contributor/dashboard" : "/dashboard"
+  const dashboardHref = getDashboardHref(location.pathname)
   const [selectedFilters, setSelectedFilters] = useState<Set<FilterKey>>(() => new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
