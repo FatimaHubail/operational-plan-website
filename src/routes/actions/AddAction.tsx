@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RequiredFieldMessage } from "@/components/required-field-message"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useRequiredFieldForm } from "@/hooks/useRequiredFieldForm"
 import { getAppRoutePrefix, getDashboardHref, getProposalsStatusHref, isRoleScopedPath } from "@/lib/appRoutePrefix"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
@@ -69,6 +71,7 @@ function AiSuggestionBlock({ fieldId, minHeightClass }: { fieldId: string; minHe
 export default function AddAction() {
   const location = useLocation()
   const [taskStatus, setTaskStatus] = useState("")
+  const { validateForm, clearFieldError, getFieldError, fieldInvalid } = useRequiredFieldForm()
   const { planSection } = useParams<{ planSection: string }>()
   const routePrefix = getAppRoutePrefix(location.pathname)
   const isRoleScoped = isRoleScopedPath(location.pathname)
@@ -88,6 +91,7 @@ export default function AddAction() {
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    validateForm(e.currentTarget)
   }
   const inputClass = "h-9 w-full border-border/80 bg-card text-foreground shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
 
@@ -146,6 +150,7 @@ export default function AddAction() {
         <form
           id="add-action-form"
           className="relative overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground shadow-md ring-1 ring-border/40"
+          noValidate
           onSubmit={onSubmit}
         >
           <div className="relative border-b border-border/70 bg-card px-6 py-6 sm:px-10 sm:py-8">
@@ -187,9 +192,15 @@ export default function AddAction() {
                   <Input
                     id="action-title"
                     name="actionTitle"
+                    required
                     placeholder="Short title to define the action"
+                    aria-invalid={fieldInvalid("actionTitle") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("actionTitle")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("actionTitle")} />
                   <AiSuggestionBlock fieldId="action-title" minHeightClass="min-h-[2.75rem]" />
                 </div>
                 <div className="min-w-0 sm:max-w-xs">
@@ -199,9 +210,15 @@ export default function AddAction() {
                   <Input
                     id="action-total-weight"
                     name="actionTotalWeight"
+                    required
                     placeholder="Enter action overall weight"
+                    aria-invalid={fieldInvalid("actionTotalWeight") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("actionTotalWeight")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("actionTotalWeight")} />
                 </div>
                 <div className="min-w-0 sm:max-w-xs">
                   <label htmlFor="action-total-achievement" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -222,9 +239,15 @@ export default function AddAction() {
                   <Input
                     id="task-main-entity"
                     name="taskMainEntity"
+                    required
                     placeholder="Department that owns action delivery"
+                    aria-invalid={fieldInvalid("taskMainEntity") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskMainEntity")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("taskMainEntity")} />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label
@@ -236,9 +259,15 @@ export default function AddAction() {
                   <Input
                     id="task-supporting-entities"
                     name="taskSupportingEntities"
+                    required
                     placeholder="Entities that support implementation"
+                    aria-invalid={fieldInvalid("taskSupportingEntities") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskSupportingEntities")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("taskSupportingEntities")} />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label
@@ -251,9 +280,15 @@ export default function AddAction() {
                     id="task-human-resources"
                     name="taskHumanResources"
                     rows={3}
+                    required
                     placeholder="Roles and staffing needed"
+                    aria-invalid={fieldInvalid("taskHumanResources") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskHumanResources")
+                    }}
                     className="min-h-[5rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                   />
+                  <RequiredFieldMessage message={getFieldError("taskHumanResources")} />
                 </div>
 
                 <div className="min-w-0 sm:col-span-2">
@@ -267,9 +302,15 @@ export default function AddAction() {
                     id="task-financial-resources"
                     name="taskFinancialResources"
                     rows={3}
+                    required
                     placeholder="Budget and key cost items"
+                    aria-invalid={fieldInvalid("taskFinancialResources") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskFinancialResources")
+                    }}
                     className="min-h-[5rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                   />
+                  <RequiredFieldMessage message={getFieldError("taskFinancialResources")} />
                   <AiSuggestionBlock fieldId="task-financial-resources" minHeightClass="min-h-[4rem]" />
                 </div>
 
@@ -283,18 +324,34 @@ export default function AddAction() {
                   <Input
                     id="task-action-contribution-percentage"
                     name="taskActionContributionPercentage"
+                    required
                     placeholder="How much this action contributes overall"
+                    aria-invalid={fieldInvalid("taskActionContributionPercentage") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskActionContributionPercentage")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("taskActionContributionPercentage")} />
                 </div>
 
                 <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="task-status" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Status <span className="text-primary">*</span>
                   </label>
-                  <input type="hidden" name="taskStatus" value={taskStatus} />
-                  <Select value={taskStatus || undefined} onValueChange={setTaskStatus}>
-                    <SelectTrigger id="task-status" className="w-full border-border/80 bg-card shadow-sm focus:ring-primary/25">
+                  <input type="hidden" name="taskStatus" value={taskStatus} required />
+                  <Select
+                    value={taskStatus || undefined}
+                    onValueChange={(v) => {
+                      setTaskStatus(v)
+                      clearFieldError("taskStatus")
+                    }}
+                  >
+                    <SelectTrigger
+                      id="task-status"
+                      className="w-full border-border/80 bg-card shadow-sm focus:ring-primary/25"
+                      aria-invalid={fieldInvalid("taskStatus") || undefined}
+                    >
                       <SelectValue placeholder="Select status…" />
                     </SelectTrigger>
                     <SelectContent>
@@ -303,6 +360,7 @@ export default function AddAction() {
                       <SelectItem value="Completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
+                  <RequiredFieldMessage message={getFieldError("taskStatus")} />
                 </div>
 
                 <div className="min-w-0 sm:col-span-2">

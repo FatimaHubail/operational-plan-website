@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { RequiredFieldMessage } from "@/components/required-field-message"
 import {
   Select,
   SelectContent,
@@ -19,16 +20,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useRequiredFieldForm } from "@/hooks/useRequiredFieldForm"
 import { UNIT_DEPARTMENT_OPTIONS } from "@/lib/unitDepartmentOptions"
+import { affiliationsFromCards, createUser } from "@/lib/usersApi"
 import { UserPlusIcon } from "lucide-react"
 
 export default function AddUser() {
+  const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from
   const showUsersCrumb = from !== "dashboard-admin"
   const [departmentCards, setDepartmentCards] = useState([{ department: "", subUnits: [""] }])
   const [sendInvite, setSendInvite] = useState(true)
   const [role, setRole] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const { validateForm, clearFieldError, getFieldError, fieldInvalid } = useRequiredFieldForm()
 
   const addDepartmentCard = () => {
     setDepartmentCards((prev) => [...prev, { department: "", subUnits: [""] }])
@@ -74,8 +81,36 @@ export default function AddUser() {
     )
   }
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setError(null)
+    if (!validateForm(e.currentTarget)) return
+
+    const form = new FormData(e.currentTarget)
+    const email = String(form.get("email") || "").trim()
+    const firstName = String(form.get("firstName") || "").trim()
+    const secondName = String(form.get("secondName") || "").trim()
+    const lastName = String(form.get("lastName") || "").trim()
+    const password = String(form.get("password") || "")
+
+    setLoading(true)
+    try {
+      await createUser({
+        email,
+        firstName,
+        secondName,
+        lastName,
+        password,
+        role,
+        sendInvite,
+        affiliations: affiliationsFromCards(departmentCards),
+      })
+      navigate("/users", { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not create user")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -84,7 +119,7 @@ export default function AddUser() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink render={<Link to="/dashboard-admin" />}>Administration</BreadcrumbLink>
+                <BreadcrumbLink render={<Link to="/dashboard" />}>Administration</BreadcrumbLink>
               </BreadcrumbItem>
               {showUsersCrumb && (
                 <>
@@ -110,6 +145,7 @@ export default function AddUser() {
         <form
           id="admin-add-user-form"
           className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-sm"
+          noValidate
           onSubmit={onSubmit}
         >
           <div className="relative border-b border-border bg-muted/30 px-6 py-6 sm:px-10 sm:py-8">
@@ -127,25 +163,63 @@ export default function AddUser() {
           </div>
 
           <div className="relative space-y-8 px-6 py-8 sm:px-10 sm:py-10">
+            {error ? (
+              <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {error}
+              </p>
+            ) : null}
             <fieldset className="min-w-0 space-y-5 border-0 p-0">
               <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-5">
                 <div className="min-w-0">
                   <label htmlFor="user-first-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     First name <span className="text-primary">*</span>
                   </label>
-                  <Input id="user-first-name" name="firstName" type="text" required autoComplete="given-name" />
+                  <Input
+                    id="user-first-name"
+                    name="firstName"
+                    type="text"
+                    required
+                    autoComplete="given-name"
+                    aria-invalid={fieldInvalid("firstName") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("firstName")
+                    }}
+                  />
+                  <RequiredFieldMessage message={getFieldError("firstName")} />
                 </div>
                 <div className="min-w-0">
                   <label htmlFor="user-second-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Second name <span className="text-primary">*</span>
                   </label>
-                  <Input id="user-second-name" name="secondName" type="text" required autoComplete="additional-name" />
+                  <Input
+                    id="user-second-name"
+                    name="secondName"
+                    type="text"
+                    required
+                    autoComplete="additional-name"
+                    aria-invalid={fieldInvalid("secondName") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("secondName")
+                    }}
+                  />
+                  <RequiredFieldMessage message={getFieldError("secondName")} />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="user-last-name" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Last name <span className="text-primary">*</span>
                   </label>
-                  <Input id="user-last-name" name="lastName" type="text" required autoComplete="family-name" />
+                  <Input
+                    id="user-last-name"
+                    name="lastName"
+                    type="text"
+                    required
+                    autoComplete="family-name"
+                    aria-invalid={fieldInvalid("lastName") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("lastName")
+                    }}
+                  />
+                  <RequiredFieldMessage message={getFieldError("lastName")} />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="user-email" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -159,21 +233,46 @@ export default function AddUser() {
                     placeholder="name@uob.edu.bh"
                     pattern=".+@uob\.edu\.bh$"
                     title="Must be a @uob.edu.bh address"
+                    aria-invalid={fieldInvalid("email") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("email")
+                    }}
                   />
+                  <RequiredFieldMessage message={getFieldError("email")} />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <label htmlFor="user-password" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Password <span className="text-primary">*</span>
                   </label>
-                  <Input id="user-password" name="password" type="password" required />
+                  <Input
+                    id="user-password"
+                    name="password"
+                    type="password"
+                    required
+                    aria-invalid={fieldInvalid("password") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value) clearFieldError("password")
+                    }}
+                  />
+                  <RequiredFieldMessage message={getFieldError("password")} />
                 </div>
                 <div className="min-w-0">
                   <label htmlFor="user-role" className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     Role <span className="text-primary">*</span>
                   </label>
-                  <input type="hidden" name="role" value={role} required />
-                  <Select value={role || undefined} onValueChange={setRole}>
-                    <SelectTrigger id="user-role" className="w-full">
+                  <input type="hidden" name="role" data-field-id="role" value={role} required />
+                  <Select
+                    value={role || undefined}
+                    onValueChange={(v) => {
+                      setRole(v)
+                      clearFieldError("role")
+                    }}
+                  >
+                    <SelectTrigger
+                      id="user-role"
+                      className="w-full"
+                      aria-invalid={fieldInvalid("role") || undefined}
+                    >
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -183,6 +282,7 @@ export default function AddUser() {
                       <SelectItem value="admin">Administrator - manage users and settings</SelectItem>
                     </SelectContent>
                   </Select>
+                  <RequiredFieldMessage message={getFieldError("role")} />
                 </div>
                 <div className="min-w-0 sm:col-span-2">
                   <div className="mb-1.5 flex flex-wrap items-end justify-between gap-2">
@@ -215,12 +315,24 @@ export default function AddUser() {
                               </label>
                               <span className="inline-flex h-6 w-6 shrink-0" aria-hidden="true" />
                             </div>
-                            <input type="hidden" name="unitDepartment[]" value={entry.department} required />
+                            <input
+                              type="hidden"
+                              name="unitDepartment[]"
+                              data-field-id={`unitDepartment-${index}`}
+                              value={entry.department}
+                              required
+                            />
                             <Select
                               value={entry.department || undefined}
-                              onValueChange={(v) => updateDepartmentCard(index, { department: v })}
+                              onValueChange={(v) => {
+                                updateDepartmentCard(index, { department: v })
+                                clearFieldError(`unitDepartment-${index}`)
+                              }}
                             >
-                              <SelectTrigger className="w-full">
+                              <SelectTrigger
+                                className="w-full"
+                                aria-invalid={fieldInvalid(`unitDepartment-${index}`) || undefined}
+                              >
                                 <SelectValue placeholder="Select unit / department" />
                               </SelectTrigger>
                               <SelectContent>
@@ -231,6 +343,7 @@ export default function AddUser() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            <RequiredFieldMessage message={getFieldError(`unitDepartment-${index}`)} />
                           </div>
                           <div className="min-w-0">
                             <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -243,14 +356,22 @@ export default function AddUser() {
                             </div>
                             <div className="space-y-2">
                               {entry.subUnits.map((subUnit, subIndex) => (
-                                <div key={`subunit-${index}-${subIndex}`} className="flex gap-2">
-                                  <Input
-                                    name={`subUnit-${index}[]`}
-                                    required
-                                    value={subUnit}
-                                    onChange={(e) => updateSubUnit(index, subIndex, e.target.value)}
-                                    placeholder="e.g. Practical Training and Career Guidance Section"
-                                  />
+                                <div key={`subunit-${index}-${subIndex}`} className="flex items-start gap-2">
+                                  <div className="min-w-0 flex-1">
+                                    <Input
+                                      name={`subUnit-${index}[]`}
+                                      data-field-id={`subUnit-${index}-${subIndex}`}
+                                      required
+                                      value={subUnit}
+                                      aria-invalid={fieldInvalid(`subUnit-${index}-${subIndex}`) || undefined}
+                                      onChange={(e) => {
+                                        updateSubUnit(index, subIndex, e.target.value)
+                                        if (e.target.value.trim()) clearFieldError(`subUnit-${index}-${subIndex}`)
+                                      }}
+                                      placeholder="e.g. Practical Training and Career Guidance Section"
+                                    />
+                                    <RequiredFieldMessage message={getFieldError(`subUnit-${index}-${subIndex}`)} />
+                                  </div>
                                   {subIndex > 0 ? (
                                     <Button
                                       type="button"
@@ -300,9 +421,10 @@ export default function AddUser() {
               </Link>
               <Button
                 type="submit"
+                disabled={loading}
                 className="inline-flex h-auto items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-xs transition hover:bg-primary/90"
               >
-                Create user
+                {loading ? "Creating…" : "Create user"}
               </Button>
             </div>
           </div>

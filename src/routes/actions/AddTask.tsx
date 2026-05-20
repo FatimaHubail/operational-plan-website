@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RequiredFieldMessage } from "@/components/required-field-message"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useRequiredFieldForm } from "@/hooks/useRequiredFieldForm"
 import { getAppRoutePrefix, getDashboardHref, getProposalsStatusHref, isRoleScopedPath } from "@/lib/appRoutePrefix"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
@@ -81,9 +83,11 @@ export default function AddTask() {
   const actionPlanHref = `${sectionHref}/action-plan`
   const [taskStartDate, setTaskStartDate] = useState<Date | undefined>(undefined)
   const [taskExpectedEndDate, setTaskExpectedEndDate] = useState<Date | undefined>(undefined)
+  const { validateForm, clearFieldError, getFieldError, fieldInvalid } = useRequiredFieldForm()
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    validateForm(e.currentTarget)
   }
   const inputClass = "h-9 w-full border-border/80 bg-card text-foreground shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
   const dateLabel = (value?: Date) => {
@@ -152,6 +156,7 @@ export default function AddTask() {
         <form
           id="add-task-form"
           className="relative overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground shadow-md ring-1 ring-border/40"
+          noValidate
           onSubmit={onSubmit}
         >
           <div className="relative border-b border-border/70 bg-card px-6 py-6 sm:px-10 sm:py-8">
@@ -197,9 +202,15 @@ export default function AddTask() {
                   <Input
                     id="task-name"
                     name="taskName"
+                    required
                     placeholder="Short title to define the task"
+                    aria-invalid={fieldInvalid("taskName") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskName")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("taskName")} />
                   <AiSuggestionBlock fieldId="task-name" minHeightClass="min-h-[2.75rem]" />
                 </div>
 
@@ -210,16 +221,22 @@ export default function AddTask() {
                   <Input
                     id="task-weight"
                     name="taskWeight"
+                    required
                     placeholder="Enter this task's weight"
+                    aria-invalid={fieldInvalid("taskWeight") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskWeight")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("taskWeight")} />
                 </div>
 
                 <div className="min-w-0 sm:col-span-1">
                   <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     Start date <span className="text-primary">*</span>
                   </label>
-                  <input type="hidden" name="taskStartDate" value={toIsoDate(taskStartDate)} />
+                  <input type="hidden" name="taskStartDate" value={toIsoDate(taskStartDate)} required />
                   <Popover>
                     <PopoverTrigger
                       render={
@@ -238,6 +255,7 @@ export default function AddTask() {
                         selected={taskStartDate}
                         onSelect={(date) => {
                           setTaskStartDate(date)
+                          if (date) clearFieldError("taskStartDate")
                           if (date && taskExpectedEndDate && taskExpectedEndDate < date) {
                             setTaskExpectedEndDate(date)
                           }
@@ -245,12 +263,13 @@ export default function AddTask() {
                       />
                     </PopoverContent>
                   </Popover>
+                  <RequiredFieldMessage message={getFieldError("taskStartDate")} />
                 </div>
                 <div className="min-w-0 sm:col-span-1">
                   <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                     End date <span className="text-primary">*</span>
                   </label>
-                  <input type="hidden" name="taskExpectedEndDate" value={toIsoDate(taskExpectedEndDate)} />
+                  <input type="hidden" name="taskExpectedEndDate" value={toIsoDate(taskExpectedEndDate)} required />
                   <Popover>
                     <PopoverTrigger
                       render={
@@ -267,11 +286,15 @@ export default function AddTask() {
                       <Calendar
                         mode="single"
                         selected={taskExpectedEndDate}
-                        onSelect={(date) => setTaskExpectedEndDate(date)}
+                        onSelect={(date) => {
+                          setTaskExpectedEndDate(date)
+                          if (date) clearFieldError("taskExpectedEndDate")
+                        }}
                         disabled={(date) => (taskStartDate ? date < taskStartDate : false)}
                       />
                     </PopoverContent>
                   </Popover>
+                  <RequiredFieldMessage message={getFieldError("taskExpectedEndDate")} />
                 </div>
 
                 <div className="min-w-0 sm:col-span-2">
@@ -285,9 +308,15 @@ export default function AddTask() {
                     id="task-performance-indicators"
                     name="taskPerformanceIndicators"
                     rows={4}
+                    required
                     placeholder="KPI or measure used to judge execution"
+                    aria-invalid={fieldInvalid("taskPerformanceIndicators") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskPerformanceIndicators")
+                    }}
                     className="min-h-[6rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                   />
+                  <RequiredFieldMessage message={getFieldError("taskPerformanceIndicators")} />
                   <AiSuggestionBlock fieldId="task-performance-indicators" minHeightClass="min-h-[5rem]" />
                 </div>
 
@@ -299,9 +328,15 @@ export default function AddTask() {
                     id="task-target-value"
                     name="taskTargetValue"
                     type="number"
+                    required
                     placeholder="Planned percentage or number the indicator must reach"
+                    aria-invalid={fieldInvalid("taskTargetValue") || undefined}
+                    onInput={(e) => {
+                      if (e.currentTarget.value.trim()) clearFieldError("taskTargetValue")
+                    }}
                     className={inputClass}
                   />
+                  <RequiredFieldMessage message={getFieldError("taskTargetValue")} />
                 </div>
                 <div className="min-w-0">
                   <label htmlFor="task-actual-value-achieved" className="mb-1.5 block text-[9px] font-bold uppercase tracking-wide text-muted-foreground">

@@ -10,10 +10,7 @@ export function isRoleScopedPath(pathname: string) {
   return prefix === "/contributor" || prefix === "/president"
 }
 
-export function getDashboardHref(pathname: string) {
-  const prefix = getAppRoutePrefix(pathname)
-  if (prefix === "/president") return "/president/dashboard"
-  if (prefix === "/contributor") return "/contributor/dashboard"
+export function getDashboardHref(_pathname: string) {
   return "/dashboard"
 }
 

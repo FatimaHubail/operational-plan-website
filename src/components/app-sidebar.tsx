@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
 
 import { NavMain } from "@/components/nav-main"
 import {
@@ -98,7 +99,7 @@ const data = {
 const adminNavMain: SidebarNavItem[] = [
   {
     title: "Home",
-    url: "/dashboard-admin",
+    url: "/dashboard",
     icon: <HomeIcon />,
   },
   {
@@ -121,7 +122,7 @@ const adminNavMain: SidebarNavItem[] = [
 const presidentNavMain: SidebarNavItem[] = [
   {
     title: "Home",
-    url: "/president/dashboard",
+    url: "/dashboard",
     icon: <HomeIcon />,
   },
   {
@@ -165,7 +166,7 @@ const presidentNavMain: SidebarNavItem[] = [
 const auditorNavMain: SidebarNavItem[] = [
   {
     title: "Home",
-    url: "/dashboard-auditor",
+    url: "/dashboard",
     icon: <HomeIcon />,
   },
   {
@@ -192,32 +193,44 @@ const auditorNavMain: SidebarNavItem[] = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+  const role = user?.role
   const sourceContext = new URLSearchParams(location.search).get("from")
+  const pathname = location.pathname
+
   const isPresidentArea =
-    location.pathname.startsWith("/president/") ||
-    location.pathname === "/president" ||
+    role === "president" ||
+    pathname.startsWith("/president/") ||
+    pathname === "/president" ||
     sourceContext === "president-dashboard"
   const isContributorArea =
-    location.pathname.startsWith("/contributor/") ||
-    location.pathname === "/contributer-dashboard" ||
+    role === "contributor" ||
+    pathname.startsWith("/contributor/") ||
+    pathname === "/contributer-dashboard" ||
     sourceContext === "contributor-dashboard"
   const routePrefix = isPresidentArea ? "/president" : isContributorArea ? "/contributor" : ""
   const isAdminArea =
-    location.pathname === "/dashboard-admin" ||
-    location.pathname === "/users" ||
-    location.pathname === "/add-user" ||
-    (location.pathname === "/notifications" && sourceContext === "dashboard-admin") ||
-    location.pathname.startsWith("/admin/")
+    role === "administrator" ||
+    pathname === "/users" ||
+    pathname === "/add-user" ||
+    (pathname === "/notifications" && sourceContext === "dashboard-admin") ||
+    pathname.startsWith("/admin/")
   const isAuditorArea =
-    location.pathname === "/dashboard-auditor" ||
-    location.pathname === "/action-queue" ||
-    location.pathname === "/objective-queue" ||
-    location.pathname === "/task-queue" ||
-    location.pathname === "/review-action" ||
-    location.pathname === "/review-objective" ||
-    location.pathname === "/review-task" ||
-    (location.pathname === "/notifications" && sourceContext === "dashboard-auditor") ||
-    location.pathname.startsWith("/auditor/")
+    role === "auditor" ||
+    pathname === "/action-queue" ||
+    pathname === "/objective-queue" ||
+    pathname === "/task-queue" ||
+    pathname === "/review-action" ||
+    pathname === "/review-objective" ||
+    pathname === "/review-task" ||
+    (pathname === "/notifications" && sourceContext === "dashboard-auditor") ||
+    pathname.startsWith("/auditor/")
+
+  async function handleLogout() {
+    await logout()
+    navigate("/login", { replace: true })
+  }
   const notificationsHref = isAdminArea
     ? "/admin/notifications?from=dashboard-admin"
     : isAuditorArea
@@ -267,7 +280,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Log out" render={<Link to="/login" />}>
+            <SidebarMenuButton tooltip="Log out" onClick={() => void handleLogout()}>
               <LogOutIcon />
               <span>Log out</span>
             </SidebarMenuButton>

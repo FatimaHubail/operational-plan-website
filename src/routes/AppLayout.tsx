@@ -2,15 +2,19 @@ import { Outlet, useLocation } from "react-router-dom"
 import uobLogo from "@/assets/UOB_LOGO.png"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { useAuth } from "@/context/AuthContext"
 
 export default function AppLayout() {
   const location = useLocation()
+  const { user } = useAuth()
   const pathname = location.pathname
-  const userScope = pathname.startsWith("/president")
-    ? "president"
-    : pathname.startsWith("/contributor")
-      ? "contributor"
-      : "default"
+
+  const userScope =
+    user?.role === "president" || pathname.startsWith("/president")
+      ? "president"
+      : user?.role === "contributor" || pathname.startsWith("/contributor")
+        ? "contributor"
+        : "default"
 
   return (
     <SidebarProvider>

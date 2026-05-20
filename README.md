@@ -1,3 +1,9 @@
+# Operational Plan — React frontend
+
+**Connect to the Node API:** see [docs/API_INTEGRATION.md](docs/API_INTEGRATION.md) for step-by-step login + admin user setup.
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

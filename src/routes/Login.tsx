@@ -1,12 +1,65 @@
-import { Link } from "react-router-dom"
+import { useEffect, useState, type FormEvent } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { RequiredFieldMessage } from "@/components/required-field-message"
+import { useAuth } from "@/context/AuthContext"
+import { useRequiredFieldForm } from "@/hooks/useRequiredFieldForm"
+import { homeForRole } from "@/lib/roleRoutes"
 import uobLogo from "@/assets/UOB_LOGO.png"
 
 export default function Login() {
   const year = new Date().getFullYear()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const loginState = location.state as { passwordUpdated?: string; from?: string } | null
+  const passwordUpdatedMessage = loginState?.passwordUpdated
+  const redirectAfterLogin = loginState?.from
+  const { user, loading: sessionLoading, login } = useAuth()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const { validateForm, clearFieldError, getFieldError, fieldInvalid } = useRequiredFieldForm()
+
+  useEffect(() => {
+    if (sessionLoading || !user) return
+    if (user.mustChangePassword) {
+      navigate("/change-password", { replace: true })
+      return
+    }
+    const target =
+      redirectAfterLogin && redirectAfterLogin !== "/login" ? redirectAfterLogin : homeForRole(user.role)
+    navigate(target, { replace: true })
+  }, [sessionLoading, user, navigate, redirectAfterLogin])
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+
+    if (!validateForm(e.currentTarget)) return
+
+    setLoading(true)
+    try {
+      const { user: signedInUser, requiresPasswordChange } = await login(email.trim(), password)
+      if (requiresPasswordChange || signedInUser.mustChangePassword) {
+        navigate("/change-password", { replace: true })
+        return
+      }
+      const target =
+        redirectAfterLogin && redirectAfterLogin !== "/login"
+          ? redirectAfterLogin
+          : homeForRole(signedInUser.role)
+      navigate(target, { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (sessionLoading || user) return null
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground antialiased lg:flex-row">
@@ -23,7 +76,7 @@ export default function Login() {
             Strategic Plan
           </p>
           <h1 className="mt-6 max-w-md text-3xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-4xl">
-            Operational planning across university administration
+            Strategic and operational planning across university administration
           </h1>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/80">
             Internal workspace for University of Bahrain staff responsible for strategic operational plans.
@@ -51,10 +104,21 @@ export default function Login() {
               </p>
             </div>
 
-            <form className="space-y-5">
+            <form className="space-y-5" noValidate onSubmit={onSubmit}>
+              {passwordUpdatedMessage ? (
+                <p className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
+                  {passwordUpdatedMessage}
+                </p>
+              ) : null}
+              {error ? (
+                <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </p>
+              ) : null}
+
               <div className="space-y-2">
                 <label htmlFor="uni-email" className="text-sm font-medium text-foreground">
-                  University email
+                  University email <span className="text-primary">*</span>
                 </label>
                 <Input
                   type="email"
@@ -63,13 +127,21 @@ export default function Login() {
                   autoComplete="username"
                   placeholder="name@uob.edu.bh"
                   required
+                  aria-required="true"
+                  aria-invalid={fieldInvalid("email") || undefined}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    if (e.target.value.trim()) clearFieldError("email")
+                  }}
                   className="h-9.5 rounded-2xl bg-muted"
                 />
+                <RequiredFieldMessage message={getFieldError("email")} />
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-foreground">
-                  Password
+                  Password <span className="text-primary">*</span>
                 </label>
                 <Input
                   type="password"
@@ -78,25 +150,29 @@ export default function Login() {
                   autoComplete="current-password"
                   placeholder="••••••••"
                   required
+                  aria-required="true"
+                  aria-invalid={fieldInvalid("password") || undefined}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    if (e.target.value) clearFieldError("password")
+                  }}
                   className="h-9.5 rounded-2xl bg-muted"
                 />
+                <RequiredFieldMessage message={getFieldError("password")} />
               </div>
 
-              <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
-                <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted-foreground">
-                  <Checkbox name="remember" />
-                  Remember this device
-                </label>
+              <p className="pt-1 text-center">
                 <Link
-                  to="#"
+                  to="/change-password"
                   className="text-sm font-semibold text-primary transition hover:text-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2"
                 >
                   Forgot password?
                 </Link>
-              </div>
+              </p>
 
-              <Button type="submit" className="mt-2 h-9.5 w-full rounded-2xl">
-                Sign in
+              <Button type="submit" disabled={loading} className="mt-2 h-9.5 w-full rounded-2xl">
+                {loading ? "Signing in…" : "Sign in"}
               </Button>
             </form>
 

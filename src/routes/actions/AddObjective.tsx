@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RequiredFieldMessage } from "@/components/required-field-message"
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/select"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Textarea } from "@/components/ui/textarea"
+import { useRequiredFieldForm } from "@/hooks/useRequiredFieldForm"
 import { getAppRoutePrefix, getDashboardHref, getProposalsStatusHref, isRoleScopedPath } from "@/lib/appRoutePrefix"
 
 const PLAN_SECTIONS = ["catalysts", "enablers", "beneficiary", "stakeholders"] as const
@@ -140,6 +142,7 @@ export default function AddObjective() {
   const location = useLocation()
   const { planSection } = useParams<{ planSection: string }>()
   const [regulatoryEntity, setRegulatoryEntity] = useState("")
+  const { validateForm, clearFieldError, getFieldError, fieldInvalid } = useRequiredFieldForm()
   const routePrefix = getAppRoutePrefix(location.pathname)
   const isRoleScoped = isRoleScopedPath(location.pathname)
   const dashboardHref = getDashboardHref(location.pathname)
@@ -158,6 +161,7 @@ export default function AddObjective() {
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    validateForm(e.currentTarget)
   }
 
   const inputClass = "h-9 w-full border-border/80 bg-card text-foreground shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
@@ -236,6 +240,7 @@ export default function AddObjective() {
           <form
             id="add-oo-form"
             className="relative overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground shadow-md ring-1 ring-border/40"
+            noValidate
             onSubmit={onSubmit}
           >
             <div className="relative border-b border-border/70 bg-card px-6 py-6 sm:px-10 sm:py-8">
@@ -300,8 +305,13 @@ export default function AddObjective() {
                       required
                       placeholder="Short title to define the objective"
                       aria-describedby="ai-desc-oo-objective"
+                      aria-invalid={fieldInvalid("objective") || undefined}
+                      onInput={(e) => {
+                        if (e.currentTarget.value.trim()) clearFieldError("objective")
+                      }}
                       className={inputClass}
                     />
+                    <RequiredFieldMessage message={getFieldError("objective")} />
                     <AiSuggestionBlock fieldId="oo-objective" minHeightClass="min-h-[2.75rem]" />
                   </div>
 
@@ -311,8 +321,18 @@ export default function AddObjective() {
                     </label>
                     <div className="relative">
                       <input type="hidden" name="regulatoryEntity" value={regulatoryEntity} required />
-                      <Select value={regulatoryEntity || undefined} onValueChange={setRegulatoryEntity}>
-                        <SelectTrigger id="oo-regulatory-entity" className="w-full border-border/80 bg-card shadow-sm focus:ring-primary/25">
+                      <Select
+                        value={regulatoryEntity || undefined}
+                        onValueChange={(v) => {
+                          setRegulatoryEntity(v)
+                          clearFieldError("regulatoryEntity")
+                        }}
+                      >
+                        <SelectTrigger
+                          id="oo-regulatory-entity"
+                          className="w-full border-border/80 bg-card shadow-sm focus:ring-primary/25"
+                          aria-invalid={fieldInvalid("regulatoryEntity") || undefined}
+                        >
                           <SelectValue placeholder="Select regulatory entity" />
                         </SelectTrigger>
                         <SelectContent>
@@ -324,6 +344,7 @@ export default function AddObjective() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <RequiredFieldMessage message={getFieldError("regulatoryEntity")} />
                   </div>
 
                   <div className="min-w-0 sm:col-span-2">
@@ -337,8 +358,13 @@ export default function AddObjective() {
                       autoComplete="off"
                       required
                       placeholder="Internal role or unit accountable for the indicator"
+                      aria-invalid={fieldInvalid("indicatorOwnerWithinEntity") || undefined}
+                      onInput={(e) => {
+                        if (e.currentTarget.value.trim()) clearFieldError("indicatorOwnerWithinEntity")
+                      }}
                       className={inputClass}
                     />
+                    <RequiredFieldMessage message={getFieldError("indicatorOwnerWithinEntity")} />
                   </div>
 
                   <div className="min-w-0 sm:col-span-2">
@@ -361,8 +387,13 @@ export default function AddObjective() {
                       required
                       placeholder="KPI or measure used to judge execution"
                       aria-describedby="ai-desc-oo-objective-execution-indicator"
+                      aria-invalid={fieldInvalid("objectiveExecutionIndicator") || undefined}
+                      onInput={(e) => {
+                        if (e.currentTarget.value.trim()) clearFieldError("objectiveExecutionIndicator")
+                      }}
                       className="min-h-[5rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                     />
+                    <RequiredFieldMessage message={getFieldError("objectiveExecutionIndicator")} />
                     <AiSuggestionBlock fieldId="oo-objective-execution-indicator" minHeightClass="min-h-[5rem]" />
                   </div>
 
@@ -385,8 +416,13 @@ export default function AddObjective() {
                       required
                       placeholder="How the indicator is applied, evidenced, or calculated"
                       aria-describedby="ai-desc-oo-execution-indicator-description"
+                      aria-invalid={fieldInvalid("executionIndicatorDescription") || undefined}
+                      onInput={(e) => {
+                        if (e.currentTarget.value.trim()) clearFieldError("executionIndicatorDescription")
+                      }}
                       className="min-h-[7rem] resize-y border-border/80 bg-card shadow-sm focus-visible:border-primary/70 focus-visible:ring-primary/25"
                     />
+                    <RequiredFieldMessage message={getFieldError("executionIndicatorDescription")} />
                     <AiSuggestionBlock fieldId="oo-execution-indicator-description" minHeightClass="min-h-[5rem]" />
                   </div>
 
@@ -401,8 +437,13 @@ export default function AddObjective() {
                       autoComplete="off"
                       required
                       placeholder="Planned percentage or number the indicator must reach"
+                      aria-invalid={fieldInvalid("targetValue") || undefined}
+                      onInput={(e) => {
+                        if (e.currentTarget.value.trim()) clearFieldError("targetValue")
+                      }}
                       className={inputClass}
                     />
+                    <RequiredFieldMessage message={getFieldError("targetValue")} />
                   </div>
                 </div>
               </fieldset>
