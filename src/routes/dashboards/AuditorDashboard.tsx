@@ -7,6 +7,8 @@ import {
 import { HorizontalRatioStack } from "@/components/ratio-bars"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/context/AuthContext"
+import { welcomeGreeting } from "@/lib/formatUserName"
 import { cn } from "@/lib/utils"
 
 /** Segmented mix bar - same structure as “Objective status” on Catalysts dashboard (flex ratios + legend). */
@@ -136,6 +138,8 @@ const auditorQueueHeaderLinksClassName =
   "notif-secondary-action inline-flex min-w-0 items-center justify-center rounded-md border border-transparent bg-[oklch(0.945_0.01_255)] px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors"
 
 export default function AuditorDashboard() {
+  const { user } = useAuth()
+
   return (
     <div className="min-w-0 flex-1 bg-background">
         {/* Top-right, flush left of UOB logo (AppLayout: right-4/6/8 + w-20 + gap); sibling of padded scroll area avoids overflow-x clip */}
@@ -162,7 +166,7 @@ export default function AuditorDashboard() {
             >
               Auditor
             </Badge>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Welcome, Sara</h1>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{welcomeGreeting(user)}</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Inspect and approve objectives, actions, and tasks
             </p>

@@ -43,7 +43,7 @@ export type AuditorPreviewItem = {
   unread: boolean
 }
 
-export type AdminPreviewCategory = "invite_delivery" | "invite_expired" | "account_access" | "validation_alert"
+export type AdminPreviewCategory = "account_access" | "validation_alert"
 
 export type AdminPreviewItem = {
   id: string
@@ -51,7 +51,7 @@ export type AdminPreviewItem = {
   time: string
   body: string
   category: AdminPreviewCategory
-  role: "administrator" | "auditor" | "contributor" | "indicator_owner"
+  role: "administrator" | "auditor" | "contributor" | "indicator_owner" | "president"
   department: string
   unread: boolean
 }
@@ -178,10 +178,6 @@ function AuditorCategoryIcon({ category }: { category: AuditorPreviewCategory })
 
 function adminCategoryLabel(category: AdminPreviewCategory) {
   switch (category) {
-    case "invite_delivery":
-      return "Invitation delivery"
-    case "invite_expired":
-      return "Invitation expiration"
     case "account_access":
       return "Account activation & access"
     case "validation_alert":
@@ -193,6 +189,8 @@ function adminCategoryLabel(category: AdminPreviewCategory) {
 
 function adminRoleLabel(role: AdminPreviewItem["role"]) {
   switch (role) {
+    case "president":
+      return "President"
     case "administrator":
       return "Administrator"
     case "auditor":
@@ -208,22 +206,6 @@ function adminRoleLabel(role: AdminPreviewItem["role"]) {
 
 function AdminCategoryIcon({ category }: { category: AdminPreviewCategory }) {
   switch (category) {
-    case "invite_delivery":
-      return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21.75 8.25v8.25A2.25 2.25 0 0 1 19.5 18.75h-15A2.25 2.25 0 0 1 2.25 16.5V8.25m19.5 0A2.25 2.25 0 0 0 19.5 6h-15A2.25 2.25 0 0 0 2.25 8.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0l-7.5-4.615A2.25 2.25 0 0 1 2.25 8.493V8.25"
-          />
-        </svg>
-      )
-    case "invite_expired":
-      return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-      )
     case "account_access":
       return (
         <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24" aria-hidden="true">

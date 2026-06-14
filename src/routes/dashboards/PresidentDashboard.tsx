@@ -2,6 +2,8 @@ import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { useAuth } from "@/context/AuthContext"
+import { welcomeGreeting } from "@/lib/formatUserName"
 import {
   Table,
   TableBody,
@@ -78,6 +80,7 @@ const reportLinks = [
 ]
 
 export default function PresidentDashboard() {
+  const { user } = useAuth()
   const metrics = usePresidentMetrics()
   const indicatorsMeasured = `${metrics.indicatorTotal - indicatorBandCounts.notMeasured} / ${metrics.indicatorTotal}`
 
@@ -143,7 +146,7 @@ export default function PresidentDashboard() {
           >
             President
           </Badge>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Welcome, Juliana</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{welcomeGreeting(user)}</h1>
           <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
             Track institutional performance, progress, and budget of the university strategic plan
           </p>

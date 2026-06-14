@@ -21,11 +21,7 @@ import {
 } from "@/lib/notificationIconChart"
 import { cn } from "@/lib/utils"
 
-type NotificationCategory =
-  | "invite_delivery"
-  | "invite_expired"
-  | "account_access"
-  | "validation_alert"
+type NotificationCategory = "account_access" | "validation_alert"
 
 type NotificationItem = {
   id: string
@@ -33,7 +29,7 @@ type NotificationItem = {
   time: string
   body: string
   category: NotificationCategory
-  role: "administrator" | "auditor" | "contributor" | "indicator_owner"
+  role: "administrator" | "auditor" | "contributor" | "indicator_owner" | "president"
   department: string
   unread: boolean
   group: "today" | "earlier"
@@ -82,10 +78,10 @@ const SORTED_DEPARTMENT_OPTIONS = [...UNIT_DEPARTMENT_OPTIONS].sort((a, b) => a.
 const notifications: NotificationItem[] = [
   {
     id: "ADN-001",
-    title: "Invitation delivery failed",
+    title: "New user added",
     time: "Just now",
-    body: "Invite to sara.alnajjar@uob.edu.bh bounced. Verify email and resend.",
-    category: "invite_delivery",
+    body: "Sara Al-Najjar was added as Auditor for Finance & Budget Directorate.",
+    category: "account_access",
     role: "auditor",
     department: "Finance & Budget Directorate",
     unread: true,
@@ -93,10 +89,10 @@ const notifications: NotificationItem[] = [
   },
   {
     id: "ADN-002",
-    title: "Invitation delivered",
+    title: "Password reset",
     time: "18 min ago",
-    body: "Invitation was successfully delivered to omar.haddad@uob.edu.bh.",
-    category: "invite_delivery",
+    body: "Administrator reset the password for omar.haddad@uob.edu.bh.",
+    category: "account_access",
     role: "contributor",
     department: "Deanship of Admission & Registration",
     unread: true,
@@ -136,17 +132,6 @@ const notifications: NotificationItem[] = [
     group: "earlier",
   },
   {
-    id: "ADN-006",
-    title: "Invitation expired",
-    time: "Yesterday",
-    body: "Invitation for f.almansoori@uob.edu.bh expired after 7 days.",
-    category: "invite_expired",
-    role: "indicator_owner",
-    department: "College of Engineering",
-    unread: true,
-    group: "earlier",
-  },
-  {
     id: "ADN-007",
     title: "Missing mandatory user fields",
     time: "Yesterday",
@@ -173,10 +158,9 @@ const notifications: NotificationItem[] = [
 const filterOptions = [
   { key: "all", label: "All" },
   { key: "unread", label: "Unread" },
-  { key: "invite_delivery", label: "Invitation delivery" },
-  { key: "invite_expired", label: "Invitation expiration" },
   { key: "account_access", label: "Account activation & access" },
   { key: "validation_alert", label: "Data validation" },
+  { key: "president", label: "President" },
   { key: "administrator", label: "Administrator" },
   { key: "auditor", label: "Auditor" },
   { key: "contributor", label: "Contributor" },
@@ -187,7 +171,13 @@ type FilterKey = (typeof filterOptions)[number]["key"]
 
 function itemMatchesFilter(item: NotificationItem, f: FilterKey): boolean {
   if (f === "unread") return item.unread
-  if (f === "administrator" || f === "auditor" || f === "contributor" || f === "indicator_owner")
+  if (
+    f === "president" ||
+    f === "administrator" ||
+    f === "auditor" ||
+    f === "contributor" ||
+    f === "indicator_owner"
+  )
     return item.role === f
   return item.category === (f as NotificationCategory)
 }
@@ -197,10 +187,6 @@ const markAllReadButtonClass =
 
 function categoryLabel(category: NotificationCategory) {
   switch (category) {
-    case "invite_delivery":
-      return "Invitation delivery"
-    case "invite_expired":
-      return "Invitation expiration"
     case "account_access":
       return "Account activation & access"
     case "validation_alert":
@@ -212,6 +198,8 @@ function categoryLabel(category: NotificationCategory) {
 
 function roleLabel(role: NotificationItem["role"]) {
   switch (role) {
+    case "president":
+      return "President"
     case "administrator":
       return "Administrator"
     case "auditor":
@@ -287,18 +275,6 @@ export default function AdminNotifications() {
 
   const renderCategoryIcon = (category: NotificationCategory) => {
     switch (category) {
-      case "invite_delivery":
-        return (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 8.25v8.25A2.25 2.25 0 0 1 19.5 18.75h-15A2.25 2.25 0 0 1 2.25 16.5V8.25m19.5 0A2.25 2.25 0 0 0 19.5 6h-15A2.25 2.25 0 0 0 2.25 8.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0l-7.5-4.615A2.25 2.25 0 0 1 2.25 8.493V8.25" />
-          </svg>
-        )
-      case "invite_expired":
-        return (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-        )
       case "account_access":
         return (
           <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24" aria-hidden="true">

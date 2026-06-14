@@ -5,6 +5,8 @@ import {
   type AdminPreviewItem,
 } from "@/components/dashboard-notification-preview"
 import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/context/AuthContext"
+import { welcomeGreeting } from "@/lib/formatUserName"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserCheckIcon, UserPlusIcon } from "lucide-react"
@@ -23,9 +25,9 @@ const adminStats = [
     valueClassName: "proposal-stat-num-pending",
   },
   {
-    label: "Pending invites",
-    value: "3",
-    note: "Awaiting email confirmation",
+    label: "Contributors",
+    value: "12",
+    note: "Edit assigned operational plans",
     valueClassName: "proposal-stat-num-chart-4",
   },
   {
@@ -39,10 +41,10 @@ const adminStats = [
 const adminNotificationPreviewItems: AdminPreviewItem[] = [
   {
     id: "adm-n1",
-    title: "Invitation sent",
+    title: "New user added",
     body: "Sara Al-Najjar - Auditor, Finance",
     time: "Today - 09:14",
-    category: "invite_delivery",
+    category: "account_access",
     role: "auditor",
     department: "Finance & Budget Directorate",
     unread: true,
@@ -70,6 +72,8 @@ const adminNotificationPreviewItems: AdminPreviewItem[] = [
 ]
 
 export default function AdminDashboard() {
+  const { user } = useAuth()
+
   return (
     <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
         <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-center lg:justify-between lg:pr-20">
@@ -82,9 +86,9 @@ export default function AdminDashboard() {
             >
               Administration
             </Badge>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Welcome, Juliana</h1>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{welcomeGreeting(user)}</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Manage who can access the operational plan workspace, their roles, and invitation lifecycle
+              Manage who can access the operational plan workspace and their roles
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-3 lg:gap-4">

@@ -10,7 +10,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { RequiredFieldMessage } from "@/components/required-field-message"
 import {
@@ -22,7 +21,7 @@ import {
 } from "@/components/ui/select"
 import { useRequiredFieldForm } from "@/hooks/useRequiredFieldForm"
 import { UNIT_DEPARTMENT_OPTIONS } from "@/lib/unitDepartmentOptions"
-import { affiliationsFromCards, createUser } from "@/lib/usersApi"
+import { affiliationsFromCards, createUser, USER_FORM_ROLE_OPTIONS } from "@/lib/usersApi"
 import { UserPlusIcon } from "lucide-react"
 
 export default function AddUser() {
@@ -31,7 +30,6 @@ export default function AddUser() {
   const from = (location.state as { from?: string } | null)?.from
   const showUsersCrumb = from !== "dashboard-admin"
   const [departmentCards, setDepartmentCards] = useState([{ department: "", subUnits: [""] }])
-  const [sendInvite, setSendInvite] = useState(true)
   const [role, setRole] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -102,7 +100,6 @@ export default function AddUser() {
         lastName,
         password,
         role,
-        sendInvite,
         affiliations: affiliationsFromCards(departmentCards),
       })
       navigate("/users", { replace: true })
@@ -156,7 +153,7 @@ export default function AddUser() {
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">New workspace member</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Administrators can invite users and change information later from the user directory
+                  Administrators can add users and change information later from the user directory
                 </p>
               </div>
             </div>
@@ -276,10 +273,11 @@ export default function AddUser() {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="auditor">Auditor - inspection and approval</SelectItem>
-                      <SelectItem value="owner">Indicator Owner - unit head/chief with contributor editing abilities</SelectItem>
-                      <SelectItem value="contributor">Contributor - edit assigned plans</SelectItem>
-                      <SelectItem value="admin">Administrator - manage users and settings</SelectItem>
+                      {USER_FORM_ROLE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.formLabel}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <RequiredFieldMessage message={getFieldError("role")} />
@@ -393,23 +391,6 @@ export default function AddUser() {
                   </div>
                 </div>
               </div>
-            </fieldset>
-
-            <fieldset className="min-w-0 space-y-4 border-0 border-t border-border pt-8 p-0">
-              <legend className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Invitation</legend>
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/40 p-4 transition hover:bg-muted/60">
-                <Checkbox
-                  checked={sendInvite}
-                  onCheckedChange={(checked) => setSendInvite(checked === true)}
-                  className="mt-0.5"
-                />
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold">Send invitation email</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
-                    The person receives a link to confirm access. Turn off if you want to send later
-                  </span>
-                </span>
-              </label>
             </fieldset>
 
             <div className="flex flex-col-reverse gap-3 border-t border-border pt-8 sm:flex-row sm:justify-end sm:gap-4">

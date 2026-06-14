@@ -25,6 +25,7 @@ import {
   ClipboardCheckIcon,
   ListTodoIcon,
   LogOutIcon,
+  UserCircleIcon,
   UsersIcon,
   UserPlusIcon,
   LayoutGridIcon,
@@ -279,6 +280,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Account"
+              isActive={pathname === "/account"}
+              render={<Link to="/account" />}
+            >
+              <UserCircleIcon />
+              <span>Account</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Log out" onClick={() => void handleLogout()}>
               <LogOutIcon />

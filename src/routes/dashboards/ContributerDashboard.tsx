@@ -6,6 +6,8 @@ import {
 } from "@/components/dashboard-notification-preview"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/context/AuthContext"
+import { welcomeGreeting } from "@/lib/formatUserName"
 import { cn } from "@/lib/utils"
 const monthLabelFormatter = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" })
 
@@ -72,6 +74,7 @@ const contributorNotificationPreviewItems: ContributorPreviewItem[] = [
 ]
 
 export default function ContributerDashboard() {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const today = new Date()
   const currentDay = String(today.getDate())
@@ -81,7 +84,7 @@ export default function ContributerDashboard() {
     <div className="min-w-0 flex-1 overflow-x-hidden bg-background p-4 sm:p-6 lg:p-8">
       <header className="mb-6 flex flex-col gap-5 lg:mb-8 lg:flex-row lg:items-center lg:gap-6">
         <div className="shrink-0 lg:max-w-none">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Welcome, Juliana</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{welcomeGreeting(user)}</h1>
           <p className="mt-1 whitespace-nowrap text-sm text-muted-foreground sm:text-base">
             Here is a concise overview of your operational plan
           </p>

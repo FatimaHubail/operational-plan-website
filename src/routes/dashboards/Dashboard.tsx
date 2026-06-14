@@ -5,6 +5,8 @@ import {
 } from "@/components/dashboard-notification-preview"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
+import { welcomeGreeting } from "@/lib/formatUserName"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link, useNavigate } from "react-router-dom"
@@ -96,6 +98,7 @@ const notificationPreviewItems: ContributorPreviewItem[] = [
 ]
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const today = new Date()
   const currentDay = String(today.getDate())
@@ -106,7 +109,7 @@ export default function DashboardPage() {
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-center">
           <div className="lg:max-w-none">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Welcome, Juliana</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{welcomeGreeting(user)}</h1>
             <p className="mt-1 whitespace-nowrap text-sm text-muted-foreground sm:text-base">
               Here is a concise overview of your operational plan
             </p>

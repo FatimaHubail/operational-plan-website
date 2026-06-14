@@ -7,10 +7,8 @@ export type UserAffiliation = {
 }
 
 export type AdminUser = AuthUser & {
-  status: "active" | "invited" | "not_invited" | "invite_expired"
+  status: "active"
   affiliations?: UserAffiliation[]
-  inviteExpiresAt?: string | null
-  inviteExpiresAtDisplay?: string | null
 }
 
 export type CreateUserBody = {
@@ -20,7 +18,6 @@ export type CreateUserBody = {
   lastName: string
   password: string
   role: string
-  sendInvite?: boolean
   affiliations: UserAffiliation[]
 }
 
@@ -46,18 +43,46 @@ const DB_TO_FORM_ROLE: Record<string, string> = {
   auditor: "auditor",
   contributor: "contributor",
   indicator_owner: "owner",
+  president: "president",
 }
+
+/** Form `<Select>` values sent to the API (mapped to DB roles on the backend). */
+export const USER_FORM_ROLE_OPTIONS = [
+  {
+    value: "president",
+    shortLabel: "President",
+    formLabel: "President - university-wide reporting and oversight",
+  },
+  {
+    value: "auditor",
+    shortLabel: "Auditor",
+    formLabel: "Auditor - inspection and approval",
+  },
+  {
+    value: "owner",
+    shortLabel: "Indicator Owner",
+    formLabel: "Indicator Owner - unit head/chief with contributor editing abilities",
+  },
+  {
+    value: "contributor",
+    shortLabel: "Contributor",
+    formLabel: "Contributor - edit assigned plans",
+  },
+  {
+    value: "admin",
+    shortLabel: "Administrator",
+    formLabel: "Administrator - manage users and settings",
+  },
+] as const
+
+export type UserFormRole = (typeof USER_FORM_ROLE_OPTIONS)[number]["value"]
 
 export function roleLabel(dbRole: string) {
   return ROLE_LABELS[dbRole] ?? dbRole
 }
 
-export function statusLabel(status: AdminUser["status"]) {
-  if (status === "active") return "Active"
-  if (status === "invited") return "Invited"
-  if (status === "not_invited") return "Not invited"
-  if (status === "invite_expired") return "Invite expired"
-  return status
+export function statusLabel(_status: AdminUser["status"]) {
+  return "Active"
 }
 
 export function formRoleFromDbRole(dbRole: string) {
@@ -67,6 +92,13 @@ export function formRoleFromDbRole(dbRole: string) {
 export function formatDepartments(affiliations?: UserAffiliation[]) {
   if (!affiliations?.length) return "—"
   return affiliations.map((a) => a.departmentName).join(", ")
+}
+
+export function formatSubUnits(affiliations?: UserAffiliation[]) {
+  if (!affiliations?.length) return "—"
+  const subUnits = affiliations.flatMap((a) => a.subUnits).filter(Boolean)
+  if (!subUnits.length) return "—"
+  return subUnits.join(", ")
 }
 
 export function affiliationsFromCards(
@@ -116,15 +148,8 @@ export function deleteUser(id: string) {
   return api<void>(`/api/users/${id}`, { method: "DELETE" })
 }
 
-export function sendInvite(id: string, password: string) {
-  return api<{ user: AdminUser }>(`/api/users/${id}/send-invite`, {
-    method: "POST",
-    body: JSON.stringify({ password }),
-  })
-}
-
-export function resendInvite(id: string, password: string) {
-  return api<{ user: AdminUser }>(`/api/users/${id}/resend-invite`, {
+export function resetUserPassword(id: string, password: string) {
+  return api<{ user: AdminUser }>(`/api/users/${id}/reset-password`, {
     method: "POST",
     body: JSON.stringify({ password }),
   })

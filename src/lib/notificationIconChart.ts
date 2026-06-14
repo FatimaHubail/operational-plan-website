@@ -43,10 +43,8 @@ export function chartSlotForAuditor(category: AuditorNotifCategory) {
 }
 
 const adminMap = {
-  invite_delivery: 1,
-  invite_expired: 2,
-  account_access: 3,
-  validation_alert: 4,
+  account_access: 1,
+  validation_alert: 2,
 } as const
 
 export type AdminNotifCategory = keyof typeof adminMap

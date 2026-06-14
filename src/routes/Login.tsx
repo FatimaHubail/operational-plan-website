@@ -13,9 +13,8 @@ export default function Login() {
   const year = new Date().getFullYear()
   const navigate = useNavigate()
   const location = useLocation()
-  const loginState = location.state as { passwordUpdated?: string; from?: string } | null
+  const loginState = location.state as { passwordUpdated?: string } | null
   const passwordUpdatedMessage = loginState?.passwordUpdated
-  const redirectAfterLogin = loginState?.from
   const { user, loading: sessionLoading, login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -25,14 +24,8 @@ export default function Login() {
 
   useEffect(() => {
     if (sessionLoading || !user) return
-    if (user.mustChangePassword) {
-      navigate("/change-password", { replace: true })
-      return
-    }
-    const target =
-      redirectAfterLogin && redirectAfterLogin !== "/login" ? redirectAfterLogin : homeForRole(user.role)
-    navigate(target, { replace: true })
-  }, [sessionLoading, user, navigate, redirectAfterLogin])
+    navigate(homeForRole(user.role), { replace: true })
+  }, [sessionLoading, user, navigate])
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -42,16 +35,8 @@ export default function Login() {
 
     setLoading(true)
     try {
-      const { user: signedInUser, requiresPasswordChange } = await login(email.trim(), password)
-      if (requiresPasswordChange || signedInUser.mustChangePassword) {
-        navigate("/change-password", { replace: true })
-        return
-      }
-      const target =
-        redirectAfterLogin && redirectAfterLogin !== "/login"
-          ? redirectAfterLogin
-          : homeForRole(signedInUser.role)
-      navigate(target, { replace: true })
+      const { user: signedInUser } = await login(email.trim(), password)
+      navigate(homeForRole(signedInUser.role), { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")
     } finally {
@@ -164,7 +149,7 @@ export default function Login() {
 
               <p className="pt-1 text-center">
                 <Link
-                  to="/change-password"
+                  to="/forgot-password"
                   className="text-sm font-semibold text-primary transition hover:text-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2"
                 >
                   Forgot password?

@@ -42,25 +42,20 @@ import {
   formatDepartments,
   formRoleFromDbRole,
   listUsers,
-  resendInvite,
+  resetUserPassword,
   roleLabel,
-  sendInvite,
   statusLabel,
   updateUser,
+  USER_FORM_ROLE_OPTIONS,
   type AdminUser,
 } from "@/lib/usersApi"
 import { Spinner } from "@/components/ui/spinner"
 
 type DepartmentCard = { department: string; subUnits: string[] }
 
-function inviteActionLabel(status: AdminUser["status"]): "Resend invite" | "Invite" | null {
-  if (status === "not_invited") return "Invite"
-  if (status === "invited" || status === "invite_expired") return "Resend invite"
-  return null
-}
-
 function roleClass(role: string) {
   if (role === "Administrator") return "bg-chart-5/18 text-muted-foreground"
+  if (role === "President") return "bg-chart-3/18 text-muted-foreground"
   if (role === "Contributor") return "bg-chart-1/18 text-muted-foreground"
   if (role === "Indicator Owner") return "bg-chart-2/18 text-muted-foreground"
   return "bg-chart-4/16 text-muted-foreground"
@@ -68,7 +63,6 @@ function roleClass(role: string) {
 
 function statusClass(label: string) {
   if (label === "Active") return "text-[color-mix(in_oklch,var(--chart-2)_70%,var(--foreground))] [&>span]:bg-[color-mix(in_oklch,var(--chart-2)_70%,var(--foreground))]"
-  if (label === "Invited") return "text-[oklch(0.82_0.13_95)] [&>span]:bg-[oklch(0.82_0.13_95)]"
   return "text-destructive [&>span]:bg-destructive"
 }
 
@@ -159,13 +153,8 @@ export default function AdminUsers() {
       const passwordChanged =
         manageForm.password.trim() !== "" && manageForm.password !== "********"
       if (passwordChanged) {
-        if (manageUser.status === "not_invited") {
-          const result = await sendInvite(manageUser.id, manageForm.password)
-          updated = result.user
-        } else if (manageUser.status === "invited" || manageUser.status === "invite_expired") {
-          const result = await resendInvite(manageUser.id, manageForm.password)
-          updated = result.user
-        }
+        const result = await resetUserPassword(manageUser.id, manageForm.password)
+        updated = result.user
       }
       replaceUserInList(updated)
       setEditingField(null)
@@ -191,12 +180,6 @@ export default function AdminUsers() {
     } finally {
       setSaving(false)
     }
-  }
-
-  const handleInviteAction = (user: AdminUser) => {
-    openManage(user)
-    setEditingField("password")
-    setManageForm((prev) => ({ ...prev, password: "" }))
   }
 
   const toggleFieldEdit = (field: string) => {
@@ -324,10 +307,11 @@ export default function AdminUsers() {
                   <SelectValue placeholder="All roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Administrator</SelectItem>
-                  <SelectItem value="owner">Indicator Owner</SelectItem>
-                  <SelectItem value="contributor">Contributor</SelectItem>
-                  <SelectItem value="auditor">Auditor</SelectItem>
+                  {USER_FORM_ROLE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.shortLabel}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -370,7 +354,6 @@ export default function AdminUsers() {
                 filteredUsers.map((user) => {
                   const roleDisplay = roleLabel(user.role)
                   const statusDisplay = statusLabel(user.status)
-                  const secondaryAction = inviteActionLabel(user.status)
                   return (
                     <TableRow key={user.id} className="transition hover:bg-muted/45">
                       <TableCell className="px-4 py-4 sm:px-6 lg:pl-8">
@@ -394,25 +377,13 @@ export default function AdminUsers() {
                         </span>
                       </TableCell>
                       <TableCell className="px-4 py-4 text-center lg:pr-8">
-                        <div className="inline-flex flex-col items-center gap-2.5">
-                          <Button
-                            type="button"
-                            className="inline-flex !h-6 min-h-6 w-28 justify-center rounded-full bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground transition hover:bg-primary/90"
-                            onClick={() => openManage(user)}
-                          >
-                            Manage
-                          </Button>
-                          {secondaryAction ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="inline-flex !h-6 min-h-6 w-28 justify-center rounded-full border border-border px-3 py-0 text-xs font-semibold leading-none text-foreground transition hover:bg-accent"
-                              onClick={() => handleInviteAction(user)}
-                            >
-                              {secondaryAction}
-                            </Button>
-                          ) : null}
-                        </div>
+                        <Button
+                          type="button"
+                          className="inline-flex !h-6 min-h-6 w-28 justify-center rounded-full bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground transition hover:bg-primary/90"
+                          onClick={() => openManage(user)}
+                        >
+                          Manage
+                        </Button>
                       </TableCell>
                     </TableRow>
                   )
@@ -524,10 +495,11 @@ export default function AdminUsers() {
                           <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="auditor">Auditor - inspection and approval</SelectItem>
-                          <SelectItem value="owner">Indicator Owner - unit head/chief with contributor editing abilities</SelectItem>
-                          <SelectItem value="contributor">Contributor - edit assigned plans</SelectItem>
-                          <SelectItem value="admin">Administrator - manage users and settings</SelectItem>
+                          {USER_FORM_ROLE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.formLabel}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <Button type="button" variant="ghost" size="icon-xs" aria-haspopup="dialog" className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 !bg-transparent !text-[oklch(0.55_0.015_255)] hover:!bg-muted/50 hover:!text-[oklch(0.55_0.015_255)] active:-translate-y-1/2" onClick={() => toggleFieldEdit("role")} aria-label="Edit role">

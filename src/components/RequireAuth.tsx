@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom"
+import { Navigate, Outlet } from "react-router-dom"
 import { Spinner } from "@/components/ui/spinner"
 import { useAuth } from "@/context/AuthContext"
 import { homeForRole } from "@/lib/roleRoutes"
@@ -9,7 +9,6 @@ type RequireAuthProps = {
 
 export function RequireAuth({ allowedRoles }: RequireAuthProps) {
   const { user, loading } = useAuth()
-  const location = useLocation()
 
   if (loading) {
     return (
@@ -20,11 +19,7 @@ export function RequireAuth({ allowedRoles }: RequireAuthProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />
-  }
-
-  if (user.mustChangePassword) {
-    return <Navigate to="/change-password" replace />
+    return <Navigate to="/login" replace />
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {

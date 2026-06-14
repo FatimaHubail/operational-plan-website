@@ -16,7 +16,8 @@ import AddAction from "@/routes/actions/AddAction"
 import AddTask from "@/routes/actions/AddTask"
 import ActionPlan from "@/routes/actions/ActionPlan"
 import Login from "@/routes/Login"
-import ChangePassword from "@/routes/ChangePassword"
+import ForgotPassword from "@/routes/ForgotPassword"
+import Account from "@/routes/Account"
 import StrategicPerspectivesOverview from "@/routes/president/StrategicPerspectivesOverview"
 import PlansOverview from "@/routes/president/PlansOverview"
 import BudgetAndFinancialResources from "@/routes/president/BudgetAndFinancialResources"
@@ -42,7 +43,8 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/change-password" element={<Navigate to="/forgot-password" replace />} />
         <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
         <Route path="/admin/dashboard" element={<Navigate to="/dashboard" replace />} />
         <Route path="/auditor/dashboard" element={<Navigate to="/dashboard" replace />} />
@@ -78,6 +80,7 @@ export default function App() {
             <Route path="/auditor/queue-objectives" element={<Navigate to="/objective-queue" replace />} />
             <Route path="/auditor/queue-tasks" element={<Navigate to="/task-queue" replace />} />
             <Route path="/auditor/task-queue" element={<Navigate to="/task-queue" replace />} />
+            <Route path="/account" element={<Account />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/admin/notifications" element={<AdminNotifications />} />
