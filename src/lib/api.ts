@@ -1,7 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_BASE ?? ""
+const API_BASE = "http://127.0.0.1:5050"
 
 type ApiError = { message: string; code?: string }
-
 export async function api<T>(
   path: string,
   options: RequestInit = {}
